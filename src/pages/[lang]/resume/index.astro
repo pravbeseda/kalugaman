@@ -1,0 +1,223 @@
+---
+import { getEntry, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import portrait from '../../../assets/portrait.png';
+import Base from '../../../layouts/Base.astro';
+import { locales, type Locale } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/utils';
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+
+const resume = await getEntry('resume', lang);
+if (!resume) throw new Error(`Missing resume for ${lang}`);
+const { Content } = await render(resume);
+const { name, role, location, experience, skills, education, languages } =
+  resume.data;
+---
+
+<Base
+  lang={lang}
+  title={`${name} — ${role}`}
+  description={`${role}, ${location}`}
+>
+  <section class="section">
+    <div class="container narrow">
+      <header class="head">
+        <div class="head__identity">
+          <Image
+            src={portrait}
+            alt={name}
+            width={160}
+            densities={[1, 2]}
+            class="portrait"
+            loading="eager"
+          />
+          <div>
+            <h1>{name}</h1>
+            <p class="role">{role}</p>
+            <p class="muted">{location}</p>
+          </div>
+        </div>
+        {/* В POC PDF не генерируем — кнопка ведёт на будущий файл (plan §6) */}
+        <a class="button" href={`/cv/cv-${lang}.pdf`}>{t('resume.download')}</a>
+      </header>
+
+      <div class="prose summary">
+        <Content />
+      </div>
+
+      <h2>{t('resume.experience')}</h2>
+      <div class="stack timeline">
+        {
+          experience.map((job) => (
+            <div class="job">
+              <div class="job__meta">
+                <strong>{job.position}</strong>
+                <span class="muted">{job.company}</span>
+                <span class="muted period">{job.period}</span>
+              </div>
+              <ul>
+                {job.highlights.map((h) => (
+                  <li>{h}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+
+      <h2>{t('resume.skills')}</h2>
+      <div class="skills">
+        {
+          skills.map((group) => (
+            <div class="skills__group">
+              <h3>{group.group}</h3>
+              <ul class="tags">
+                {group.items.map((item) => (
+                  <li class="tag">{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="two-col">
+        <div>
+          <h2>{t('resume.education')}</h2>
+          <div class="stack">
+            {
+              education.map((e) => (
+                <div>
+                  <strong>{e.degree}</strong>
+                  <div class="muted">{e.place}</div>
+                  <div class="muted period">{e.period}</div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+        <div>
+          <h2>{t('resume.languages')}</h2>
+          <ul class="langs">
+            {
+              languages.map((l) => (
+                <li>
+                  <span>{l.name}</span>
+                  <span class="muted">{l.level}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .narrow {
+    max-width: 48rem;
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-8);
+  }
+  .head__identity {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .portrait {
+    width: 88px;
+    height: 108px;
+    object-fit: cover;
+    object-position: 50% 20%;
+    border-radius: var(--radius);
+    border: var(--border-width) solid var(--color-border);
+    flex-shrink: 0;
+  }
+  .role {
+    font-size: var(--text-lg);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+  .summary {
+    margin-bottom: var(--space-12);
+  }
+  h2 {
+    margin-top: var(--space-12);
+    padding-bottom: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+  .timeline {
+    margin-top: var(--space-6);
+  }
+  .job__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-3);
+    margin-bottom: var(--space-2);
+  }
+  .period {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    margin-left: auto;
+  }
+  .job ul {
+    padding-left: var(--space-6);
+  }
+  .job + .job {
+    margin-top: var(--space-6);
+    padding-top: var(--space-6);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+  .skills {
+    display: grid;
+    gap: var(--space-6);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    margin-top: var(--space-6);
+  }
+  .skills__group h3 {
+    font-size: var(--text-base);
+    margin-bottom: var(--space-3);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+  }
+  .two-col {
+    display: grid;
+    gap: var(--space-8);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 640px) {
+    .two-col {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .langs {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-6);
+  }
+  .langs li {
+    display: flex;
+    justify-content: space-between;
+    padding-block: var(--space-2);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+</style>

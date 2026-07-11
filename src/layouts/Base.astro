@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { locales, defaultLocale, type Locale } from '../i18n/config';
+import { switchLocalePath } from '../i18n/utils';
+
+interface Props {
+  lang: Locale;
+  title: string;
+  description: string;
+}
+const { lang, title, description } = Astro.props;
+
+const path = Astro.url.pathname;
+const canonical = new URL(path, Astro.site).href;
+const alternates = locales.map((l) => ({
+  lang: l,
+  href: new URL(switchLocalePath(path, l), Astro.site).href,
+}));
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href={new URL(switchLocalePath(path, defaultLocale), Astro.site).href}
+    />
+
+    {/* Open Graph */}
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+
+    {/* Тема до первой отрисовки — нет FOUC */}
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark' || saved === 'light') {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <Header lang={lang} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer lang={lang} />
+
+    <style>
+      .skip-link {
+        position: absolute;
+        left: -999px;
+      }
+      .skip-link:focus {
+        left: var(--space-4);
+        top: var(--space-4);
+        z-index: 20;
+        background: var(--color-surface);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-sm);
+      }
+    </style>
+  </body>
+</html>

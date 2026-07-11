@@ -1,0 +1,20 @@
+---
+// Корень /. В проде язык выбирает nginx по Accept-Language (см. plan §8.1).
+// Здесь — fallback через meta-refresh, чтобы локальный build/preview работал.
+import { defaultLocale } from '../i18n/config';
+const target = `/${defaultLocale}`;
+---
+
+<!doctype html>
+<html lang={defaultLocale}>
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={target} />
+    <title>kalugaman.ru</title>
+  </head>
+  <body>
+    <p>Redirecting to <a href={target}>{target}</a>…</p>
+  </body>
+</html>

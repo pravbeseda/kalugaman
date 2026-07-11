@@ -1,0 +1,97 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import type { Locale } from '../../../i18n/config';
+import { useTranslations } from '../../../i18n/utils';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((p) => {
+    const [lang, slug] = p.id.split('/');
+    return { params: { lang, slug }, props: { entry: p } };
+  });
+}
+
+const lang = Astro.params.lang as Locale;
+const { entry } = Astro.props;
+const t = useTranslations(lang);
+const { Content } = await render(entry);
+const { title, description, tags, period, links } = entry.data;
+---
+
+<Base lang={lang} title={`${title} · kalugaman`} description={description}>
+  <article class="section">
+    <div class="container narrow">
+      <a class="back" href={`/${lang}/projects`}>← {t('projects.back')}</a>
+
+      <header class="head">
+        <h1>{title}</h1>
+        <p class="muted head__period">{period}</p>
+        <p class="lead">{description}</p>
+        <ul class="tags">
+          {tags.map((tag) => <li class="tag">{tag}</li>)}
+        </ul>
+        {
+          (links.repo || links.demo) && (
+            <div class="links">
+              {links.repo && (
+                <a class="button" href={links.repo}>
+                  {t('projects.repo')}
+                </a>
+              )}
+              {links.demo && (
+                <a class="button button--primary" href={links.demo}>
+                  {t('projects.demo')}
+                </a>
+              )}
+            </div>
+          )
+        }
+      </header>
+
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .narrow {
+    max-width: 46rem;
+  }
+  .back {
+    display: inline-block;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    margin-bottom: var(--space-6);
+  }
+  .head {
+    padding-bottom: var(--space-8);
+    margin-bottom: var(--space-8);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+  .head__period {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    margin-top: var(--space-2);
+  }
+  .lead {
+    font-size: var(--text-lg);
+    margin-top: var(--space-4);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-4);
+  }
+  .links {
+    display: flex;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    flex-wrap: wrap;
+  }
+</style>

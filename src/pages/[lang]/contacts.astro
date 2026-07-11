@@ -1,0 +1,75 @@
+---
+import { getEntry, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { locales, type Locale } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+
+const page = await getEntry('pages', `${lang}/contacts`);
+if (!page) throw new Error(`Missing contacts page for ${lang}`);
+const { Content } = await render(page);
+const { email, socials = [] } = page.data;
+---
+
+<Base lang={lang} title={`${t('contacts.title')} · kalugaman`} description={page.data.description}>
+  <section class="section">
+    <div class="container narrow">
+      <h1>{t('contacts.title')}</h1>
+
+      <div class="prose intro">
+        <Content />
+      </div>
+
+      {
+        email && (
+          <p class="email-row">
+            <span class="muted">{t('contacts.email')}:</span>
+            <a href={`mailto:${email}`}>{email}</a>
+          </p>
+        )
+      }
+
+      <ul class="socials">
+        {
+          socials.map((s) => (
+            <li>
+              <a class="button" href={s.url}>
+                {s.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .narrow {
+    max-width: 42rem;
+  }
+  .intro {
+    margin-block: var(--space-6) var(--space-8);
+    font-size: var(--text-lg);
+  }
+  .email-row {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-8);
+  }
+  .email-row a {
+    font-family: var(--font-mono);
+  }
+  .socials {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    list-style: none;
+    padding: 0;
+  }
+</style>

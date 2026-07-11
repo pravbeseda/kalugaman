@@ -1,0 +1,56 @@
+---
+import { useTranslations } from '../i18n/utils';
+import type { Locale } from '../i18n/config';
+const { lang } = Astro.props as { lang: Locale };
+const t = useTranslations(lang);
+---
+
+<button
+  id="theme-toggle"
+  class="theme-toggle"
+  type="button"
+  aria-label={t('theme.toggle')}
+  title={t('theme.toggle')}
+>
+  <span class="theme-toggle__sun" aria-hidden="true">☀︎</span>
+  <span class="theme-toggle__moon" aria-hidden="true">☾</span>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    border: var(--border-width) solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  .theme-toggle__moon {
+    display: none;
+  }
+  :global(:root[data-theme='dark']) .theme-toggle__sun {
+    display: none;
+  }
+  :global(:root[data-theme='dark']) .theme-toggle__moon {
+    display: inline;
+  }
+</style>
+
+<script>
+  const btn = document.getElementById('theme-toggle');
+  btn?.addEventListener('click', () => {
+    const root = document.documentElement;
+    const isDark =
+      root.getAttribute('data-theme') === 'dark' ||
+      (!root.getAttribute('data-theme') &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const next = isDark ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  });
+</script>

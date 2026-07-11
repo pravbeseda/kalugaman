@@ -1,0 +1,133 @@
+---
+import { getCollection, getEntry, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import portrait from '../../assets/portrait.png';
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { locales, type Locale } from '../../i18n/config';
+import { useTranslations } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  return locales.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const t = useTranslations(lang);
+
+const home = await getEntry('pages', `${lang}/home`);
+if (!home) throw new Error(`Missing home page for ${lang}`);
+const { Content } = await render(home);
+
+// Имя — единый источник: берём из резюме той же локали
+const resume = await getEntry('resume', lang);
+const displayName = resume?.data.name ?? 'kalugaman';
+
+const featured = (await getCollection('projects'))
+  .filter((p) => p.id.startsWith(`${lang}/`) && p.data.featured)
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 3);
+---
+
+<Base lang={lang} title={home.data.title} description={home.data.description}>
+  <section class="hero section">
+    <div class="container home__col">
+      <div class="hero__intro">
+        <Image
+          src={portrait}
+          alt={displayName}
+          width={128}
+          densities={[1, 2]}
+          class="hero__avatar"
+          loading="eager"
+        />
+        <h1 class="hero__name">{displayName}</h1>
+      </div>
+      {home.data.tagline && <p class="hero__tagline">{home.data.tagline}</p>}
+      <div class="prose hero__body">
+        <Content />
+      </div>
+      <div class="hero__cta">
+        <a class="button button--primary" href={`/${lang}/projects`}>
+          {t('home.cta.projects')}
+        </a>
+        <a class="button" href={`/${lang}/resume`}>{t('home.cta.resume')}</a>
+      </div>
+    </div>
+  </section>
+
+  {
+    featured.length > 0 && (
+      <section class="section">
+        <div class="container home__col">
+          <h2>{t('home.featured')}</h2>
+          <div class="grid">
+            {featured.map((p) => (
+              <ProjectCard
+                lang={lang}
+                slug={p.id.replace(`${lang}/`, '')}
+                title={p.data.title}
+                description={p.data.description}
+                tags={p.data.tags}
+                period={p.data.period}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .hero {
+    padding-block: var(--space-16) var(--space-8);
+  }
+  /* единая центрированная колонка для всей главной — как на /resume и /contacts */
+  .home__col {
+    max-width: 46rem;
+  }
+  .hero__intro {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+  .hero__avatar {
+    width: 104px;
+    height: 104px;
+    object-fit: cover;
+    /* сдвигаем кадр к верху фото — над головой остаётся воздух */
+    object-position: 50% 18%;
+    border-radius: 50%;
+    border: var(--border-width) solid var(--color-border);
+    flex-shrink: 0;
+  }
+  .hero__name {
+    font-size: var(--step-fluid-h2);
+    line-height: 1.1;
+  }
+  .hero__tagline {
+    font-family: var(--font-mono);
+    color: var(--color-accent);
+    font-size: var(--text-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: var(--space-4);
+  }
+  .hero__body {
+    max-width: 46rem;
+    font-size: var(--text-lg);
+  }
+  .hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-8);
+  }
+  .grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+    margin-top: var(--space-6);
+  }
+</style>
