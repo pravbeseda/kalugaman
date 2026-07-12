@@ -78,6 +78,15 @@ on the `server` level, with `always`.
 
 **Clean URLs**: `try_files $uri $uri/index.html $uri.html =404;`
 
+**The site's own 404 page.** The build produces `404.html`; without this line the `=404`
+above falls back to nginx's built-in error page and the site's own is never served:
+
+```nginx
+error_page 404 /404.html;
+```
+
+The status stays 404 — `error_page` does not rewrite it unless asked to.
+
 Verify after a change:
 
 ```bash
@@ -86,6 +95,8 @@ curl -sI -H 'Accept-Language: en-US,en;q=0.9,ru;q=0.8' https://kalugaman.ru/  # 
 curl -sI https://kalugaman.ru/en/            # must-revalidate + both security headers
 curl -sI https://kalugaman.ru/favicon-32.png # must-revalidate — no hash in the name
 curl -sI https://kalugaman.ru/_astro/<file>  # immutable
+curl -si https://kalugaman.ru/nope | head -1              # HTTP/2 404
+curl -s  https://kalugaman.ru/nope | grep -o '<title>[^<]*'  # the site's page, not nginx's
 ```
 
 TLS is certbot (`kalugaman.ru` + `www`), with the 80→443 redirect. DNS: an A record for
