@@ -34,7 +34,7 @@ server on its own. Full write-up: [`ci-cd.md`](./ci-cd.md).
 - [x] Language parity script (`scripts/check-i18n-parity.mjs`)
 - [x] Smoke check of `dist/` after the build (`scripts/check-dist.mjs`)
 - [x] `.github/workflows/ci.yml` — on PRs and pushes to `main`: format + check + parity + build + smoke
-- [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `~/kalugaman.ru` into place
+- [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `/var/www/kalugaman.ru/public` into place
 - [x] nginx config and server setup guide — `deploy/`
 - [ ] **Manual, on the server** (see [`deploy/README.md`](../deploy/README.md)): deploy key, site directory, nginx, DNS, certbot
 - [ ] **Manual, in GitHub**: secrets `SSH_HOST` / `SSH_USER` / `SSH_PORT` / `SSH_PRIVATE_KEY` / `SSH_KNOWN_HOSTS`, then the `DEPLOY_ENABLED=true` variable that arms the deploy job

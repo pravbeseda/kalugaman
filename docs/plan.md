@@ -141,7 +141,7 @@ Details and the step-by-step plan live in [`ci-cd.md`](./ci-cd.md). The gist:
 
 ### 8.1 VPS + nginx
 
-- The site is static files in the deploy user's home directory: `~/kalugaman.ru` (on the same VPS as drevo, next to its `releases/`). No symlinks, no release directories: the build is small, and swapping it in is a rename of a staging directory.
+- The site is static files in `/var/www/kalugaman.ru/public` on the mars VPS (which also hosts drevo, but under its own deploy user and directory). No symlinks, no release directories: the build is small, and swapping it in renames a staging directory into place. The server is provisioned by Ansible — see [`../deploy/README.md`](../deploy/README.md).
 - HTTPS: certbot (Let's Encrypt) with auto-renewal; 80→443 and www→apex redirects.
 - Root language redirect:
 
@@ -153,7 +153,7 @@ map $http_accept_language $lang_redirect {
 
 server {
     server_name kalugaman.ru;
-    root /home/<deploy-user>/kalugaman.ru;
+    root /var/www/kalugaman.ru/public;
 
     location = / {
         return 302 $lang_redirect;
@@ -177,7 +177,7 @@ server {
 Two workflows:
 
 - **`ci.yml`** — on pull requests and pushes to `main`: `prettier --check`, `astro check` (types, content schemas, broken imports), the language parity script, `astro build` plus a smoke check of `dist/`.
-- **`deploy.yml`** — on pushes to `main` and on demand (`workflow_dispatch`): build → `rsync` to `~/kalugaman.ru.new` on the VPS → swap the live directory into place (`mv` the old one to `.old`, `.new` to `kalugaman.ru`). Rollback = put `.old` back.
+- **`deploy.yml`** — on pushes to `main` and on demand (`workflow_dispatch`): build → `rsync` to `public.new/` on the VPS → swap it into place (`mv` the live `public/` to `public.old/`, then `public.new/` to `public/`). Rollback = put `public.old` back.
 
 GitHub secrets: `SSH_HOST`, `SSH_USER`, `SSH_PORT`, `SSH_PRIVATE_KEY`, `SSH_KNOWN_HOSTS` (a deploy key scoped to this repo).
 
@@ -193,7 +193,7 @@ Live checklists and current status: [`roadmap.md`](./roadmap.md).
 - [x] **3. Pages**: home, resume, projects (list + detail), contacts — mobile-first
 - [x] **4. Themes**: themes.css, inline script, ThemeToggle
 - [x] **5. SEO baseline**: sitemap with i18n, canonical, OG/meta
-- [ ] **6. CI/CD + VPS**: checks on PRs, auto-deploy to `~/kalugaman.ru`, nginx, certbot, DNS ← _we are here_
+- [ ] **6. CI/CD + VPS**: checks on PRs, auto-deploy to `/var/www/kalugaman.ru`, nginx, certbot, DNS ← _we are here_
 - [ ] **7. Polish**: mobile menu, 404, robots.txt, a11y, token debt
 - [ ] **8. PDF**: PrintResume layout, print page, Playwright script, download buttons
 - [ ] **9. Launch**: Lighthouse 95+, ATS parsing of the PDF, Search Console, monitoring

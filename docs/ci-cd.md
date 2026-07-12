@@ -7,14 +7,14 @@ Complements [`plan.md`](./plan.md) §8 and [`roadmap.md`](./roadmap.md).
 
 ## Decisions
 
-| Question           | Decision                                                                          | Why                                                                                                               |
-| ------------------ | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Server             | The same VPS as drevo; directory `~/kalugaman.ru`, next to its `~/releases/`      | The machine exists and nginx is already there                                                                     |
-| Swapping the build | rsync into `~/kalugaman.ru.new` → `mv` the live one to `.old` → `.new` into place | Effectively atomic, without symlinks or release dirs; `.old` is a one-step rollback                               |
-| Deploy trigger     | Push to `main` + `workflow_dispatch` (a button)                                   | Single developer; the gate already exists on PRs                                                                  |
-| Checks             | `astro check`, `prettier --check`, language parity, build + smoke                 | They catch exactly the failures that are real here                                                                |
-| ESLint             | **Skipped**                                                                       | Almost no JS in the project; 5–6 dependencies for a couple of inline scripts                                      |
-| Tests              | **None**                                                                          | No logic to test; types and schemas are covered by `astro check`. E2E later, together with Playwright for the PDF |
+| Question           | Decision                                                                                       | Why                                                                                                               |
+| ------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Server             | The mars VPS (also hosts drevo), provisioned by Ansible; site root `/var/www/kalugaman.ru`     | The machine exists and nginx is already there; own user and directory, independent of drevo                       |
+| Swapping the build | rsync into `public.new/` → `mv` the live `public/` to `public.old/` → `public.new/` into place | Effectively atomic, without symlinks or release dirs; `public.old` is a one-step rollback                         |
+| Deploy trigger     | Push to `main` + `workflow_dispatch` (a button)                                                | Single developer; the gate already exists on PRs                                                                  |
+| Checks             | `astro check`, `prettier --check`, language parity, build + smoke                              | They catch exactly the failures that are real here                                                                |
+| ESLint             | **Skipped**                                                                                    | Almost no JS in the project; 5–6 dependencies for a couple of inline scripts                                      |
+| Tests              | **None**                                                                                       | No logic to test; types and schemas are covered by `astro check`. E2E later, together with Playwright for the PDF |
 
 ## What we build
 
@@ -89,7 +89,7 @@ jobs.deploy (ubuntu-latest, environment: production):
   - npm run build
   - npm run check:dist                        # never ship an empty build
   - shimataro/ssh-key-action@v2               # SSH_PRIVATE_KEY + SSH_KNOWN_HOSTS
-  - rsync -az --delete dist/ user@host:kalugaman.ru.new/
+  - rsync -az --delete dist/ user@host:/var/www/kalugaman.ru/public.new/
   - ssh: swap into place (below)
   - curl https://kalugaman.ru/en/             # the site answers 200
   - on failed verification: roll back
@@ -104,13 +104,13 @@ plumbing than it saves here.
 The swap, in one ssh command under `set -euo pipefail`:
 
 ```bash
-test -f ~/kalugaman.ru.new/index.html
-rm -rf ~/kalugaman.ru.old
-if [ -d ~/kalugaman.ru ]; then
-  mv ~/kalugaman.ru ~/kalugaman.ru.old
+test -f "$SITE_ROOT/public.new/index.html"
+rm -rf "$SITE_ROOT/public.old"
+if [ -d "$SITE_ROOT/public" ]; then
+  mv "$SITE_ROOT/public" "$SITE_ROOT/public.old"
 fi
-mv ~/kalugaman.ru.new ~/kalugaman.ru
-test -f ~/kalugaman.ru/en/index.html
+mv "$SITE_ROOT/public.new" "$SITE_ROOT/public"
+test -f "$SITE_ROOT/public/en/index.html"
 ```
 
 Two `mv`s within one filesystem are inode renames — milliseconds. There is
@@ -118,7 +118,7 @@ effectively no window where the site is in a mixed state.
 
 The final step verifies the site answers 200 (`curl --retry 3`, so a transient blip on
 the VPS does not fail an otherwise-good deploy). If it does not, the workflow rolls back
-by itself: `.old` goes back into place, the failed build is kept as `~/kalugaman.ru.bad`.
+by itself: `public.old` goes back into place, the failed build is kept as `public.bad`.
 The rollback step is gated on the swap step having succeeded — otherwise a failure
 _before_ the swap would restore an older build over the live one.
 
@@ -141,7 +141,7 @@ Step-by-step server setup: [`../deploy/README.md`](../deploy/README.md).
 ### 7. nginx on the server
 
 Config: [`../deploy/nginx/kalugaman.ru.conf`](../deploy/nginx/kalugaman.ru.conf), with
-`root /home/<deploy-user>/kalugaman.ru;` — root language redirect via `Accept-Language`,
+`root /var/www/kalugaman.ru/public;` — root language redirect via `Accept-Language`,
 clean URLs, immutable caching for `/_astro/`, `must-revalidate` for HTML, gzip, security
 headers. TLS via certbot, with 80→443 and www→apex redirects. DNS `kalugaman.ru` (A) → the VPS IP.
 
