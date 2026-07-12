@@ -26,6 +26,17 @@ jobs:
 
       - run: npm ci
 
+      # Same checks as ci.yml: deploy is its own gate, so a commit that reaches
+      # main outside a green PR still cannot ship.
+      - name: Format
+        run: npm run format:check
+
+      - name: Types and content schemas
+        run: npm run check
+
+      - name: Language parity
+        run: npm run check:i18n
+
       - name: Build
         run: npm run build
 
@@ -48,6 +59,7 @@ jobs:
             dist/ "$SSH_USER@$SSH_HOST:kalugaman.ru.new/"
 
       - name: Swap into place
+        id: swap
         env:
           SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
           SSH_USER: ${{ secrets.SSH_USER }}
@@ -65,4 +77,28 @@ jobs:
           EOF
 
       - name: Verify site responds
-        run: curl -fsS -o /dev/null -w '%{http_code}\n' https://kalugaman.ru/en/
+        run: |
+          curl -fsS --retry 3 --retry-delay 5 --retry-all-errors \
+            -o /dev/null -w '%{http_code}\n' https://kalugaman.ru/en/
+
+      # Only when the swap itself succeeded: on an earlier failure nothing was
+      # swapped, and .old is the previous deploy — restoring it would replace a
+      # live good build with an older one.
+      - name: Roll back on failed verification
+        if: failure() && steps.swap.outcome == 'success'
+        env:
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" bash -s <<'EOF'
+          set -euo pipefail
+          if [ ! -d ~/kalugaman.ru.old ]; then
+            echo "No ~/kalugaman.ru.old to roll back to — leaving the site as is."
+            exit 1
+          fi
+          rm -rf ~/kalugaman.ru.bad
+          mv ~/kalugaman.ru ~/kalugaman.ru.bad
+          mv ~/kalugaman.ru.old ~/kalugaman.ru
+          echo "Rolled back to the previous build; the failed one is in ~/kalugaman.ru.bad"
+          EOF

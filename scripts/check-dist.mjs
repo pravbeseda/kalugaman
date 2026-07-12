@@ -1,26 +1,36 @@
 // Smoke check: the build succeeded, but did it actually produce a site?
 // Guards against deploying an empty or half-built dist/.
+//
+// Project detail pages are derived from the content rather than listed here, so a new
+// project is covered the day it is added.
 import { existsSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { locales } from '../src/i18n/config.ts';
 
 const DIST = new URL('../dist/', import.meta.url).pathname;
+const PROJECTS = new URL('../src/content/projects/', import.meta.url).pathname;
 
-const REQUIRED_FILES = [
-  'index.html',
-  'en/index.html',
-  'en/resume/index.html',
-  'en/projects/index.html',
-  'en/contacts/index.html',
-  'ru/index.html',
-  'ru/resume/index.html',
-  'ru/projects/index.html',
-  'ru/contacts/index.html',
-  'sitemap-index.xml',
-];
+const ROUTES = ['', 'resume', 'projects', 'contacts'];
+
+const expected = ['index.html', 'sitemap-index.xml'];
+
+for (const lang of locales) {
+  for (const route of ROUTES) {
+    expected.push(join(lang, route, 'index.html'));
+  }
+
+  const slugs = readdirSync(join(PROJECTS, lang))
+    .filter((f) => f.endsWith('.md'))
+    .map((f) => f.replace(/\.md$/, ''));
+
+  for (const slug of slugs) {
+    expected.push(join(lang, 'projects', slug, 'index.html'));
+  }
+}
 
 const errors = [];
 
-for (const file of REQUIRED_FILES) {
+for (const file of expected) {
   const path = join(DIST, file);
   if (!existsSync(path)) {
     errors.push(`missing ${file}`);
@@ -40,4 +50,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(`dist/ smoke check OK (${REQUIRED_FILES.length} pages, assets present)`);
+console.log(`dist/ smoke check OK (${expected.length} pages, assets present)`);

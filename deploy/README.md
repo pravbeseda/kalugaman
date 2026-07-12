@@ -92,7 +92,12 @@ but the simplest path is to run the first deploy after step 5.
 
 ## Rollback
 
-The previous build sits right next to the live one, in `~/kalugaman.ru.old`:
+If the post-deploy verification fails (the site does not answer 200 after three
+attempts), the workflow rolls back on its own: `.old` goes back into place and the
+failed build is kept in `~/kalugaman.ru.bad` for inspection.
+
+To roll back by hand, the previous build sits right next to the live one, in
+`~/kalugaman.ru.old`:
 
 ```bash
 mv ~/kalugaman.ru ~/kalugaman.ru.bad

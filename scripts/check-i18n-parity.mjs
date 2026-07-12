@@ -1,39 +1,67 @@
 // Language parity: every document must exist in both en/ and ru/ with the same slug.
 // A missing translation means LangSwitch links to a 404, so this fails the build.
-import { readdirSync, existsSync } from 'node:fs';
+//
+// Collections are discovered from the filesystem rather than listed here, so a new
+// collection is checked from the day it appears. Two shapes are supported:
+//   projects/{en,ru}/<slug>.md   — slug sets must match
+//   resume/{en,ru}.md            — both files must exist
+import { readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
+import { locales } from '../src/i18n/config.ts';
 
 const CONTENT = new URL('../src/content/', import.meta.url).pathname;
-const PAIRED = ['projects', 'pages'];
 const errors = [];
 
+// A missing directory is a parity failure, not a crash — it is the most likely way
+// parity breaks in the first place (a collection added in one language only).
 const slugs = (dir) =>
-  readdirSync(dir)
-    .filter((f) => f.endsWith('.md'))
-    .map((f) => f.replace(/\.md$/, ''));
+  existsSync(dir)
+    ? readdirSync(dir)
+        .filter((f) => f.endsWith('.md'))
+        .map((f) => f.replace(/\.md$/, ''))
+    : null;
 
-for (const collection of PAIRED) {
-  const en = new Set(slugs(join(CONTENT, collection, 'en')));
-  const ru = new Set(slugs(join(CONTENT, collection, 'ru')));
+const collections = readdirSync(CONTENT).filter((name) =>
+  statSync(join(CONTENT, name)).isDirectory(),
+);
 
-  for (const slug of en) {
-    if (!ru.has(slug)) errors.push(`${collection}: missing ru/${slug}.md (en/${slug}.md exists)`);
+for (const collection of collections) {
+  const perLocale = new Map(locales.map((lang) => [lang, slugs(join(CONTENT, collection, lang))]));
+
+  // resume/{en,ru}.md — no language subdirectories, documents are the locale files.
+  if ([...perLocale.values()].every((s) => s === null)) {
+    for (const lang of locales) {
+      if (!existsSync(join(CONTENT, collection, `${lang}.md`))) {
+        errors.push(`${collection}: missing ${lang}.md`);
+      }
+    }
+    continue;
   }
-  for (const slug of ru) {
-    if (!en.has(slug)) errors.push(`${collection}: missing en/${slug}.md (ru/${slug}.md exists)`);
-  }
-}
 
-for (const lang of ['en', 'ru']) {
-  if (!existsSync(join(CONTENT, 'resume', `${lang}.md`))) {
-    errors.push(`resume: missing ${lang}.md`);
+  for (const lang of locales) {
+    if (perLocale.get(lang) === null) {
+      errors.push(`${collection}: missing the whole ${lang}/ directory`);
+    }
+  }
+
+  const known = new Set([...perLocale.values()].filter((s) => s !== null).flatMap((s) => s));
+
+  for (const slug of known) {
+    for (const lang of locales) {
+      const present = perLocale.get(lang);
+      if (present && !present.includes(slug)) {
+        errors.push(`${collection}: missing ${lang}/${slug}.md`);
+      }
+    }
   }
 }
 
 if (errors.length > 0) {
   console.error('Language parity check failed:');
-  for (const e of errors) console.error(`  - ${e}`);
+  for (const e of errors.sort()) console.error(`  - ${e}`);
   process.exit(1);
 }
 
-console.log('Language parity OK');
+console.log(
+  `Language parity OK (${collections.length} collections, locales: ${locales.join(', ')})`,
+);

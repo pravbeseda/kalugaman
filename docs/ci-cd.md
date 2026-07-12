@@ -30,18 +30,24 @@ Complements [`plan.md`](./plan.md) §8 and [`roadmap.md`](./roadmap.md).
 
 The rule from CLAUDE.md: every document exists in both `en/` and `ru/` under the same slug.
 
-- Reads `src/content/projects/{en,ru}` and `src/content/pages/{en,ru}` and compares the sets of filenames; for `src/content/resume/` it just checks that `en.md` and `ru.md` exist.
+- Collections are discovered from the filesystem and locales come from `src/i18n/config.ts` — nothing is hardcoded, so a new collection or locale is checked from the day it appears. Two shapes are handled: `projects/{en,ru}/<slug>.md` (slug sets must match) and `resume/{en,ru}.md` (both files must exist).
+- A missing language directory is reported as a parity failure, not an ENOENT crash — that is the most likely way parity breaks in the first place.
 - On a mismatch it prints what is missing and exits 1 (an **error**, not a warning: a mismatch means LangSwitch links to a 404).
-- Plain Node, no dependencies (`node:fs`), ~30 lines. Exposed as `npm run check:i18n`.
+- Plain Node, no dependencies. Exposed as `npm run check:i18n`.
 
 ### 3. Build smoke check — `scripts/check-dist.mjs`
 
-After `astro build`, confirm the build actually produced a site: `dist/index.html`,
-`dist/{en,ru}/index.html` and the other top-level pages exist and are non-empty,
-`dist/sitemap-index.xml` is there, and `dist/_astro/` is not empty. Otherwise exit 1.
+After `astro build`, confirm the build actually produced a site: the root page, every
+top-level route in every locale, **every project detail page** (derived from
+`src/content/projects/`, so a new project is covered automatically) and
+`sitemap-index.xml` all exist and are non-empty, and `dist/_astro/` is not empty.
+Otherwise exit 1.
 
 Cheap, and it catches "the build was green but we shipped an empty directory".
 Exposed as `npm run check:dist`.
+
+Both scripts import `src/i18n/config.ts` directly, which relies on Node's native type
+stripping (default since 22.18) — hence `engines.node: >=22.18.0`.
 
 ### 4. `.github/workflows/ci.yml`
 
@@ -63,7 +69,7 @@ jobs.ci (ubuntu-latest):
 cancels the previous run on the same branch.
 
 Node is pinned to 22 explicitly rather than read from `package.json`: `engines` holds
-a range (`>=22.12.0`), and setup-node would resolve that to the newest Node available,
+a range (`>=22.18.0`), and setup-node would resolve that to the newest Node available,
 silently drifting away from the local version.
 
 ### 5. `.github/workflows/deploy.yml`
@@ -79,13 +85,21 @@ rather than failing red), and afterwards it doubles as a kill switch for auto-de
 ```
 jobs.deploy (ubuntu-latest, environment: production):
   - checkout / setup-node / npm ci
-  - npm run build                       # the other checks already ran on the PR
-  - npm run check:dist                  # never ship an empty build
-  - shimataro/ssh-key-action@v2         # SSH_PRIVATE_KEY + SSH_KNOWN_HOSTS
+  - format:check + astro check + check:i18n   # same gate as ci.yml, see below
+  - npm run build
+  - npm run check:dist                        # never ship an empty build
+  - shimataro/ssh-key-action@v2               # SSH_PRIVATE_KEY + SSH_KNOWN_HOSTS
   - rsync -az --delete dist/ user@host:kalugaman.ru.new/
   - ssh: swap into place (below)
-  - curl https://kalugaman.ru/en/       # the site answers 200
+  - curl https://kalugaman.ru/en/             # the site answers 200
+  - on failed verification: roll back
 ```
+
+Deploy re-runs the full check suite rather than trusting `ci.yml`: both workflows fire on
+`push` to `main` and run in parallel, so nothing would stop a commit that lands outside a
+green PR from shipping while CI goes red next to it. The three duplicated steps cost about
+ten seconds and make the deploy its own gate; a `workflow_run` dependency would cost more
+plumbing than it saves here.
 
 The swap, in one ssh command under `set -euo pipefail`:
 
@@ -100,9 +114,13 @@ test -f ~/kalugaman.ru/en/index.html
 ```
 
 Two `mv`s within one filesystem are inode renames — milliseconds. There is
-effectively no window where the site is in a mixed state. Rollback:
-`mv ~/kalugaman.ru ~/kalugaman.ru.bad && mv ~/kalugaman.ru.old ~/kalugaman.ru`
-(or simply re-deploy from the previous commit).
+effectively no window where the site is in a mixed state.
+
+The final step verifies the site answers 200 (`curl --retry 3`, so a transient blip on
+the VPS does not fail an otherwise-good deploy). If it does not, the workflow rolls back
+by itself: `.old` goes back into place, the failed build is kept as `~/kalugaman.ru.bad`.
+The rollback step is gated on the swap step having succeeded — otherwise a failure
+_before_ the swap would restore an older build over the live one.
 
 Note: rsync into `.new` runs with `--delete` so leftovers from an aborted previous
 run cannot survive into the next deploy.

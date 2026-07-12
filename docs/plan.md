@@ -147,9 +147,8 @@ Details and the step-by-step plan live in [`ci-cd.md`](./ci-cd.md). The gist:
 
 ```nginx
 map $http_accept_language $lang_redirect {
-    default   /en/;
-    ~*^ru     /ru/;
-    ~*,\s*ru  /ru/;
+    default  /en/;
+    ~*^ru    /ru/;
 }
 
 server {
