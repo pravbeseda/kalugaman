@@ -43,7 +43,7 @@ const { name, role, location, experience, skills, education, languages } =
             <p class="muted">{location}</p>
           </div>
         </div>
-        {/* В POC PDF не генерируем — кнопка ведёт на будущий файл (plan §6) */}
+        {/* PDF is not generated yet — the button points to a future file (plan §6) */}
         <a class="button" href={`/cv/cv-${lang}.pdf`}>{t('resume.download')}</a>
       </header>
 

@@ -42,15 +42,20 @@ const t = useTranslations(lang);
 </style>
 
 <script>
-  const btn = document.getElementById('theme-toggle');
-  btn?.addEventListener('click', () => {
-    const root = document.documentElement;
-    const isDark =
-      root.getAttribute('data-theme') === 'dark' ||
-      (!root.getAttribute('data-theme') &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const next = isDark ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-  });
+  // Re-bind on every page: with View Transitions the button is a new
+  // element after navigation, so the handler must be attached again.
+  function wireThemeToggle() {
+    const btn = document.getElementById('theme-toggle');
+    btn?.addEventListener('click', () => {
+      const root = document.documentElement;
+      const isDark =
+        root.getAttribute('data-theme') === 'dark' ||
+        (!root.getAttribute('data-theme') &&
+          window.matchMedia('(prefers-color-scheme: dark)').matches);
+      const next = isDark ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+  document.addEventListener('astro:page-load', wireThemeToggle);
 </script>
