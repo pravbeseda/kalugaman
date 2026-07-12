@@ -25,20 +25,19 @@ the PDF resume.
 
 ---
 
-## Phase E' — CI/CD (current work) 🔨
+## Phase E' — CI/CD ✅
 
-Pulled ahead of the rest: with a pipeline in place, every later change ships to the
-server on its own. Full write-up: [`ci-cd.md`](./ci-cd.md).
+The site is live at **https://kalugaman.ru** and every push to `main` ships it.
+Full write-up: [`ci-cd.md`](./ci-cd.md), server side: [`deploy/README.md`](../deploy/README.md).
 
 - [x] Prettier + `prettier-plugin-astro`, `npm run format` / `format:check`
 - [x] Language parity script (`scripts/check-i18n-parity.mjs`)
 - [x] Smoke check of `dist/` after the build (`scripts/check-dist.mjs`)
 - [x] `.github/workflows/ci.yml` — on PRs and pushes to `main`: format + check + parity + build + smoke
-- [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `/var/www/kalugaman.ru/public` into place
-- [x] nginx config and server setup guide — `deploy/`
-- [ ] **Manual, on the server** (see [`deploy/README.md`](../deploy/README.md)): deploy key, site directory, nginx, DNS, certbot
-- [ ] **Manual, in GitHub**: secrets `SSH_HOST` / `SSH_USER` / `SSH_PORT` / `SSH_PRIVATE_KEY` / `SSH_KNOWN_HOSTS`, then the `DEPLOY_ENABLED=true` variable that arms the deploy job
-- [ ] First deploy via `workflow_dispatch` + a rollback drill
+- [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `/var/www/kalugaman.ru/public` into place, with an automatic rollback if the site does not answer
+- [x] Server (mars) provisioned by Ansible: `kalugaman-deploy` user, site root, nginx vhost, TLS, DNS
+- [x] GitHub secrets + `DEPLOY_ENABLED`; first deploy done, live behaviour verified (language redirect, cache headers, security headers)
+- [ ] Rollback drill — the automatic path has not been exercised in anger yet
 
 Open questions (not blocking):
 
