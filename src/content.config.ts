@@ -1,8 +1,7 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
-// Общая часть: язык извлекаем из id (en/<slug> | ru/<slug>).
-// Схемы через zod — опечатка во frontmatter = ошибка сборки.
+// Locale is derived from the entry id (en/<slug> | ru/<slug>).
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
@@ -58,7 +57,7 @@ const pages = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
-    // произвольный frontmatter для конкретных страниц (главная, контакты)
+    // page-specific optional frontmatter (home, contacts)
     tagline: z.string().optional(),
     email: z.string().optional(),
     socials: z

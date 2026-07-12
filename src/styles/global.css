@@ -123,7 +123,13 @@ h2 {
   border-radius: 999px;
 }
 
-/* содержимое, отрендеренное из markdown */
+/* No page crossfade — instant swap via ClientRouter, no animation */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* rendered markdown content */
 .prose > * + * {
   margin-top: var(--space-4);
 }

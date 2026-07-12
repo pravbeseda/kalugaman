@@ -42,8 +42,12 @@ const t = useTranslations(lang);
 </style>
 
 <script>
-  const btn = document.getElementById('theme-toggle');
-  btn?.addEventListener('click', () => {
+  // Delegated handler on the document: bound once, works from first paint
+  // (no astro:page-load gap) and survives ClientRouter navigation.
+  document.addEventListener('click', (e) => {
+    if (!(e.target instanceof Element) || !e.target.closest('#theme-toggle')) {
+      return;
+    }
     const root = document.documentElement;
     const isDark =
       root.getAttribute('data-theme') === 'dark' ||

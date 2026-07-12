@@ -18,7 +18,7 @@ const home = await getEntry('pages', `${lang}/home`);
 if (!home) throw new Error(`Missing home page for ${lang}`);
 const { Content } = await render(home);
 
-// Имя — единый источник: берём из резюме той же локали
+// Single source for the name: read it from the resume of the same locale
 const resume = await getEntry('resume', lang);
 const displayName = resume?.data.name ?? 'kalugaman';
 
@@ -82,7 +82,7 @@ const featured = (await getCollection('projects'))
   .hero {
     padding-block: var(--space-16) var(--space-8);
   }
-  /* единая центрированная колонка для всей главной — как на /resume и /contacts */
+  /* single centered column for the whole home page, like /resume and /contacts */
   .home__col {
     max-width: 46rem;
   }
@@ -96,7 +96,7 @@ const featured = (await getCollection('projects'))
     width: 104px;
     height: 104px;
     object-fit: cover;
-    /* сдвигаем кадр к верху фото — над головой остаётся воздух */
+    /* bias the crop toward the top so there's headroom above the head */
     object-position: 50% 18%;
     border-radius: 50%;
     border: var(--border-width) solid var(--color-border);

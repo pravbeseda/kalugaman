@@ -1,6 +1,6 @@
 ---
-// Корень /. В проде язык выбирает nginx по Accept-Language (см. plan §8.1).
-// Здесь — fallback через meta-refresh, чтобы локальный build/preview работал.
+// Root /. In production nginx picks the language via Accept-Language (plan §8.1).
+// This meta-refresh is a fallback so local build/preview still works.
 import { defaultLocale } from '../i18n/config';
 const target = `/${defaultLocale}`;
 ---
