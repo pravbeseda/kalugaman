@@ -1,129 +1,103 @@
-# Roadmap: от POC до продакшена с авто-деплоем
+# Roadmap: from POC to production with auto-deploy
 
-Дополняет [`plan.md`](./plan.md) (архитектура). Здесь — путь от текущего состояния
-POC до боевого сайта на `kalugaman.ru` с автоматическим развёртыванием из GitHub.
+Complements [`plan.md`](./plan.md) (architecture). This is the path from where the
+project stands today to a live site on `kalugaman.ru` deployed automatically from
+GitHub. CI/CD details live in [`ci-cd.md`](./ci-cd.md).
 
-## Где мы сейчас (сделано в POC)
+## Where we are
 
-- [x] Каркас Astro (SSG), структура папок, tokens/themes/global CSS, `Base` layout
-- [x] Контент-модель: Content Collections + zod-схемы (`projects`, `resume`, `pages`)
-- [x] i18n: `[lang]`-роутинг en/ru, словари UI-строк + `t()`, переключатель языка, `hreflang`/`x-default`, canonical, OG-мета
-- [x] Страницы: главная, resume, projects (список + деталь), contacts — mobile-first
-- [x] Темы: светлая (сепия/бумага) + тёмная через токены, инлайн-скрипт без FOUC, `ThemeToggle`
-- [x] Изображения через `astro:assets` (webp/срсеты/lazy); фото на главной и в резюме
-- [x] Демо-контент на двух языках (3 проекта, резюме, тексты главной/контактов)
+Done:
 
-**Вывод:** контент отделён от кода, база расширяемая. Дальше — наполнение и слои
-поверх, без слома архитектуры.
+- [x] Astro skeleton (SSG), folder structure, tokens/themes/global CSS, `Base` layout
+- [x] Upgrade to **Astro 7** (Node >= 22.12), zod 4 via `astro/zod`
+- [x] Content model: Content Collections (Content Layer, `src/content.config.ts`) + zod schemas (`projects`, `resume`, `pages`)
+- [x] i18n: `[lang]` routing en/ru, UI dictionaries + `t()`, language switch, `hreflang`/`x-default`, canonical, OG meta
+- [x] Pages: home, resume, projects (list + detail), contacts — mobile-first
+- [x] Themes: light (sepia/paper) + dark via tokens, inline script with no FOUC, `ThemeToggle`
+- [x] Images through `astro:assets` (webp/srcset/lazy)
+- [x] **Real content** in both languages: resume, 3 projects (Intermedia Unite, VBC Marketplace, Assad Video), home and contacts copy, real links (GitHub / Telegram / LinkedIn / email)
+- [x] **View Transitions** (`<ClientRouter />`) — no-reload navigation; scripts hook into `astro:page-load` / `astro:after-swap`
+- [x] **Sitemap** (`@astrojs/sitemap`) with i18n links; the root is kept out of the index
 
----
-
-## Фаза A — Наполнение и решение открытых вопросов
-
-Цель: реальный контент вместо демо + закрыть design/content-решения.
-
-### A1. Открытые решения (закрыть до вёрстки контента)
-- [ ] **Мобильная навигация**: бургер vs нижняя панель vs текущий перенос (plan §5 оставлял на потом). Рекомендация: бургер-меню (проще, привычнее).
-- [ ] **Имя/бренд**: подтвердить написание — `Александр Иванов` (ru) / `Alexander Ivanov` (en). ✅ уже проставлено.
-- [ ] **Акцентный цвет** светлой темы (сейчас сиена `#8a4f2c`) и тёмной (сейчас голубой).
-- [ ] **Доп. темы?** сейчас 2 (день/ночь). Оставляем 2 или закладываем «системная/светлая/тёмная» селектором.
-- [ ] **Аналитика**: нужна ли? Если да — privacy-friendly (Plausible/Umami self-hosted), без cookie-баннера.
-- [ ] **Домены-соцсети**: реальные ссылки GitHub/Telegram/LinkedIn/email.
-
-### A2. Реальный контент (в `src/content/**`)
-- [ ] Резюме `resume/en.md` + `resume/ru.md`: настоящий опыт, навыки, образование, summary.
-- [ ] Проекты: заменить 3 демо на реальные; для каждого — `en/` и `ru/` (правило паритета, plan §2.3).
-- [ ] Тексты главной и контактов — финальные, на двух языках.
-- [ ] Фото — при желании заменить `src/assets/portrait.png` (сборка сама переоптимизирует).
-- [ ] Вычитка: орфография, единый tone of voice, длина строк.
+**Takeaway:** content is separated from code and the base is extensible. What's left:
+infrastructure (CI/CD, VPS), the missing small pieces (404, robots, mobile menu) and
+the PDF resume.
 
 ---
 
-## Фаза B — Полировка и недостающие куски
+## Phase E' — CI/CD (current work) 🔨
 
-Цель: довести до «выглядит и работает как продукт».
+Pulled ahead of the rest: with a pipeline in place, every later change ships to the
+server on its own. Full write-up: [`ci-cd.md`](./ci-cd.md).
 
-- [ ] **Мобильное меню** — реализовать выбранный в A1 паттерн (островок vanilla-JS).
-- [ ] **Страница 404** (`src/pages/404.astro`) — двуязычная, ведёт на главную.
-- [ ] **SEO-инфраструктура**:
-  - [ ] `@astrojs/sitemap` с i18n-связками
-  - [ ] `public/robots.txt` (+ ссылка на sitemap)
-  - [ ] OG-картинки (статические или генерация через `@vercel/og`/satori на сборке)
-  - [ ] JSON-LD `Person` (главная/резюме), `SoftwareSourceCode` (проекты) — по желанию
-  - [ ] `noindex` служебных страниц (корневой редирект уже стоит; печатная — на фазе C)
-- [ ] **Техдолг**: убрать дубль значений тёмной темы в `themes.css` (общий набор токенов → переключение только там, где отличается).
-- [ ] **Доступность (a11y)**: проверка контраста обеих тем, фокус-стили, `aria` на меню/переключателях, навигация с клавиатуры, `prefers-reduced-motion`.
-- [ ] **Скрипт паритета языков** (plan §2.3): проверяет, что у каждого проекта есть `en/` и `ru/`; вывод — предупреждение (позже подключить в CI).
+- [x] Prettier + `prettier-plugin-astro`, `npm run format` / `format:check`
+- [x] Language parity script (`scripts/check-i18n-parity.mjs`)
+- [x] Smoke check of `dist/` after the build (`scripts/check-dist.mjs`)
+- [x] `.github/workflows/ci.yml` — on PRs and pushes to `main`: format + check + parity + build + smoke
+- [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `~/kalugaman.ru` into place
+- [x] nginx config and server setup guide — `deploy/`
+- [ ] **Manual, on the server** (see [`deploy/README.md`](../deploy/README.md)): deploy key, site directory, nginx, DNS, certbot
+- [ ] **Manual, in GitHub**: secrets `SSH_HOST` / `SSH_USER` / `SSH_PORT` / `SSH_PRIVATE_KEY` / `SSH_KNOWN_HOSTS`, then the `DEPLOY_ENABLED=true` variable that arms the deploy job
+- [ ] First deploy via `workflow_dispatch` + a rollback drill
+
+Open questions (not blocking):
+
+- **Analytics**: do we want any? If so — privacy-friendly (self-hosted Plausible/Umami), no cookie banner.
+- **More themes?** Two today (light/dark). Keep two, or plan for a "system / light / dark" selector.
 
 ---
 
-## Фаза C — PDF-резюме
+## Phase B — Polish and missing pieces
 
-Цель: скачиваемый «чистый» PDF из того же источника, что и веб-резюме (plan §6).
+Goal: make it look and behave like a product.
 
-- [ ] `PrintResume.astro` — печатный layout: одна колонка, `@page`-поля, без навигации, `noindex`.
-- [ ] Страницы `/[lang]/resume/print` — источник для PDF (контент из коллекции `resume`).
+- [ ] **Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
+- [ ] **404 page** (`src/pages/404.astro`) — bilingual, links home.
+- [ ] **SEO leftovers**:
+  - [ ] `public/robots.txt` (+ a link to the sitemap)
+  - [ ] OG images (static, or generated with satori at build time)
+  - [ ] JSON-LD `Person` (home/resume), `SoftwareSourceCode` (projects) — optional
+- [ ] **Tech debt**: duplicated values in `themes.css` (one shared token set → override only what actually differs).
+- [ ] **Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
+
+---
+
+## Phase C — PDF resume
+
+Goal: a downloadable, clean PDF built from the same source as the web resume (plan §6).
+
+- [ ] `PrintResume.astro` — print layout: single column, `@page` margins, no navigation, `noindex`.
+- [ ] Pages `/[lang]/resume/print` — the PDF source (content from the `resume` collection).
 - [ ] `scripts/generate-pdf.mjs` — Playwright: `preview` → `page.pdf()` → `dist/cv/cv-en.pdf`, `cv-ru.pdf`.
-- [ ] Кнопки «Download PDF» уже ссылаются на `/cv/cv-<lang>.pdf` — проверить, что файлы появляются.
-- [ ] Локальный прогон + проверка текстового слоя (селектится/парсится).
+- [ ] "Download PDF" buttons on `/resume` linking to `/cv/cv-<lang>.pdf`.
+- [ ] Wire into the pipeline: a PDF step in `deploy.yml` (cache the Playwright browser).
+- [ ] While Playwright is there anyway: 3–4 e2e smoke tests (page loads, theme toggles, LangSwitch goes where it should).
 
 ---
 
-## Фаза D — Инфраструктура (VPS + nginx)
+## Phase F — Launch and beyond
 
-Цель: место, куда деплоить статику, с HTTPS и языковым редиректом корня.
-
-- [ ] VPS: пользователь под деплой, firewall, только nginx (без рантаймов — минимум поверхности).
-- [ ] **DNS**: `kalugaman.ru` (A/AAAA) → IP VPS; `www` → apex.
-- [ ] nginx-конфиг (plan §8.1): раздача `current/`, кэш `/_astro/` immutable, короткий html-кэш, gzip/brotli.
-- [ ] Языковой редирект `location = /` по `Accept-Language` (map → `/en/` | `/ru/`).
-- [ ] TLS: certbot (Let's Encrypt), автопродление; редиректы 80→443 и www→apex.
-- [ ] Security-заголовки: CSP, `X-Content-Type-Options`, `Referrer-Policy`.
-- [ ] Структура релизов: `releases/<ts>` + симлинк `current` (атомарность + мгновенный откат).
+- [ ] **Lighthouse** ≥ 95 across the board (Perf/A11y/Best/SEO); optionally Lighthouse CI as a gate.
+- [ ] Check **ATS parsing** of the PDF (text is extractable).
+- [ ] Verify hreflang/canonical in Google Search Console; submit the sitemap.
+- [ ] Monitoring: uptime ping (e.g. UptimeRobot), TLS expiry alert.
+- [ ] Project README: how to add a project / language / theme.
 
 ---
 
-## Фаза E — CI/CD (авто-деплой из GitHub)
-
-Цель: `push в main` → сайт на проде без ручных шагов (plan §8.2).
-
-- [ ] Репозиторий на GitHub (сейчас проект не под git — начать с `git init` + первый коммит).
-- [ ] **Секреты** в GitHub: `SSH_HOST`, `SSH_USER`, `SSH_KEY` (ограниченный deploy-ключ).
-- [ ] `.github/workflows/deploy.yml`, триггер — push в `main`:
-  1. checkout → setup-node → `npm ci`
-  2. `npm run build`
-  3. кэш браузера Playwright → `npx playwright install chromium` → `node scripts/generate-pdf.mjs`
-  4. проверки: паритет языков, `astro check` (типы/ссылки)
-  5. `rsync -az --delete dist/` → `releases/<ts>` на VPS → переключение симлинка `current`
-- [ ] **PR-превью-чек** (опционально): на pull_request гонять build + `astro check` без деплоя.
-- [ ] Проверка отката: вернуть симлинк на прошлый релиз = мгновенный откат.
-
----
-
-## Фаза F — Запуск и после
-
-- [ ] **Lighthouse** ≥ 95 по всем метрикам (Perf/A11y/Best/SEO) — прогнать и починить.
-- [ ] Проверка **ATS-парсинга** PDF (текст извлекается роботами).
-- [ ] Проверка hreflang/canonical через Google Search Console; отправить sitemap.
-- [ ] Мониторинг: аптайм-пинг (напр. UptimeRobot), алерт на истечение TLS.
-- [ ] README проекта: как добавить проект/язык/тему (2.3 строки — архитектура это позволяет).
-
----
-
-## Порядок и зависимости
+## Order and dependencies
 
 ```
-A (контент+решения) ─┬─> B (полировка) ─┬─> D (VPS) ─> E (CI/CD) ─> F (запуск)
-                     └─> C (PDF) ────────┘
+E' (CI/CD + VPS) ─> B (polish) ─> C (PDF) ─> F (launch)
 ```
 
-- A желательно раньше всего (без реального контента полировать нечего).
-- C (PDF) можно вести параллельно B — они не мешают друг другу; но E (CI) зависит от готового C, т.к. пайплайн собирает PDF.
-- «Прогрессивный jpeg»: после B сайт уже можно показывать (даже без своего VPS — залить на любой статик-хостинг). D+E добавляют собственный домен и автоматизацию.
+Content (the former phase A) is done. CI/CD goes first, so every later change ships
+automatically. B and C are independent — order between them is a matter of taste.
 
-## Заметки о рисках (из plan §10, актуальны)
+## Risk notes
 
-- Мажорные апгрейды Astro иногда трогают Content Collections → фиксировать версию, обновляться осознанно.
-- Playwright в CI тянет chromium (~1 мин) → кэшировать браузер в Actions.
-- Паритет переводов легко потерять → скрипт-проверка (B) + подключить в CI (E).
-- VPS требует обслуживания → минимальная поверхность: nginx + статика, без рантаймов.
+- Major Astro upgrades occasionally touch Content Collections → upgrade deliberately (5 → 7 already done).
+- Playwright in CI pulls chromium (~1 min) → cache the browser in Actions.
+- Translation parity is easy to lose → the parity script in CI (phase E').
+- A VPS needs maintenance → keep the surface minimal: nginx + static files, no runtimes.
+- No tests, and none planned: there is no logic here, and `astro check` covers types and content schemas. No unit tests; e2e only alongside the Playwright work in phase C.

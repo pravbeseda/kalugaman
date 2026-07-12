@@ -1,0 +1,68 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Kill switch: the job is skipped until DEPLOY_ENABLED is set in repository
+    # variables — i.e. until the server and the SSH_* secrets exist.
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke check dist/
+        run: npm run check:dist
+
+      - name: Setup SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Upload build to staging directory
+        env:
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          rsync -az --delete -e "ssh -p $SSH_PORT" \
+            dist/ "$SSH_USER@$SSH_HOST:kalugaman.ru.new/"
+
+      - name: Swap into place
+        env:
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" bash -s <<'EOF'
+          set -euo pipefail
+          test -f ~/kalugaman.ru.new/index.html
+          rm -rf ~/kalugaman.ru.old
+          if [ -d ~/kalugaman.ru ]; then
+            mv ~/kalugaman.ru ~/kalugaman.ru.old
+          fi
+          mv ~/kalugaman.ru.new ~/kalugaman.ru
+          test -f ~/kalugaman.ru/en/index.html
+          EOF
+
+      - name: Verify site responds
+        run: curl -fsS -o /dev/null -w '%{http_code}\n' https://kalugaman.ru/en/
