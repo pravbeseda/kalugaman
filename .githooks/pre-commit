@@ -1,0 +1,10 @@
+#!/bin/sh
+# Refuse to commit directly on main — work happens on branches (see CLAUDE.md).
+branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+
+if [ "$branch" = "main" ]; then
+	echo "✖ Direct commits to 'main' are blocked."
+	echo "  Move to a branch:  git switch -c <branch>"
+	echo "  Bypass (rare):     git commit --no-verify"
+	exit 1
+fi

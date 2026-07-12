@@ -1,0 +1,13 @@
+#!/bin/sh
+# Refuse to push to main — changes land via pull request (GitHub enforces this too).
+remote_main="refs/heads/main"
+
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+	if [ "$remote_ref" = "$remote_main" ]; then
+		echo "✖ Pushing to 'main' is blocked — open a pull request instead."
+		echo "  gh pr create"
+		exit 1
+	fi
+done
+
+exit 0
