@@ -23,7 +23,9 @@ body {
   color: var(--color-text);
   background: var(--color-bg);
   -webkit-font-smoothing: antialiased;
-  transition: background var(--transition), color var(--transition);
+  transition:
+    background var(--transition),
+    color var(--transition);
 }
 
 a {
@@ -100,7 +102,9 @@ h2 {
   font-weight: 600;
   font-size: var(--text-base);
   cursor: pointer;
-  transition: transform var(--transition), border-color var(--transition);
+  transition:
+    transform var(--transition),
+    border-color var(--transition);
 }
 .button:hover {
   text-decoration: none;

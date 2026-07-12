@@ -34,20 +34,20 @@ const resume = defineCollection({
         position: z.string(),
         period: z.string(),
         highlights: z.array(z.string()),
-      })
+      }),
     ),
     skills: z.array(
       z.object({
         group: z.string(),
         items: z.array(z.string()),
-      })
+      }),
     ),
     education: z.array(
       z.object({
         place: z.string(),
         degree: z.string(),
         period: z.string(),
-      })
+      }),
     ),
     languages: z.array(z.object({ name: z.string(), level: z.string() })),
   }),
@@ -61,9 +61,7 @@ const pages = defineCollection({
     // page-specific optional frontmatter (home, contacts)
     tagline: z.string().optional(),
     email: z.string().optional(),
-    socials: z
-      .array(z.object({ label: z.string(), url: z.url() }))
-      .optional(),
+    socials: z.array(z.object({ label: z.string(), url: z.url() })).optional(),
   }),
 });
 

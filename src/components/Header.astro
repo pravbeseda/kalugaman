@@ -16,8 +16,7 @@ const links = [
   { href: `${base}/contacts`, label: t('nav.contacts') },
 ];
 
-const isActive = (href: string) =>
-  href === base ? path === base : path.startsWith(href);
+const isActive = (href: string) => (href === base ? path === base : path.startsWith(href));
 ---
 
 <header class="header">

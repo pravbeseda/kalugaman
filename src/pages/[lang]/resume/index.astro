@@ -16,15 +16,10 @@ const t = useTranslations(lang);
 const resume = await getEntry('resume', lang);
 if (!resume) throw new Error(`Missing resume for ${lang}`);
 const { Content } = await render(resume);
-const { name, role, location, experience, skills, education, languages } =
-  resume.data;
+const { name, role, location, experience, skills, education, languages } = resume.data;
 ---
 
-<Base
-  lang={lang}
-  title={`${name} — ${role}`}
-  description={`${role}, ${location}`}
->
+<Base lang={lang} title={`${name} — ${role}`} description={`${role}, ${location}`}>
   <section class="section">
     <div class="container narrow">
       <header class="head">

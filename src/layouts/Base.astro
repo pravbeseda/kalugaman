@@ -49,8 +49,10 @@ const alternates = locales.map((l) => ({
     {/* SPA-like navigation (no full reload) */}
     <ClientRouter />
 
-    {/* Apply theme before first paint (no FOUC); re-apply on client
-        navigation via astro:after-swap, before the new document paints. */}
+    {
+      /* Apply theme before first paint (no FOUC); re-apply on client
+        navigation via astro:after-swap, before the new document paints. */
+    }
     <script is:inline>
       (() => {
         const applyTheme = () => {
