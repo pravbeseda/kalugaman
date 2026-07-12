@@ -1,7 +1,5 @@
 ---
 import { getEntry, render } from 'astro:content';
-import { Image } from 'astro:assets';
-import avatar from '../../assets/avatar.png';
 import Base from '../../layouts/Base.astro';
 import { locales, type Locale } from '../../i18n/config';
 import { useTranslations } from '../../i18n/utils';
@@ -22,17 +20,7 @@ const { email, socials = [] } = page.data;
 <Base lang={lang} title={`${t('contacts.title')} · kalugaman`} description={page.data.description}>
   <section class="section">
     <div class="container narrow">
-      <div class="heading">
-        <Image
-          src={avatar}
-          alt=""
-          width={72}
-          densities={[1, 2]}
-          class="heading__avatar"
-          loading="eager"
-        />
-        <h1>{t('contacts.title')}</h1>
-      </div>
+      <h1>{t('contacts.title')}</h1>
 
       <div class="prose intro">
         <Content />
@@ -65,21 +53,6 @@ const { email, socials = [] } = page.data;
 <style>
   .narrow {
     max-width: 42rem;
-  }
-  .heading {
-    display: flex;
-    align-items: center;
-    gap: var(--space-4);
-  }
-  .heading h1 {
-    margin: 0;
-  }
-  .heading__avatar {
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    border: var(--border-width) solid var(--color-border);
-    flex-shrink: 0;
   }
   .intro {
     margin-block: var(--space-6) var(--space-8);
