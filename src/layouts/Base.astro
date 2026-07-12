@@ -10,8 +10,25 @@ interface Props {
   lang: Locale;
   title: string;
   description: string;
+  /** Keep the page out of search results. Says nothing about its URL. */
+  noindex?: boolean;
+  /**
+   * The page has no meaningful URL of its own — it is served for arbitrary paths (404).
+   * Separate from `noindex`: a noindex page with a real URL (the print resume, say) still
+   * wants a canonical, pointing at the page it duplicates.
+   */
+  noCanonical?: boolean;
+  /** Drop the site chrome. For pages that are not tied to one language (404). */
+  bare?: boolean;
 }
-const { lang, title, description } = Astro.props;
+const {
+  lang,
+  title,
+  description,
+  noindex = false,
+  noCanonical = false,
+  bare = false,
+} = Astro.props;
 
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site).href;
@@ -32,20 +49,33 @@ const alternates = locales.map((l) => ({
 
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
 
-    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href={new URL(switchLocalePath(path, defaultLocale), Astro.site).href}
-    />
+    {noindex && <meta name="robots" content="noindex, follow" />}
 
-    {/* Open Graph */}
+    {
+      !noCanonical && (
+        <>
+          <link rel="canonical" href={canonical} />
+          {alternates.map((a) => (
+            <link rel="alternate" hreflang={a.lang} href={a.href} />
+          ))}
+          <link
+            rel="alternate"
+            hreflang="x-default"
+            href={new URL(switchLocalePath(path, defaultLocale), Astro.site).href}
+          />
+        </>
+      )
+    }
+
+    {
+      /* Open Graph. og:url is a claim about where the page lives — same claim as
+      canonical, so a page without a URL of its own makes neither. */
+    }
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!noCanonical && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary" />
 
     {/* SPA-like navigation (no full reload) */}
@@ -70,11 +100,11 @@ const alternates = locales.map((l) => ({
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <Header lang={lang} />
+    {!bare && <Header lang={lang} />}
     <main id="main">
       <slot />
     </main>
-    <Footer lang={lang} />
+    {!bare && <Footer lang={lang} />}
 
     <style>
       .skip-link {

@@ -20,5 +20,8 @@ export default {
   'contacts.email': 'Email',
   'theme.toggle': 'Toggle theme',
   'lang.switch': 'Русский',
+  'notfound.title': 'Page not found',
+  'notfound.text': 'The page you are looking for does not exist, or has moved.',
+  'notfound.home': 'Go to the homepage',
   'footer.built': 'Built with Astro · content in Markdown',
 } as const;

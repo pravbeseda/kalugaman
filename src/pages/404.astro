@@ -1,0 +1,118 @@
+---
+import Base from '../layouts/Base.astro';
+import { useTranslations } from '../i18n/utils';
+import { locales, defaultLocale } from '../i18n/config';
+
+// nginx serves this one file for every unknown URL, so the page cannot be built
+// per language. It renders in the default language and swaps to the visitor's on
+// load — see the script below. Without JS it stays English, which is the fallback
+// we would pick anyway.
+const t = useTranslations(defaultLocale);
+
+const strings = Object.fromEntries(
+  locales.map((lang) => {
+    const tr = useTranslations(lang);
+    return [
+      lang,
+      { title: tr('notfound.title'), text: tr('notfound.text'), home: tr('notfound.home') },
+    ];
+  }),
+);
+---
+
+<Base
+  lang={defaultLocale}
+  title={t('notfound.title')}
+  description={t('notfound.text')}
+  noindex
+  noCanonical
+  bare
+>
+  <section class="notfound">
+    <p class="code">404</p>
+    <h1 data-i18n="title">{t('notfound.title')}</h1>
+    <p class="text" data-i18n="text">{t('notfound.text')}</p>
+    <a class="button" href={`/${defaultLocale}/`} data-i18n="home">{t('notfound.home')}</a>
+  </section>
+
+  {
+    /* The data goes through a JSON tag rather than define:vars, which strips every other
+      attribute off the <script> — including the data-astro-rerun below. */
+  }
+  <script
+    type="application/json"
+    id="notfound-i18n"
+    is:inline
+    set:html={JSON.stringify({ strings, locales, defaultLocale })}
+  />
+
+  {
+    /* Inside the slot: a script placed next to <Base> would land after </html>.
+      data-astro-rerun because ClientRouter swaps in a 404 response like any other
+      document (it checks the content type, not the status) and skips scripts it has
+      already run — without it, a second dead link would show the English body. */
+  }
+  <script is:inline data-astro-rerun>
+    (() => {
+      const { strings, locales, defaultLocale } = JSON.parse(
+        document.getElementById('notfound-i18n').textContent,
+      );
+
+      const pick = () => {
+        const seg = location.pathname.split('/')[1];
+        if (locales.includes(seg)) return seg;
+
+        // No language in the path (a bare /typo). Walk the visitor's preference list and
+        // take the first language we have — navigator.language alone is the browser's UI
+        // language, which is not necessarily what they asked pages to be served in.
+        const preferred = navigator.languages?.length ? navigator.languages : [navigator.language];
+        for (const tag of preferred) {
+          const lang = (tag || '').slice(0, 2).toLowerCase();
+          if (locales.includes(lang)) return lang;
+        }
+        return defaultLocale;
+      };
+
+      const lang = pick();
+      if (lang === defaultLocale) return;
+
+      document.documentElement.lang = lang;
+      document.title = strings[lang].title;
+      for (const el of document.querySelectorAll('[data-i18n]')) {
+        el.textContent = strings[lang][el.dataset.i18n];
+      }
+      document.querySelector('[data-i18n="home"]').href = `/${lang}/`;
+    })();
+  </script>
+</Base>
+
+<style>
+  .notfound {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    min-height: 100vh;
+    padding: var(--space-8) var(--space-4);
+    text-align: center;
+  }
+  .code {
+    font-family: var(--font-mono);
+    font-size: var(--step-fluid-h1);
+    font-weight: 800;
+    color: var(--color-accent);
+    margin: 0;
+  }
+  h1 {
+    margin: 0;
+  }
+  .text {
+    color: var(--color-muted);
+    max-width: 32rem;
+    margin: 0;
+  }
+  .button {
+    margin-top: var(--space-4);
+  }
+</style>
