@@ -35,16 +35,42 @@ const strings = Object.fromEntries(
     <a class="button" href={`/${defaultLocale}/`} data-i18n="home">{t('notfound.home')}</a>
   </section>
 
-  {/* Inside the slot: a script placed next to <Base> would land after </html>. */}
-  <script is:inline define:vars={{ strings, locales, defaultLocale }}>
+  {
+    /* The data goes through a JSON tag rather than define:vars, which strips every other
+      attribute off the <script> — including the data-astro-rerun below. */
+  }
+  <script
+    type="application/json"
+    id="notfound-i18n"
+    is:inline
+    set:html={JSON.stringify({ strings, locales, defaultLocale })}
+  />
+
+  {
+    /* Inside the slot: a script placed next to <Base> would land after </html>.
+      data-astro-rerun because ClientRouter swaps in a 404 response like any other
+      document (it checks the content type, not the status) and skips scripts it has
+      already run — without it, a second dead link would show the English body. */
+  }
+  <script is:inline data-astro-rerun>
     (() => {
+      const { strings, locales, defaultLocale } = JSON.parse(
+        document.getElementById('notfound-i18n').textContent,
+      );
+
       const pick = () => {
         const seg = location.pathname.split('/')[1];
         if (locales.includes(seg)) return seg;
-        // No language in the path (a bare /typo): fall back to the browser's, the same
-        // way nginx picks one for the root.
-        const browser = (navigator.language || '').slice(0, 2).toLowerCase();
-        return locales.includes(browser) ? browser : defaultLocale;
+
+        // No language in the path (a bare /typo). Walk the visitor's preference list and
+        // take the first language we have — navigator.language alone is the browser's UI
+        // language, which is not necessarily what they asked pages to be served in.
+        const preferred = navigator.languages?.length ? navigator.languages : [navigator.language];
+        for (const tag of preferred) {
+          const lang = (tag || '').slice(0, 2).toLowerCase();
+          if (locales.includes(lang)) return lang;
+        }
+        return defaultLocale;
       };
 
       const lang = pick();

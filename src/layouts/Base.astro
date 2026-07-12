@@ -68,11 +68,14 @@ const alternates = locales.map((l) => ({
       )
     }
 
-    {/* Open Graph */}
+    {
+      /* Open Graph. og:url is a claim about where the page lives — same claim as
+      canonical, so a page without a URL of its own makes neither. */
+    }
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
+    {!noCanonical && <meta property="og:url" content={canonical} />}
     <meta name="twitter:card" content="summary" />
 
     {/* SPA-like navigation (no full reload) */}
