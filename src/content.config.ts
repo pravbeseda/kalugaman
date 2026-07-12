@@ -12,8 +12,8 @@ const projects = defineCollection({
     period: z.string(),
     links: z
       .object({
-        repo: z.string().url().optional(),
-        demo: z.string().url().optional(),
+        repo: z.url().optional(),
+        demo: z.url().optional(),
       })
       .default({}),
     featured: z.boolean().default(false),
@@ -61,7 +61,7 @@ const pages = defineCollection({
     tagline: z.string().optional(),
     email: z.string().optional(),
     socials: z
-      .array(z.object({ label: z.string(), url: z.string().url() }))
+      .array(z.object({ label: z.string(), url: z.url() }))
       .optional(),
   }),
 });
