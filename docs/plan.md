@@ -143,34 +143,7 @@ Details and the step-by-step plan live in [`ci-cd.md`](./ci-cd.md). The gist:
 
 - The site is static files in `/var/www/kalugaman.ru/public` on the mars VPS (which also hosts drevo, but under its own deploy user and directory). No symlinks, no release directories: the build is small, and swapping it in renames a staging directory into place. The server is provisioned by Ansible — see [`../deploy/README.md`](../deploy/README.md).
 - HTTPS: certbot (Let's Encrypt) with auto-renewal; 80→443 and www→apex redirects.
-- Root language redirect:
-
-```nginx
-map $http_accept_language $lang_redirect {
-    default  /en/;
-    ~*^ru    /ru/;
-}
-
-server {
-    server_name kalugaman.ru;
-    root /var/www/kalugaman.ru/public;
-
-    location = / {
-        return 302 $lang_redirect;
-    }
-
-    location / {
-        try_files $uri $uri/ $uri/index.html =404;
-    }
-
-    # caching: Astro's hashed assets forever, HTML short
-    location /_astro/ {
-        add_header Cache-Control "public, max-age=31536000, immutable";
-    }
-}
-```
-
-- gzip/brotli and security headers (CSP, X-Content-Type-Options) are configured on the server. The working config lives in [`../deploy/nginx/kalugaman.ru.conf`](../deploy/nginx/kalugaman.ru.conf).
+- The vhost belongs to the Ansible role, not to this repository. Its requirements — the root language redirect from `Accept-Language`, caching by path (only `/_astro/` is hashed, so only it may be `immutable`), all `add_header` declared on one level, clean URLs — are spelled out in [`../deploy/README.md`](../deploy/README.md), along with the curl checks that verify them.
 
 ### 8.2 GitHub Actions
 

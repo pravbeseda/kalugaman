@@ -1,8 +1,12 @@
-# Deployment setup
+# Deployment
 
 The site is deployed to the **mars** host, which is provisioned with Ansible. Nothing
-here is meant to be applied by hand on the server: this file specifies the state the
-playbook has to produce, plus the GitHub-side setup, which lives outside Ansible.
+here is applied by hand on the server: this file records what the server has to provide
+and what is configured on the GitHub side (which is outside Ansible).
+
+The nginx vhost lives in the Ansible role, not in this repository — a second copy here
+would only drift out of sync with the real one. What that vhost has to do is written
+down below, so the requirement survives even though the config does not live here.
 
 The pipeline itself: [`../docs/ci-cd.md`](../docs/ci-cd.md).
 
@@ -19,46 +23,75 @@ The pipeline itself: [`../docs/ci-cd.md`](../docs/ci-cd.md).
 ```
 
 The content deliberately does **not** live in the deploy user's home: home directories
-tend to be created `0700`/`0750`, which makes nginx return 403 on everything, and mixing
-a service account's home with a document root muddles both backups and permissions.
+tend to be created `0700`/`0750`, which makes nginx return 403 on everything, and a
+service account's home doubling as a document root muddles backups and permissions.
 
-`public.new` and `public.old` are created by the workflow; Ansible only needs to create
-`/var/www/kalugaman.ru` itself. All three must sit on one filesystem — the swap relies on
-`mv` being a rename, not a copy.
+`public.new` and `public.old` are created by the workflow; Ansible only creates
+`/var/www/kalugaman.ru`. All three must sit on one filesystem — the swap relies on `mv`
+being a rename, not a copy.
 
-## What Ansible has to provision
+The deploy user is `kalugaman-deploy`, an account of its own rather than the shared
+`github-deploy` that drevo uses: the private key lives in the secrets of a _public_
+repository, so it must not be able to write anywhere near another project. It is
+unprivileged, has no sudo, and owns only the site root.
 
-**User.** `kalugaman-deploy`, unprivileged, no sudo, home `/home/kalugaman-deploy`
-(`0755`), with `.ssh` at `0700` and `authorized_keys` at `0600` holding the public half of
-the deploy key.
+## What the nginx vhost has to do
 
-A user of its own, not the shared `github-deploy` that drevo uses: the private half lives
-in a public repository's secrets, and it must not be able to write anywhere near another
-project.
+Serve `/var/www/kalugaman.ru/public`, plus four things that are specific to this site:
 
-**Site root.** `/var/www/kalugaman.ru`, owner `kalugaman-deploy`, mode `0755`. The deploy
-user needs write access to this directory itself (not just its contents) — the swap
-renames directories inside it.
+**Language redirect on the root.** `/` is the only page without a language, so nginx
+picks one from `Accept-Language`:
 
-**nginx.** The vhost from [`nginx/kalugaman.ru.conf`](./nginx/kalugaman.ru.conf), with
-`root /var/www/kalugaman.ru/public`. It carries the root language redirect, clean URLs,
-immutable caching for `/_astro/`, no-cache HTML, gzip and the security headers.
-
-nginx must be able to traverse every directory on the path (`/var`, `/var/www`,
-`/var/www/kalugaman.ru`, `public`). With `/var/www` this is the default; worth verifying
-once after the first deploy:
-
-```bash
-sudo -u www-data namei -l /var/www/kalugaman.ru/public/index.html
+```nginx
+map $http_accept_language $lang_redirect {
+    default  /en/;
+    ~*^ru    /ru/;
+}
+# in the server block:
+location = / { return 302 $lang_redirect; }
 ```
 
-**TLS.** certbot for `kalugaman.ru` and `www.kalugaman.ru`; it adds the TLS block and the
-80→443 redirect to the vhost. Renewal runs from certbot's systemd timer.
+Only a _leading_ `ru` wins. A rule matching `ru` anywhere would send the very common
+`en-US,en;q=0.9,ru;q=0.8` — English preferred, Russian as a fallback — to the Russian
+version, the opposite of what that visitor asked for.
 
-**DNS** (outside Ansible, at the registrar): `kalugaman.ru` A record → the mars IP;
-`www` → CNAME to the apex.
+**Caching by path, not by extension.** Only files under `/_astro/` carry a content hash
+in their name, and only they may be cached forever. Everything else — the favicons, the
+apple-touch-icon, the sitemap, and later the CV PDFs — keeps a stable filename and must
+be revalidated, or a changed file stays stale in browsers for a year:
 
-## What is set up in GitHub
+```nginx
+map $uri $cache_control {
+    default     "public, max-age=0, must-revalidate";
+    ~^/_astro/  "public, max-age=31536000, immutable";
+}
+```
+
+`must-revalidate` on HTML also matters for the deploy itself: a cached page pointing at
+hashed assets that no longer exist renders without styles.
+
+**All `add_header` directives on one level.** nginx drops every inherited `add_header`
+as soon as a `location` declares one of its own — so putting `Cache-Control` inside a
+location silently strips the security headers from those responses. Hence the `map`
+above: `Cache-Control`, `X-Content-Type-Options` and `Referrer-Policy` are all declared
+on the `server` level, with `always`.
+
+**Clean URLs**: `try_files $uri $uri/index.html $uri.html =404;`
+
+Verify after a change:
+
+```bash
+curl -sI -H 'Accept-Language: ru' https://kalugaman.ru/            # 302 → /ru/
+curl -sI -H 'Accept-Language: en-US,en;q=0.9,ru;q=0.8' https://kalugaman.ru/  # 302 → /en/
+curl -sI https://kalugaman.ru/en/            # must-revalidate + both security headers
+curl -sI https://kalugaman.ru/favicon-32.png # must-revalidate — no hash in the name
+curl -sI https://kalugaman.ru/_astro/<file>  # immutable
+```
+
+TLS is certbot (`kalugaman.ru` + `www`), with the 80→443 redirect. DNS: an A record for
+the apex to the mars IP, `www` as a CNAME.
+
+## GitHub side
 
 Settings → Secrets and variables → Actions.
 
@@ -70,35 +103,14 @@ Settings → Secrets and variables → Actions.
 | `SSH_PRIVATE_KEY` | the private half of the deploy key, in full        |
 | `SSH_KNOWN_HOSTS` | output of `ssh-keyscan -p 53812 mars.kalugaman.ru` |
 
-The deploy key is a fresh pair, generated for this repository only:
-
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/kalugaman_deploy -C "github-actions kalugaman" -N ""
-```
-
-The public half goes into the Ansible playbook (the user's `authorized_keys`), the private
-half into `SSH_PRIVATE_KEY`.
-
-Finally, the variable that arms the deploy job: **Variables** → `DEPLOY_ENABLED` = `true`.
-Until it is set, the job is skipped, so the workflow can sit on `main` before the server is
-ready. Removing it later is the kill switch for auto-deploy.
-
-## First deploy
-
-Actions → Deploy → **Run workflow**. Then:
-
-```bash
-ls /var/www/kalugaman.ru/public     # index.html, en/, ru/, _astro/, sitemap-index.xml
-curl -I https://kalugaman.ru/en/
-```
-
-After that every push to `main` deploys on its own.
+Plus the variable that arms the deploy job: **Variables** → `DEPLOY_ENABLED` = `true`.
+Removing it is the kill switch for auto-deploy — the job is skipped, nothing else breaks.
 
 ## Rollback
 
 If the post-deploy check fails (the site does not answer 200 after three tries), the
-workflow rolls back on its own: `public.old` goes back into place and the failed build is
-kept as `public.bad`.
+workflow rolls back on its own: `public.old` goes back into place and the failed build
+is kept as `public.bad`.
 
 By hand:
 

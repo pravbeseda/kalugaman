@@ -140,13 +140,12 @@ Step-by-step server setup: [`../deploy/README.md`](../deploy/README.md).
 
 ### 7. nginx on the server
 
-Config: [`../deploy/nginx/kalugaman.ru.conf`](../deploy/nginx/kalugaman.ru.conf), with
-`root /var/www/kalugaman.ru/public;` — root language redirect via `Accept-Language`,
-clean URLs, immutable caching for `/_astro/`, `must-revalidate` for HTML, gzip, security
-headers. TLS via certbot, with 80→443 and www→apex redirects. DNS `kalugaman.ru` (A) → the VPS IP.
-
-Important: nginx must be able to traverse the deploy user's home directory
-(`chmod o+x ~`), otherwise every request is a 403.
+The vhost is owned by the Ansible role that provisions mars, not by this repository —
+keeping a copy here would only drift from the one actually serving traffic. What it has
+to provide (root language redirect, caching by path rather than by extension, all
+`add_header` on one level, clean URLs) is written down in
+[`../deploy/README.md`](../deploy/README.md), together with the curl checks that prove
+it. TLS is certbot, with 80→443 and www→apex redirects.
 
 ## Order of work
 
