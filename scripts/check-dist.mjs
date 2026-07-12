@@ -12,7 +12,7 @@ const PROJECTS = new URL('../src/content/projects/', import.meta.url).pathname;
 
 const ROUTES = ['', 'resume', 'projects', 'contacts'];
 
-const expected = ['index.html', 'sitemap-index.xml'];
+const expected = ['index.html', '404.html', 'sitemap-index.xml'];
 
 for (const lang of locales) {
   for (const route of ROUTES) {

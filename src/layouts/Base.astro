@@ -10,8 +10,12 @@ interface Props {
   lang: Locale;
   title: string;
   description: string;
+  /** Keep the page out of search results and out of the canonical/hreflang graph. */
+  noindex?: boolean;
+  /** Drop the site chrome. For pages that are not tied to one language (404). */
+  bare?: boolean;
 }
-const { lang, title, description } = Astro.props;
+const { lang, title, description, noindex = false, bare = false } = Astro.props;
 
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site).href;
@@ -32,14 +36,28 @@ const alternates = locales.map((l) => ({
 
     <title>{title}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
 
-    {alternates.map((a) => <link rel="alternate" hreflang={a.lang} href={a.href} />)}
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href={new URL(switchLocalePath(path, defaultLocale), Astro.site).href}
-    />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    {
+      /* A noindex page has no place in the canonical/hreflang graph: it is served
+        for arbitrary URLs, so those links would point nowhere meaningful. */
+    }
+    {
+      !noindex && (
+        <>
+          <link rel="canonical" href={canonical} />
+          {alternates.map((a) => (
+            <link rel="alternate" hreflang={a.lang} href={a.href} />
+          ))}
+          <link
+            rel="alternate"
+            hreflang="x-default"
+            href={new URL(switchLocalePath(path, defaultLocale), Astro.site).href}
+          />
+        </>
+      )
+    }
 
     {/* Open Graph */}
     <meta property="og:type" content="website" />
@@ -70,11 +88,11 @@ const alternates = locales.map((l) => ({
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <Header lang={lang} />
+    {!bare && <Header lang={lang} />}
     <main id="main">
       <slot />
     </main>
-    <Footer lang={lang} />
+    {!bare && <Footer lang={lang} />}
 
     <style>
       .skip-link {
