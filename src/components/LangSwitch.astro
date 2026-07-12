@@ -1,6 +1,6 @@
 ---
 import { useTranslations, switchLocalePath } from '../i18n/utils';
-import { defaultLocale, type Locale } from '../i18n/config';
+import { type Locale } from '../i18n/config';
 const { lang } = Astro.props as { lang: Locale };
 const t = useTranslations(lang);
 const other: Locale = lang === 'en' ? 'ru' : 'en';

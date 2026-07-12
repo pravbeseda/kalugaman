@@ -5,9 +5,13 @@ portfolio / resume. Repo: https://github.com/pravbeseda/kalugaman (public).
 
 ## Stack & architecture
 
-- **Astro 5** (SSG, zero client JS by default).
-- **Content Collections + zod** — all content is Markdown under `src/content/`,
-  schemas in `src/content.config.ts`. A frontmatter typo is a build error.
+- **Astro 7** (SSG, zero client JS by default). Requires Node >= 22.12. Markdown is
+  rendered by Sätteri (Astro's native pipeline, not remark/rehype); `compressHTML`
+  defaults to `'jsx'`, so whitespace between inline elements is stripped.
+- **Content Collections (Content Layer) + zod 4** — all content is Markdown under
+  `src/content/`, each collection has a `loader`; schemas in `src/content.config.ts`.
+  A frontmatter typo is a build error. Use the zod 4 API (`z.url()`, not
+  `z.string().url()`).
 - **i18n** — English (default) and Russian, both prefixed: `/en/...`, `/ru/...`.
   Routing is manual via `src/pages/[lang]/...`; UI strings live in typed
   dictionaries `src/i18n/{en,ru}.ts` with a `t()` helper.
