@@ -37,7 +37,7 @@ Full write-up: [`ci-cd.md`](./ci-cd.md), server side: [`deploy/README.md`](../de
 - [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `/var/www/kalugaman.ru/public` into place, with an automatic rollback if the site does not answer
 - [x] Server (mars) provisioned by Ansible: `kalugaman-deploy` user, site root, nginx vhost, TLS, DNS
 - [x] GitHub secrets + `DEPLOY_ENABLED`; first deploy done, live behaviour verified (language redirect, cache headers, security headers)
-- [ ] Rollback drill — the automatic path has not been exercised in anger yet
+- [x] Rollback drill: verification pointed at a missing URL on purpose, the previous build was restored by rename (same inode), the bad one kept as `public.bad`, the site never stopped answering, and the run still went red
 
 Open questions (not blocking):
 
