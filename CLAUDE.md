@@ -44,7 +44,10 @@ i18n dictionaries. Presentation = `.astro` layouts/components. Styling = tokens.
 ## Workflow
 
 - **Do not commit unless explicitly asked.** The user reviews changes first.
-- Feature work goes on a branch, not directly on `main`.
+- Feature work goes on a branch, not directly on `main`. `main` is protected on
+  GitHub (PR required, no force-push, no admin bypass), and `.githooks/` blocks
+  commits and pushes to it locally. Enable the hooks once per clone:
+  `git config core.hooksPath .githooks`.
 - Verify with a **clean build**: do not run `astro build` while `astro dev` is
   running — concurrent access to the `.astro/` cache produces spurious
   "Duplicate id" warnings. Stop dev first (`rm -rf .astro dist` if unsure).
