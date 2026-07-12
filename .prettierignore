@@ -1,0 +1,7 @@
+dist
+.astro
+node_modules
+package-lock.json
+
+# Content is prose: Prettier rewraps lines and mangles hand-set layout
+src/content
