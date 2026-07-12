@@ -9,6 +9,11 @@ concurrency:
   group: deploy
   cancel-in-progress: false
 
+env:
+  # Provisioned by Ansible; owned by the deploy user. public/ is what nginx serves,
+  # public.new/ and public.old/ are the staging and rollback siblings.
+  SITE_ROOT: /var/www/kalugaman.ru
+
 jobs:
   deploy:
     # Kill switch: the job is skipped until DEPLOY_ENABLED is set in repository
@@ -56,7 +61,7 @@ jobs:
           SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
           rsync -az --delete -e "ssh -p $SSH_PORT" \
-            dist/ "$SSH_USER@$SSH_HOST:kalugaman.ru.new/"
+            dist/ "$SSH_USER@$SSH_HOST:$SITE_ROOT/public.new/"
 
       - name: Swap into place
         id: swap
@@ -65,15 +70,15 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" bash -s <<'EOF'
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" SITE_ROOT="$SITE_ROOT" bash -s <<'EOF'
           set -euo pipefail
-          test -f ~/kalugaman.ru.new/index.html
-          rm -rf ~/kalugaman.ru.old
-          if [ -d ~/kalugaman.ru ]; then
-            mv ~/kalugaman.ru ~/kalugaman.ru.old
+          test -f "$SITE_ROOT/public.new/index.html"
+          rm -rf "$SITE_ROOT/public.old"
+          if [ -d "$SITE_ROOT/public" ]; then
+            mv "$SITE_ROOT/public" "$SITE_ROOT/public.old"
           fi
-          mv ~/kalugaman.ru.new ~/kalugaman.ru
-          test -f ~/kalugaman.ru/en/index.html
+          mv "$SITE_ROOT/public.new" "$SITE_ROOT/public"
+          test -f "$SITE_ROOT/public/en/index.html"
           EOF
 
       - name: Verify site responds
@@ -91,14 +96,14 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
-          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" bash -s <<'EOF'
+          ssh -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" SITE_ROOT="$SITE_ROOT" bash -s <<'EOF'
           set -euo pipefail
-          if [ ! -d ~/kalugaman.ru.old ]; then
-            echo "No ~/kalugaman.ru.old to roll back to — leaving the site as is."
+          if [ ! -d "$SITE_ROOT/public.old" ]; then
+            echo "No public.old to roll back to — leaving the site as is."
             exit 1
           fi
-          rm -rf ~/kalugaman.ru.bad
-          mv ~/kalugaman.ru ~/kalugaman.ru.bad
-          mv ~/kalugaman.ru.old ~/kalugaman.ru
-          echo "Rolled back to the previous build; the failed one is in ~/kalugaman.ru.bad"
+          rm -rf "$SITE_ROOT/public.bad"
+          mv "$SITE_ROOT/public" "$SITE_ROOT/public.bad"
+          mv "$SITE_ROOT/public.old" "$SITE_ROOT/public"
+          echo "Rolled back to the previous build; the failed one is in $SITE_ROOT/public.bad"
           EOF
