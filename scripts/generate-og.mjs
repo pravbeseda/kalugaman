@@ -1,7 +1,7 @@
-// Builds the Open Graph cards (public/og-<lang>.jpg) from the portrait and the design
-// tokens. Run by hand after changing the portrait, the name or the palette
-// (`npm run og`) and commit the result — the cards are static, the build does not
-// touch them.
+// Builds the Open Graph cards (public/og-<lang>.jpg) from the resume, the portrait and
+// the design tokens. Runs as `prebuild`, so the card cannot drift from the resume it
+// quotes: change the role, and the next build redraws it. The files are generated, not
+// committed (.gitignore) — run `npm run og` to look at one.
 //
 // JPEG, not webp: the consumers are social scrapers, and LinkedIn is unreliable with
 // webp.
@@ -15,7 +15,9 @@
 
 import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { locales } from '../src/i18n/config.ts';
 
 const root = new URL('../', import.meta.url);
 const asset = (path) => fileURLToPath(new URL(path, root));
@@ -44,10 +46,21 @@ const PORTRAIT_CX = WIDTH - MARGIN - PORTRAIT_SIZE / 2;
 const PORTRAIT_CY = HEIGHT / 2;
 const TAGLINE = 'frontend · fullstack · mobile';
 
-const cards = {
-  en: { name: 'Alexander Ivanov', role: 'Senior Angular Developer' },
-  ru: { name: 'Александр Иванов', role: 'Senior Angular-разработчик' },
-};
+/**
+ * The card says what the resume says. Two scalar fields off the top of the
+ * frontmatter — a YAML parser would be a dependency for `name:` and `role:`.
+ */
+function identity(lang) {
+  const source = readFileSync(asset(`src/content/resume/${lang}.md`), 'utf8');
+  const read = (key) => source.match(new RegExp(`^${key}:\\s*'(.+)'\\s*$`, 'm'))?.[1];
+
+  const name = read('name');
+  const role = read('role');
+  if (!name || !role) {
+    throw new Error(`resume/${lang}.md: could not read 'name' and 'role' from the frontmatter`);
+  }
+  return { name, role };
+}
 
 const escape = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -90,8 +103,8 @@ const card = ({ name, role }) => `
   </svg>
 `;
 
-for (const [lang, values] of Object.entries(cards)) {
-  const png = new Resvg(card(values), {
+for (const lang of locales) {
+  const png = new Resvg(card(identity(lang)), {
     font: { fontFiles: FONT_FILES, loadSystemFonts: false, defaultFontFamily: SANS },
   })
     .render()

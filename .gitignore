@@ -1,5 +1,7 @@
 # build output
 dist/
+# OG cards — drawn from the resume by `npm run og` (prebuild)
+public/og-*.jpg
 # generated types
 .astro/
 # deps

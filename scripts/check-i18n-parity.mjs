@@ -5,12 +5,39 @@
 // collection is checked from the day it appears. Two shapes are supported:
 //   projects/{en,ru}/<slug>.md   — slug sets must match
 //   resume/{en,ru}.md            — both files must exist
-import { readdirSync, existsSync, statSync } from 'node:fs';
+import { readdirSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { locales } from '../src/i18n/config.ts';
 
 const CONTENT = new URL('../src/content/', import.meta.url).pathname;
 const errors = [];
+
+/**
+ * Which experience entry carries `current: true` (-1 if none). The flag drives
+ * `worksFor` in the JSON-LD, and it lives in every locale's resume — set it in one
+ * language only and that language alone would claim an employer. The schema checks
+ * each file on its own; only parity can see the two disagree.
+ */
+const currentJobIndex = (file) =>
+  readFileSync(file, 'utf8')
+    .split(/^ {2}- company:/m)
+    .slice(1)
+    .findIndex((job) => /^ {4}current:\s*true\s*$/m.test(job));
+
+function checkCurrentJobParity(collection) {
+  const perLocale = locales.map((lang) => ({
+    lang,
+    index: currentJobIndex(join(CONTENT, collection, `${lang}.md`)),
+  }));
+
+  const [first, ...rest] = perLocale;
+  if (rest.some((other) => other.index !== first.index)) {
+    const shown = perLocale
+      .map(({ lang, index }) => `${lang}: ${index === -1 ? 'none' : `job #${index + 1}`}`)
+      .join(', ');
+    errors.push(`${collection}: \`current\` is not on the same job in every language (${shown})`);
+  }
+}
 
 // A missing directory is a parity failure, not a crash — it is the most likely way
 // parity breaks in the first place (a collection added in one language only).
@@ -30,11 +57,11 @@ for (const collection of collections) {
 
   // resume/{en,ru}.md — no language subdirectories, documents are the locale files.
   if ([...perLocale.values()].every((s) => s === null)) {
-    for (const lang of locales) {
-      if (!existsSync(join(CONTENT, collection, `${lang}.md`))) {
-        errors.push(`${collection}: missing ${lang}.md`);
-      }
+    const missing = locales.filter((lang) => !existsSync(join(CONTENT, collection, `${lang}.md`)));
+    for (const lang of missing) {
+      errors.push(`${collection}: missing ${lang}.md`);
     }
+    if (missing.length === 0) checkCurrentJobParity(collection);
     continue;
   }
 

@@ -56,11 +56,12 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
 - [x] **404 page** (`src/pages/404.astro`) — bilingual, links home.
 - [x] **B1 — SEO**:
   - [x] `public/robots.txt` (+ a link to the sitemap)
-  - [x] OG images — static per language (`public/og-{en,ru}.jpg`), redrawn by
-        `npm run og` (`scripts/generate-og.mjs`). JPEG on purpose: the consumers are
-        social scrapers, and LinkedIn is unreliable with webp. The text is drawn by
-        resvg from the fonts bundled in `scripts/fonts/` with the system fonts off,
-        so the card renders identically on any machine.
+  - [x] OG images — one card per language, drawn from the resume at build time
+        (`prebuild` → `scripts/generate-og.mjs`), so the card cannot drift from the
+        role it quotes. JPEG on purpose: the consumers are social scrapers, and
+        LinkedIn is unreliable with webp. The text is drawn by resvg from the fonts
+        bundled in `scripts/fonts/` with the system fonts off, so the card renders
+        identically on any machine.
   - [x] JSON-LD `Person` on home/resume (`sameAs` ties the site to GitHub /
         LinkedIn / Telegram). `SoftwareSourceCode` renders only for projects that
         declare `links.repo` — it is a claim about readable source, so the current
