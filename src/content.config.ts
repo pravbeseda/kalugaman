@@ -33,6 +33,9 @@ const resume = defineCollection({
         company: z.string(),
         position: z.string(),
         period: z.string(),
+        // The job still held. `period` is free-form prose, so being current cannot be
+        // read off it, and it must not be inferred from the order of the entries.
+        current: z.boolean().default(false),
         highlights: z.array(z.string()),
       }),
     ),

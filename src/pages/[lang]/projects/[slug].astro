@@ -22,7 +22,13 @@ const { title, description, tags, period, links } = entry.data;
 // Only projects with a public repository get markup — see src/lib/schema.ts.
 const resume = await getEntry('resume', lang);
 const schema = resume
-  ? projectSchema(entry, new URL(Astro.url.pathname, Astro.site).href, resume.data.name)
+  ? projectSchema({
+      entry,
+      lang,
+      site: Astro.site!,
+      canonical: new URL(Astro.url.pathname, Astro.site).href,
+      authorName: resume.data.name,
+    })
   : null;
 ---
 

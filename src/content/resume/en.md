@@ -6,6 +6,7 @@ experience:
   - company: 'Intermedia Intelligent Communications'
     position: 'Senior Software Developer'
     period: 'Feb 2022 — now'
+    current: true
     highlights:
       - 'Develop Intermedia Unite (a business messenger: chats, telephony, SMS, video calls, file storage) and Contact Center — web on Angular (plus some legacy React) and desktop on Electron.'
       - 'Reworked the chat search from the ground up: decomposed a monolith into small services and components, making it far easier to maintain and test.'
