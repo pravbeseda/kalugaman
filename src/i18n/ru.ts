@@ -26,6 +26,7 @@ const ru: Record<keyof typeof en, string> = {
   'notfound.text': 'Такой страницы нет — возможно, она переехала или в ссылке опечатка.',
   'notfound.home': 'На главную',
   'footer.built': 'Собрано на Astro · контент в Markdown',
+  'og.alt': 'Александр Иванов — Senior Angular-разработчик',
 };
 
 export default ru;

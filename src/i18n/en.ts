@@ -24,4 +24,6 @@ export default {
   'notfound.text': 'The page you are looking for does not exist, or has moved.',
   'notfound.home': 'Go to the homepage',
   'footer.built': 'Built with Astro · content in Markdown',
+  /* Describes the share card itself (public/og-en.jpg), not the page it is attached to. */
+  'og.alt': 'Alexander Ivanov — Senior Angular Developer',
 } as const;

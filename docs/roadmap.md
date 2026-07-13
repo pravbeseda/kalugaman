@@ -50,14 +50,22 @@ Open questions (not blocking):
 
 Goal: make it look and behave like a product.
 
-- [ ] **Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
-- [ ] **404 page** (`src/pages/404.astro`) — bilingual, links home.
-- [ ] **SEO leftovers**:
-  - [ ] `public/robots.txt` (+ a link to the sitemap)
-  - [ ] OG images (static, or generated with satori at build time)
-  - [ ] JSON-LD `Person` (home/resume), `SoftwareSourceCode` (projects) — optional
-- [ ] **Tech debt**: duplicated values in `themes.css` (one shared token set → override only what actually differs).
-- [ ] **Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
+Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens**,
+**B3 navigation + accessibility**.
+
+- [x] **404 page** (`src/pages/404.astro`) — bilingual, links home.
+- [x] **B1 — SEO**:
+  - [x] `public/robots.txt` (+ a link to the sitemap)
+  - [x] OG images — static per language (`public/og-{en,ru}.jpg`), redrawn by
+        `npm run og` (sharp, `scripts/generate-og.mjs`). JPEG on purpose: the
+        consumers are social scrapers, and LinkedIn is unreliable with webp.
+  - [x] JSON-LD `Person` on home/resume (`sameAs` ties the site to GitHub /
+        LinkedIn / Telegram). `SoftwareSourceCode` renders only for projects that
+        declare `links.repo` — it is a claim about readable source, so the current
+        (closed, commercial) three get no markup.
+- [ ] **B3 — Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
+- [ ] **B2 — Tech debt**: duplicated values in `themes.css` (one shared token set → override only what actually differs).
+- [ ] **B3 — Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
 
 ---
 

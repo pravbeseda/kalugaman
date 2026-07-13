@@ -13,6 +13,7 @@
     "check": "astro check",
     "check:i18n": "node scripts/check-i18n-parity.mjs",
     "check:dist": "node scripts/check-dist.mjs",
+    "og": "node scripts/generate-og.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -24,6 +25,7 @@
     "@astrojs/check": "^0.9.9",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
+    "sharp": "^0.35.3",
     "typescript": "^6.0.3"
   }
 }
