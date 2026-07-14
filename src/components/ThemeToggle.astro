@@ -10,12 +10,21 @@ const t = useTranslations(lang);
     so a glyph would be drawn by whatever symbol font the OS happens to have — a
     different moon on every platform, next to a sun from Inter. */
 }
+{
+  /* The name and the tooltip say what a click will do, and that depends on the theme in
+    force — which at build time is the visitor's system preference, unknowable from here.
+    So the two possible strings are carried on the element and the script picks one; the
+    attributes rendered here are the neutral form, never wrong, and in any case the button
+    is not shown until that script has run. */
+}
 <button
   id="theme-toggle"
   class="theme-toggle"
   type="button"
-  aria-label={t('theme.dark')}
+  aria-label={t('theme.toggle')}
   title={t('theme.toggle')}
+  data-to-dark={t('theme.toDark')}
+  data-to-light={t('theme.toLight')}
 >
   <svg
     class="theme-toggle__icon theme-toggle__sun"
@@ -87,30 +96,33 @@ const t = useTranslations(lang);
   .theme-toggle__icon {
     grid-area: 1 / 1;
   }
-  .theme-toggle__moon {
+  .theme-toggle__sun {
     display: none;
   }
 
-  /* The icon names the theme in force. Without an explicit choice that is the system's,
-     which the attribute cannot tell us — hence the media query. */
+  /* The icon shows the theme a click brings, not the one in force — the language switch
+     beside it reads the same way ("Русский" is where you go, not where you are), and two
+     identical-looking chips in one header cannot be read by two opposite rules. So: moon in
+     the light theme, sun in the dark one. Without an explicit choice the theme is the
+     system's, which the attribute cannot tell us — hence the media query. */
   @media (prefers-color-scheme: dark) {
-    :global(:root:not([data-theme])) .theme-toggle__sun {
+    :global(:root:not([data-theme])) .theme-toggle__moon {
       display: none;
     }
-    :global(:root:not([data-theme])) .theme-toggle__moon {
+    :global(:root:not([data-theme])) .theme-toggle__sun {
       display: block;
     }
   }
-  :global(:root[data-theme='dark']) .theme-toggle__sun {
+  :global(:root[data-theme='dark']) .theme-toggle__moon {
     display: none;
   }
-  :global(:root[data-theme='dark']) .theme-toggle__moon {
-    display: block;
-  }
-  :global(:root[data-theme='light']) .theme-toggle__sun {
+  :global(:root[data-theme='dark']) .theme-toggle__sun {
     display: block;
   }
   :global(:root[data-theme='light']) .theme-toggle__moon {
+    display: block;
+  }
+  :global(:root[data-theme='light']) .theme-toggle__sun {
     display: none;
   }
 </style>
@@ -123,17 +135,26 @@ const t = useTranslations(lang);
     return chosen === 'dark' || (!chosen && systemDark.matches);
   };
 
-  // The icon names the theme in force; so must the button, for a reader who does not see
-  // it. Hence a toggle button named after the dark theme, pressed when that theme is on —
-  // rather than a button named after the act of switching, whose "pressed" would say
-  // nothing about which theme that left us in.
+  // The icon shows the theme a click brings; so does the name, for a reader who does not
+  // see the icon. Hence a plain button named after the action, and no aria-pressed: a name
+  // that describes the action paired with a pressed state is a contradiction ("Switch to
+  // light theme, pressed"), and the state is not what this control reports — the language
+  // switch next to it names where you go, not where you are, and the two are read together.
   //
   // Written by script and not rendered: at build time the theme is whatever the visitor's
-  // system says, so any attribute we shipped would be a guess, and a wrong one for anyone
-  // whose system prefers dark. The gap that leaves is between parsing this button and
-  // running this module, which is deferred — hence the call below, not just the listeners.
-  const syncPressed = () => {
-    document.getElementById('theme-toggle')?.setAttribute('aria-pressed', String(isDark()));
+  // system says, so a name shipped in the markup would be a guess, and a wrong one for
+  // anyone whose system prefers dark. The gap that leaves is between parsing this button
+  // and running this module, which is deferred — hence the call below, not just the
+  // listeners; and the button is not shown until this has run.
+  const syncButton = () => {
+    const button = document.getElementById('theme-toggle');
+    if (button) {
+      const label = isDark() ? button.dataset.toLight : button.dataset.toDark;
+      if (label) {
+        button.setAttribute('aria-label', label);
+        button.setAttribute('title', label);
+      }
+    }
     // Reveals the button (see the styles). Set from here, because this module is what makes
     // the button do anything; a flag set anywhere else would only say that some other JS ran.
     document.documentElement.setAttribute('data-theme-ready', '');
@@ -148,16 +169,16 @@ const t = useTranslations(lang);
     const next = isDark() ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
-    syncPressed();
+    syncButton();
   });
 
-  syncPressed();
+  syncButton();
 
   // A navigation swaps in a button without the attribute, and takes data-theme-ready off
   // <html> with the rest of its attributes; astro:after-swap runs before the new document
   // paints, so neither the state nor the button itself flickers. (astro:page-load would be
   // too late for the button — it fires after that paint.) A system that flips theme under a
   // visitor who never chose one changes the answer without touching the button at all.
-  document.addEventListener('astro:after-swap', syncPressed);
-  systemDark.addEventListener('change', syncPressed);
+  document.addEventListener('astro:after-swap', syncButton);
+  systemDark.addEventListener('change', syncButton);
 </script>

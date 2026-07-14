@@ -112,15 +112,19 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         colour now parts them (recolouring the ring cannot work: nothing that contrasts
         with the accent fill also contrasts with the page the ring is drawn on).
         `check:contrast` asserts the band, as it already did the ring.
-  - [x] The theme toggle is now a toggle button in the APG sense: it is _named_ after the
-        dark theme, and `aria-pressed` says whether that theme is the one in force —
-        "Toggle theme, pressed" would have announced a state without a meaning. The name is
-        not swapped per state (a name describing the action plus `aria-pressed` is a
-        contradiction), and it matches what the icon already showed the sighted reader: the
-        theme in force, not the one a click would bring. Written by script, because at
-        build time the theme is the visitor's system preference and any value served would
-        be a guess. The button is also hidden without JS (`data-js`, set before the first
-        paint) — it used to be visible and inert, promising a switch it could not perform.
+  - [x] The theme toggle says what a click will do — icon, name and tooltip alike (moon in
+        the light theme, "Switch to dark theme"), and no `aria-pressed`. It used to report
+        the theme in force instead, which is defensible on its own (it is a toggle button)
+        but not next to the language switch: that one is a link, and a link names where it
+        goes, not where you are. Two identical chips side by side cannot be read by two
+        opposite rules — so both name the action now. Written by script, because at build
+        time the theme is the visitor's system preference and a name shipped in the markup
+        would be a guess.
+  - [x] The button is revealed by the very script that gives it behaviour
+        (`data-theme-ready`), not by an inline flag saying "some JS ran": a module that
+        never executes would otherwise leave it visible and inert — the thing the gate
+        exists to prevent. Hidden with `visibility`, so it holds its place in the row and
+        cannot shove the language switch sideways when it appears.
   - [x] `prefers-reduced-motion`: no smooth scroll, no theme crossfade, and no lift under
         the cursor — on the project cards as well as the buttons, since it is the same
         gesture and must answer the setting the same way.
