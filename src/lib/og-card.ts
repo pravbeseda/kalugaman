@@ -135,18 +135,21 @@ function fits(lang: Locale, label: string, text: string, ...font: [number, numbe
   }
 }
 
-// Lives as long as the module does — one build, or in dev until the content changes:
-// editing the resume tears this module down along with the cache (verified: the served
-// card and its hash both change without restarting the dev server). So the card cannot
-// go stale behind the data it quotes.
-const cards = new Map<Locale, Promise<Buffer>>();
+// Keyed by the palette as well as the language. Editing the resume tears this module
+// down (it imports astro:content) and the memo with it, but editing themes.css does not:
+// the colours are read from disk, not imported, so a card memoised by language alone
+// would keep its old colours in dev until the server restarted. The key changes with the
+// palette, so the card follows the stylesheet.
+const cards = new Map<string, Promise<Buffer>>();
 
 /** The card for a language. Drawn once: the endpoint and Base share the same bytes. */
 export function ogCard(lang: Locale): Promise<Buffer> {
-  if (!cards.has(lang)) {
-    cards.set(lang, draw(lang));
+  const key = `${lang}|${Object.values(colors()).join(',')}`;
+
+  if (!cards.has(key)) {
+    cards.set(key, draw(lang));
   }
-  return cards.get(lang)!;
+  return cards.get(key)!;
 }
 
 async function draw(lang: Locale): Promise<Buffer> {

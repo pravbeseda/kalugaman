@@ -8,8 +8,10 @@ export default defineConfig({
   site: 'https://kalugaman.ru',
   trailingSlash: 'ignore',
   // Self-hosted, cut to Latin + Cyrillic (scripts/subset-fonts.sh) — ~35 KB a weight.
-  // Astro hashes the files, preloads them and derives a metric-matched system fallback,
-  // so the swap does not shift the layout.
+  // Astro hashes the files and derives a metric-matched system fallback for 400 and 600.
+  // Not for 700: it emits the bold-metric family behind one that already covers 400/600,
+  // and font matching settles on a family before a weight, so the bold fallback is never
+  // reached and headings do shift a little when Inter lands (see the note in Base).
   fonts: [
     {
       provider: fontProviders.local(),
