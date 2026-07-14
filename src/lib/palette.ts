@@ -138,15 +138,30 @@ export function palettes(): { light: Palette; dark: Palette } {
     );
   }
 
-  // A token with no light-dark() pair is not a token with a sensible dark value — it is a
-  // token whose dark value someone forgot, and a modern browser would paint its light
-  // colour on a near-black page. Say so, rather than model the mistake faithfully.
+  // Every colour is written in both places, and each absence is its own failure.
+  //
+  // No pair: a modern browser keeps the light colour and paints it on a near-black page.
+  // No plain declaration: a browser without light-dark() reads nothing at all, the var()
+  // turns invalid, and the cascade collapses — the very thing the fallback exists to
+  // prevent. Neither shows up in the palette these checks run on, so neither can be left
+  // to the reader's good manners.
   const unpaired = Object.keys(light).filter((token) => !(token in dark));
   if (unpaired.length > 0) {
     throw new Error(
       `src/styles/themes.css: ${unpaired.map((t) => `--${t}`).join(', ')} has no dark value.\n` +
         `Every colour token needs a light-dark() pair in the @supports block; the plain ` +
         `declaration above it is only the fallback for browsers without light-dark().`,
+    );
+  }
+
+  const unguarded = Object.keys(light).filter((token) => !(token in fallback));
+  if (unguarded.length > 0) {
+    throw new Error(
+      `src/styles/themes.css: ${unguarded.map((t) => `--${t}`).join(', ')} is declared only ` +
+        `inside @supports.\n` +
+        `A browser without light-dark() would then read no value for it at all, every ` +
+        `var() using it would be invalid, and the page would fall back to the browser's ` +
+        `own colours. Declare the light value plainly in the base :root as well.`,
     );
   }
 

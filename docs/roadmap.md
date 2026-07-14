@@ -77,7 +77,10 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
   - [x] `themes.css` deduplicated: every token is a `light-dark()` pair, so a theme is a
         `color-scheme` choice rather than a second set of overrides. The dark palette,
         previously written out twice (explicit toggle + `prefers-color-scheme`), now
-        exists once.
+        exists once. The dark theme therefore became an enhancement: a browser without
+        `light-dark()` (2024 baseline; iOS 16 is the realistic case) gets the light theme
+        even if its system prefers dark, and no toggle. A deliberate trade — the
+        alternative is to write the dark palette a second time for a shrinking audience.
   - [x] Contrast: muted text was below WCAG AA in the light theme (4.10 on the page,
         4.48 on a card) and is now 4.95 / 5.41. Controls got their own border token —
         a secondary button was told apart from the page by a 1.21:1 outline, where

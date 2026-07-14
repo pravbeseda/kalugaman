@@ -142,15 +142,28 @@ function covered(lang: Locale, label: string, text: string, font: Font) {
     // where skipping marks would have let it through to be dropped from the card.
     if (/^\s$/u.test(char)) continue;
 
-    if (!bbox(char, font)) {
-      const codepoint = char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0');
+    if (bbox(char, font)) continue;
+
+    const codepoint = char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0');
+
+    // A soft hyphen, a zero-width space, a stray variation selector: these have no box
+    // either, but no font ever will draw them, so blaming the subset would send the next
+    // reader off to widen ranges that cannot help. They are copy-paste debris — usually
+    // out of a Word CV — and they have no business in a name.
+    if (/^[\p{Cf}\u{FE00}-\u{FE0F}]$/u.test(char)) {
       throw new Error(
-        `OG card (${lang}): the ${label} contains "${char}" (U+${codepoint}), which the ` +
-          `fonts in src/assets/fonts do not have — resvg would drop it and the card would ` +
-          `ship with the character missing. Widen the ranges in scripts/subset-fonts.sh, ` +
-          `if the typeface has the glyph at all.`,
+        `OG card (${lang}): the ${label} contains an invisible character (U+${codepoint}) — ` +
+          `a soft hyphen, zero-width space or the like. It draws nothing, in any font, so ` +
+          `no subset can fix it. Remove it from the resume.`,
       );
     }
+
+    throw new Error(
+      `OG card (${lang}): the ${label} contains "${char}" (U+${codepoint}), which the ` +
+        `fonts in src/assets/fonts do not have — resvg would drop it and the card would ` +
+        `ship with the character missing. Widen the ranges in scripts/subset-fonts.sh, ` +
+        `if the typeface has the glyph at all.`,
+    );
   }
 }
 

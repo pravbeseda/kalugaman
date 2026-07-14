@@ -27,12 +27,23 @@ body {
     color var(--transition);
 }
 
+/* A link inside a sentence is told apart from the text around it by its underline, not by
+   its colour: accent against muted text is 1.09:1, so colour alone leaves the link
+   invisible to a reader who does not see it (WCAG 1.4.1). Links that are not inside text —
+   buttons, nav items, the brand, a whole card — carry their own affordance and keep the
+   plain form. */
 a {
   color: var(--color-accent);
-  text-decoration: none;
-}
-a:hover {
   text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.button,
+.nav__link,
+.brand,
+.lang-switch,
+.project-card,
+.back {
+  text-decoration: none;
 }
 
 img,

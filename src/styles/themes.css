@@ -13,6 +13,13 @@
    two-declarations-in-a-row fallback, because the minifier drops the earlier one as
    redundant (verified in dist).
 
+   So the dark theme is an enhancement, not a baseline: a browser from before 2024 gets
+   the light one even if its system asks for dark. That is a deliberate trade and it is a
+   regression — those browsers used to read the dark palette out of a plain
+   prefers-color-scheme block. Bringing it back would mean writing the dark values a second
+   time, which is the duplication this file exists to remove, and the light theme is the
+   primary design: readable, contrast-checked, and no worse than the site had in daylight.
+
    light-dark() takes colours only, so the shadow is composed from colour tokens rather
    than swapped whole; its geometry is one set for both themes (it used to differ by 2px). */
 
