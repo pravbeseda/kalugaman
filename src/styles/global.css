@@ -152,9 +152,13 @@ h2 {
 }
 
 /* A reader who asked the system for less motion gets none of ours: the smooth scroll, the
-   theme crossfade on <body>, the button lift. !important because the declarations it
-   overrides live in component <style> blocks, whose specificity we do not control from
-   here. */
+   theme crossfade on <body>, the lift under the cursor.
+
+   The durations carry !important because they are set through the universal selector,
+   which has no specificity at all — every scoped component rule outranks it (Astro scopes
+   with an attribute selector, not :where(), so it does add specificity). The lift needs
+   none: .button is declared in this file, and a hover lift declared in a component is
+   turned off in that component (see ProjectCard) rather than shouted down from here. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

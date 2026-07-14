@@ -21,7 +21,10 @@ export default {
   'projects.back': 'Back to projects',
   'contacts.title': 'Get in touch',
   'contacts.email': 'Email',
-  'theme.toggle': 'Toggle theme',
+  // Names the theme the button turns on, not the act of switching: it is a toggle button,
+  // and aria-pressed says whether that theme is the one in force. A name that named the
+  // action ("Switch to light theme") would contradict the state it is paired with.
+  'theme.dark': 'Dark theme',
   'lang.switch': 'Русский',
   'notfound.title': 'Page not found',
   'notfound.text': 'The page you are looking for does not exist, or has moved.',

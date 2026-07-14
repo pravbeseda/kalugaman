@@ -38,6 +38,13 @@ const href = `/${lang}/projects/${slug}`;
     transform: translateY(-2px);
     border-color: var(--color-accent);
   }
+  /* The same lift the button has, so it answers the same setting the same way. Declared
+     here because the rule it turns off is scoped: global.css would have to shout. */
+  @media (prefers-reduced-motion: reduce) {
+    .project-card:hover {
+      transform: none;
+    }
+  }
   .project-card__head {
     display: flex;
     justify-content: space-between;

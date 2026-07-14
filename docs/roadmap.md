@@ -19,8 +19,10 @@ Done:
 - [x] **View Transitions** (`<ClientRouter />`) — no-reload navigation; scripts hook into `astro:page-load` / `astro:after-swap`
 - [x] **Sitemap** (`@astrojs/sitemap`) with i18n links; the root is kept out of the index
 
-**Takeaway:** content is separated from code and the base is extensible. What's left:
-the PDF resume.
+**Takeaway:** content is separated from code and the base is extensible. The
+infrastructure shipped (Phase E' — the site is live and deploys itself) and so did the
+polish (Phase B — 404, robots, SEO, theme tokens, mobile menu, accessibility). What's
+left: the PDF resume.
 
 ---
 
@@ -73,9 +75,13 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         that is and on the set of jobs itself.
 - [x] **B3 — Mobile menu** — a burger below 560px, built on `<details>` rather than a
       button: the browser owns the open state, the keyboard and `aria-expanded`, and the
-      menu still opens with JS off. The script adds only what the element lacks — Escape,
-      a click outside, and a viewport that grew past the breakpoint. A navigation swaps in
-      a fresh, closed `<details>`, so a click on a link needs no handling.
+      menu still opens with JS off. The script adds only what the element lacks: Escape
+      (restoring focus only if focus was still inside the panel — nothing traps it there),
+      a click outside, a click on a link inside, and a viewport that grew past the
+      breakpoint (listening on the CSS breakpoint itself, so no width matches neither).
+      The link could have been left to the navigation, which swaps in a fresh, closed
+      `<details>` — but that is a fact about the router, and closing the menu is the menu's
+      own business.
 - [x] **B2 — Theme tokens, contrast, typography**:
   - [x] `themes.css` deduplicated: every token is a `light-dark()` pair, so a theme is a
         `color-scheme` choice rather than a second set of overrides. The dark palette,
@@ -103,11 +109,18 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         colour now parts them (recolouring the ring cannot work: nothing that contrasts
         with the accent fill also contrasts with the page the ring is drawn on).
         `check:contrast` asserts the band, as it already did the ring.
-  - [x] The theme toggle now says which theme is in force (`aria-pressed`), written by
-        script because at build time the theme is the visitor's system preference. It is
-        also hidden without JS (`data-js`, set before first paint) — it was visible and
-        inert, promising a switch it could not perform.
-  - [x] `prefers-reduced-motion`: no smooth scroll, no theme crossfade, no button lift.
+  - [x] The theme toggle is now a toggle button in the APG sense: it is _named_ after the
+        dark theme, and `aria-pressed` says whether that theme is the one in force —
+        "Toggle theme, pressed" would have announced a state without a meaning. The name is
+        not swapped per state (a name describing the action plus `aria-pressed` is a
+        contradiction), and it matches what the icon already showed the sighted reader: the
+        theme in force, not the one a click would bring. Written by script, because at
+        build time the theme is the visitor's system preference and any value served would
+        be a guess. The button is also hidden without JS (`data-js`, set before the first
+        paint) — it used to be visible and inert, promising a switch it could not perform.
+  - [x] `prefers-reduced-motion`: no smooth scroll, no theme crossfade, and no lift under
+        the cursor — on the project cards as well as the buttons, since it is the same
+        gesture and must answer the setting the same way.
 
 ---
 

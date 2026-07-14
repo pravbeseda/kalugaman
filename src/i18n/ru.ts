@@ -23,7 +23,7 @@ const ru: Record<keyof typeof en, string> = {
   'projects.back': 'К списку проектов',
   'contacts.title': 'Связаться',
   'contacts.email': 'Почта',
-  'theme.toggle': 'Сменить тему',
+  'theme.dark': 'Тёмная тема',
   'lang.switch': 'English',
   'notfound.title': 'Страница не найдена',
   'notfound.text': 'Такой страницы нет — возможно, она переехала или в ссылке опечатка.',

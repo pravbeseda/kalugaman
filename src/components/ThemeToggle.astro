@@ -14,8 +14,8 @@ const t = useTranslations(lang);
   id="theme-toggle"
   class="theme-toggle"
   type="button"
-  aria-label={t('theme.toggle')}
-  title={t('theme.toggle')}
+  aria-label={t('theme.dark')}
+  title={t('theme.dark')}
 >
   <svg
     class="theme-toggle__icon theme-toggle__sun"
@@ -113,8 +113,14 @@ const t = useTranslations(lang);
   };
 
   // The icon names the theme in force; so must the button, for a reader who does not see
-  // the icon. Pressed = dark, and it is written by script rather than rendered, because at
-  // build time the theme is whatever the visitor's system says — unknowable from here.
+  // it. Hence a toggle button named after the dark theme, pressed when that theme is on —
+  // rather than a button named after the act of switching, whose "pressed" would say
+  // nothing about which theme that left us in.
+  //
+  // Written by script and not rendered: at build time the theme is whatever the visitor's
+  // system says, so any attribute we shipped would be a guess, and a wrong one for anyone
+  // whose system prefers dark. The gap that leaves is between parsing this button and
+  // running this module, which is deferred — hence the call below, not just the listeners.
   const syncPressed = () => {
     document.getElementById('theme-toggle')?.setAttribute('aria-pressed', String(isDark()));
   };
@@ -130,6 +136,8 @@ const t = useTranslations(lang);
     localStorage.setItem('theme', next);
     syncPressed();
   });
+
+  syncPressed();
 
   // A navigation swaps in a button without the attribute; a system that flips theme under
   // a visitor who never chose one changes the answer without touching the button at all.

@@ -242,31 +242,45 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
 </style>
 
 <script>
-  // Delegated on the document: bound once, survives ClientRouter navigation. A navigation
-  // swaps in a fresh <details>, which is closed — so a click on a link needs no handling.
-  const DESKTOP = '(min-width: 561px)';
+  // Delegated on the document: bound once, survives ClientRouter navigation.
+  // The same query the CSS shows the burger with, so there is no width that matches
+  // neither (fractional widths are real: zoom, fractional DPR). Keep the two in step.
+  const MOBILE = '(max-width: 560px)';
 
   const openMenu = () => {
     const el = document.getElementById('menu');
     return el instanceof HTMLDetailsElement && el.open ? el : null;
   };
 
+  // Escape closes the menu from anywhere, but the focus is only rescued when it is about
+  // to disappear with the panel. Nothing traps it there — the panel is not a dialog, and
+  // the page behind it is not inert — so it may well be sitting somewhere else entirely,
+  // and moving it back from there would lose the reader's place.
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
     const menu = openMenu();
     if (!menu) return;
+    const hadFocus = menu.contains(document.activeElement);
     menu.open = false;
-    menu.querySelector('summary')?.focus();
+    if (hadFocus) menu.querySelector('summary')?.focus();
   });
 
+  // A click outside closes the menu; so does a link inside it. The link could be left to
+  // the navigation, which swaps in a fresh, closed <details> — but that is a fact about
+  // the router (it swaps even a same-URL navigation, unless the link carries a hash), and
+  // closing the menu is the menu's own business.
   document.addEventListener('click', (e) => {
     const menu = openMenu();
-    if (!menu || !(e.target instanceof Node) || menu.contains(e.target)) return;
-    menu.open = false;
+    if (!menu || !(e.target instanceof Node)) return;
+    const inside = menu.contains(e.target);
+    const onLink = e.target instanceof Element && e.target.closest('.menu__panel a');
+    if (!inside || onLink) menu.open = false;
   });
 
-  window.matchMedia(DESKTOP).addEventListener('change', (e) => {
-    if (!e.matches) return;
+  // The burger is gone at this width, so an open menu would be an invisible one — and it
+  // would still be open on the way back down.
+  window.matchMedia(MOBILE).addEventListener('change', (e) => {
+    if (e.matches) return;
     const menu = openMenu();
     if (menu) menu.open = false;
   });
