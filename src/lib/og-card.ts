@@ -103,29 +103,58 @@ const svg = (name: string, role: string, portrait: string) => {
 `;
 };
 
-/** Width of one line as resvg will actually draw it, fonts and all. */
-function measure(text: string, size: number, weight: number, family: string): number {
+type Font = [size: number, weight: number, family: string];
+
+/** Bounding box of one line as resvg will actually draw it, fonts and all. */
+function bbox(text: string, [size, weight, family]: Font) {
   const line = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}">
       <text x="0" y="${size}" font-family="${family}" font-size="${size}"
             font-weight="${weight}">${escape(text)}</text>
     </svg>
   `;
+  return new Resvg(line, { font: FONT }).getBBox();
+}
 
-  // No bbox means resvg drew nothing — a font without the glyphs, say. That is a blank
-  // line on the card, not a line of zero width, so it must not read as "it fits".
-  const bbox = new Resvg(line, { font: FONT }).getBBox();
-  if (!bbox) {
+/** Width of one line. No bbox means resvg drew nothing — a blank line, not a zero-width one. */
+function measure(text: string, font: Font): number {
+  const box = bbox(text, font);
+  if (!box) {
     throw new Error(
       `OG card: "${text}" could not be measured — resvg drew nothing for it. ` +
         `Do the fonts in src/assets/fonts cover this script?`,
     );
   }
-  return bbox.width;
+  return box.width;
 }
 
-function fits(lang: Locale, label: string, text: string, ...font: [number, number, string]) {
-  const width = Math.ceil(measure(text, ...font));
+/**
+ * The fonts are subset to Latin and Cyrillic, and resvg does not draw a .notdef box for a
+ * character they do not have — it drops it. A single foreign character therefore vanishes
+ * from an otherwise ordinary line, which no width check can see (measured: "Ivanov 漢" is
+ * exactly as wide as "Ivanov"). So each character is asked for its own box.
+ */
+function covered(lang: Locale, label: string, text: string, font: Font) {
+  for (const char of text) {
+    // Spaces and combining marks legitimately draw nothing on their own.
+    if (/^[\s\p{M}]$/u.test(char)) continue;
+
+    if (!bbox(char, font)) {
+      const codepoint = char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0');
+      throw new Error(
+        `OG card (${lang}): the ${label} contains "${char}" (U+${codepoint}), which the ` +
+          `fonts in src/assets/fonts do not have — resvg would drop it and the card would ` +
+          `ship with the character missing. Widen the ranges in scripts/subset-fonts.sh, ` +
+          `if the typeface has the glyph at all.`,
+      );
+    }
+  }
+}
+
+function fits(lang: Locale, label: string, text: string, font: Font) {
+  covered(lang, label, text, font);
+
+  const width = Math.ceil(measure(text, font));
   if (width > TEXT_COLUMN) {
     throw new Error(
       `OG card (${lang}): the ${label} "${text}" is ${width}px wide and the card allows ` +
@@ -135,21 +164,25 @@ function fits(lang: Locale, label: string, text: string, ...font: [number, numbe
   }
 }
 
-// Keyed by the palette as well as the language. Editing the resume tears this module
-// down (it imports astro:content) and the memo with it, but editing themes.css does not:
-// the colours are read from disk, not imported, so a card memoised by language alone
-// would keep its old colours in dev until the server restarted. The key changes with the
-// palette, so the card follows the stylesheet.
-const cards = new Map<string, Promise<Buffer>>();
+// Editing the resume tears this module down (it imports astro:content) and the memo with
+// it. Editing themes.css does not — the colours are read from disk, not imported — so the
+// memo is dropped by hand when the palette changes, and a card cannot keep colours the
+// stylesheet no longer has.
+const cards = new Map<Locale, Promise<Buffer>>();
+let drawnWith = '';
 
 /** The card for a language. Drawn once: the endpoint and Base share the same bytes. */
 export function ogCard(lang: Locale): Promise<Buffer> {
-  const key = `${lang}|${Object.values(colors()).join(',')}`;
-
-  if (!cards.has(key)) {
-    cards.set(key, draw(lang));
+  const palette = Object.values(colors()).join(',');
+  if (palette !== drawnWith) {
+    cards.clear();
+    drawnWith = palette;
   }
-  return cards.get(key)!;
+
+  if (!cards.has(lang)) {
+    cards.set(lang, draw(lang));
+  }
+  return cards.get(lang)!;
 }
 
 async function draw(lang: Locale): Promise<Buffer> {
@@ -157,8 +190,11 @@ async function draw(lang: Locale): Promise<Buffer> {
   if (!resume) throw new Error(`Missing resume for ${lang} — the OG card quotes it`);
 
   const { name, role } = resume.data;
-  fits(lang, 'name', name, 60, 700, SANS);
-  fits(lang, 'role', role, 34, 600, SANS);
+  fits(lang, 'name', name, [60, 700, SANS]);
+  fits(lang, 'role', role, [34, 600, SANS]);
+  // Fixed strings, but they are drawn from the same subset fonts as the resume is.
+  covered(lang, 'tagline', TAGLINE, [22, 400, MONO]);
+  covered(lang, 'domain', 'kalugaman.ru', [24, 400, MONO]);
 
   const png = new Resvg(svg(name, role, await portraitHref()), { font: FONT }).render().asPng();
 

@@ -51,7 +51,10 @@ const t = useTranslations(lang);
 
 <style>
   .theme-toggle {
-    display: inline-grid;
+    /* Both themes live behind @supports (see themes.css). A browser without light-dark()
+       has one theme, so it gets no button promising to switch it — clicking it would do
+       nothing but quietly store a choice that never shows. */
+    display: none;
     place-items: center;
     width: 2.25rem;
     height: 2.25rem;
@@ -61,6 +64,11 @@ const t = useTranslations(lang);
     color: var(--color-text);
     cursor: pointer;
     line-height: 1;
+  }
+  @supports (color: light-dark(#000, #fff)) {
+    .theme-toggle {
+      display: inline-grid;
+    }
   }
   /* Both icons share the one grid cell, so swapping them cannot shift the layout. */
   .theme-toggle__icon {

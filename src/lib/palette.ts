@@ -69,8 +69,9 @@ function declarations(css: string): Array<[token: string, value: string]> {
 /**
  * Read on every call, deliberately. A memo would survive an edit to themes.css: this
  * module reads the stylesheet rather than importing it, so nothing invalidates it in dev,
- * and the card would keep its old colours until the server restarted. The file is 2 KB
- * and is read twice per build.
+ * and the card would keep its old colours until the server restarted. Callers ask often —
+ * Base asks once per page, to key the card memo and version the og:image — so this is a
+ * 2 KB file read a few dozen times per build, which is nothing next to drawing the card.
  */
 export function palettes(): { light: Palette; dark: Palette } {
   const css = readFileSync(join(process.cwd(), 'src/styles/themes.css'), 'utf8');
@@ -81,7 +82,6 @@ export function palettes(): { light: Palette; dark: Palette } {
     if (HEX.test(value)) {
       // The plain declaration: the light theme, and all an old browser ever sees.
       light[token] = value;
-      dark[token] ??= value;
       continue;
     }
 
@@ -100,9 +100,21 @@ export function palettes(): { light: Palette; dark: Palette } {
     );
   }
 
-  const missing = REQUIRED.filter((token) => !(token in light) || !(token in dark));
+  // A token with no light-dark() pair is not a token with a sensible dark value — it is a
+  // token whose dark value someone forgot, and a modern browser would paint its light
+  // colour on a near-black page. Say so, rather than model the mistake faithfully.
+  const unpaired = Object.keys(light).filter((token) => !(token in dark));
+  if (unpaired.length > 0) {
+    throw new Error(
+      `src/styles/themes.css: ${unpaired.map((t) => `--${t}`).join(', ')} has no dark value.\n` +
+        `Every colour token needs a light-dark() pair in the @supports block; the plain ` +
+        `declaration above it is only the fallback for browsers without light-dark().`,
+    );
+  }
+
+  const missing = REQUIRED.filter((token) => !(token in light));
   if (missing.length > 0) {
-    throw new Error(`src/styles/themes.css does not define ${missing.join(', ')} in both themes.`);
+    throw new Error(`src/styles/themes.css does not define ${missing.join(', ')}.`);
   }
 
   return { light: light as Palette, dark: dark as Palette };
