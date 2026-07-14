@@ -69,7 +69,18 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <Font cssVariable="--font-inter" preload />
+    {
+      /* Only the body weight is preloaded. A preload is a claim on bandwidth ahead of
+        everything else, including the portrait that is likely the LCP; the other two
+        weights are fetched right after the CSS is parsed.
+
+        Their fallback is metric-matched at 400 and 600. Not at 700: Astro puts the
+        bold-metric family after a fallback family that already covers 400 and 600, and
+        font matching picks a family before it picks a weight — so a 700 request never
+        reaches it (measured: 331.03px either way, against 329.52px with the bold family
+        first). Headings therefore do move a little when Inter lands. */
+    }
+    <Font cssVariable="--font-inter" preload={[{ weight: 400 }]} />
 
     <title>{title}</title>
     <meta name="description" content={description} />

@@ -30,12 +30,9 @@ const HEIGHT = CARD_SIZE.height;
 
 // The card wears the light ("reader") theme, read from the stylesheet that defines it —
 // a copy of the hex values here would fall behind the site the first time one changed.
-const { light } = palettes();
-const BG = light['color-bg'];
-const TEXT = light['color-text'];
-const MUTED = light['color-muted'];
-const ACCENT = light['color-accent'];
-const BORDER = light['color-border'];
+// Read when a card is first drawn, not when the module is imported: importing a module
+// should not touch the disk.
+const colors = () => palettes().light;
 
 const SANS = 'Inter';
 const MONO = 'JetBrains Mono';
@@ -70,7 +67,10 @@ async function portraitHref(): Promise<string> {
   return `data:image/png;base64,${png.toString('base64')}`;
 }
 
-const svg = (name: string, role: string, portrait: string) => `
+const svg = (name: string, role: string, portrait: string) => {
+  const c = colors();
+
+  return `
   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
        width="${WIDTH}" height="${HEIGHT}">
     <defs>
@@ -79,27 +79,29 @@ const svg = (name: string, role: string, portrait: string) => `
       </clipPath>
     </defs>
 
-    <rect width="${WIDTH}" height="${HEIGHT}" fill="${BG}"/>
-    <rect width="14" height="${HEIGHT}" fill="${ACCENT}"/>
+    <rect width="${WIDTH}" height="${HEIGHT}" fill="${c['color-bg']}"/>
+    <rect width="14" height="${HEIGHT}" fill="${c['color-accent']}"/>
 
     <text x="${MARGIN}" y="250" font-family="${SANS}" font-size="60" font-weight="700"
-          fill="${TEXT}">${escape(name)}</text>
+          fill="${c['color-text']}">${escape(name)}</text>
     <text x="${MARGIN}" y="316" font-family="${SANS}" font-size="34" font-weight="600"
-          fill="${ACCENT}">${escape(role)}</text>
+          fill="${c['color-accent']}">${escape(role)}</text>
     <text x="${MARGIN}" y="382" font-family="${MONO}" font-size="22" letter-spacing="1"
-          fill="${MUTED}">${escape(TAGLINE)}</text>
+          fill="${c['color-muted']}">${escape(TAGLINE)}</text>
 
-    <line x1="${MARGIN}" y1="470" x2="${MARGIN + 160}" y2="470" stroke="${BORDER}" stroke-width="2"/>
+    <line x1="${MARGIN}" y1="470" x2="${MARGIN + 160}" y2="470"
+          stroke="${c['color-border']}" stroke-width="2"/>
     <text x="${MARGIN}" y="524" font-family="${MONO}" font-size="24" letter-spacing="2"
-          fill="${MUTED}">kalugaman.ru</text>
+          fill="${c['color-muted']}">kalugaman.ru</text>
 
     <image xlink:href="${portrait}" clip-path="url(#round)"
            x="${PORTRAIT_CX - PORTRAIT_SIZE / 2}" y="${PORTRAIT_CY - PORTRAIT_SIZE / 2}"
            width="${PORTRAIT_SIZE}" height="${PORTRAIT_SIZE}"/>
     <circle cx="${PORTRAIT_CX}" cy="${PORTRAIT_CY}" r="${PORTRAIT_SIZE / 2 + 6}"
-            fill="none" stroke="${BORDER}" stroke-width="3"/>
+            fill="none" stroke="${c['color-border']}" stroke-width="3"/>
   </svg>
 `;
+};
 
 /** Width of one line as resvg will actually draw it, fonts and all. */
 function measure(text: string, size: number, weight: number, family: string): number {

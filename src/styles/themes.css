@@ -1,37 +1,64 @@
-/* Theme colours. A token carries both of its values at once — light first, dark second
-   — so a theme is not a set of overrides but a choice between the two, made by
-   `color-scheme`. The dark palette exists in exactly one place, and the system
+/* Theme colours.
+
+   The palette is declared once, in light. `light-dark()` then re-declares each token
+   with its dark counterpart, so a theme is a choice of `color-scheme` rather than a
+   second set of overrides — the dark values exist in exactly one place, and the system
    preference and the explicit toggle cannot drift apart.
 
-   `light-dark()` takes colours only, so the shadow is built from colour tokens rather
-   than swapped whole; its geometry is now one set for both themes (it differed by 2px).
+   The @supports wrapper is not decoration: without light-dark() (before Chrome 123 /
+   Safari 17.5 / Firefox 120 — iOS 16 is the realistic case) the declaration would be
+   dropped, every var() reading it would turn invalid, and the page would render in the
+   browser's own colours rather than in a slightly wrong theme. Those browsers keep the
+   block above and get the light theme. It has to be @supports rather than the usual
+   two-declarations-in-a-row fallback, because the minifier drops the earlier one as
+   redundant (verified in dist).
 
-   Needs Chrome 123 / Safari 17.5 / Firefox 120 (2024). */
+   light-dark() takes colours only, so the shadow is composed from colour tokens rather
+   than swapped whole; its geometry is one set for both themes (it used to differ by 2px). */
 
 :root {
-  /* light: warm paper, reader-style (sepia). dark: deep blue-grey. */
+  /* light: warm paper, reader-style (sepia) */
   color-scheme: light dark;
 
-  --color-bg: light-dark(#f3ead4, #0d0f14);
-  --color-surface: light-dark(#fbf4e2, #151821);
-  --color-text: light-dark(#3f3628, #e7e9ee);
+  --color-bg: #f3ead4;
+  --color-surface: #fbf4e2;
+  --color-text: #3f3628;
   /* Muted is body text (periods, locations, captions), so it has to clear WCAG AA on
      both bg and surface. The old #7c6f59 gave 4.10 / 4.48 — below the 4.5 it needs. */
-  --color-muted: light-dark(#6f6250, #9aa2b1);
+  --color-muted: #6f6250;
   /* Decorative: card edges and rules. Nothing is identified by it, so it stays faint. */
-  --color-border: light-dark(#e2d5b8, #262a35);
+  --color-border: #e2d5b8;
   /* The outline of a control. A secondary button sits on a surface barely distinct from
      the page (1.09:1), so this border is the only thing that says "button" — WCAG 1.4.11
      asks 3:1 of it, against the page and against a card alike. */
-  --color-border-control: light-dark(#948050, #5c6580);
-  --color-accent: light-dark(#8a4f2c, #6ea8ff);
-  --color-accent-contrast: light-dark(#fbf4e2, #0d0f14);
-  --color-tag-bg: light-dark(#eadfc4, #1c2230);
-  --color-tag-text: light-dark(#6c4823, #9db8ff);
+  --color-border-control: #948050;
+  --color-accent: #8a4f2c;
+  --color-accent-contrast: #fbf4e2;
+  --color-tag-bg: #eadfc4;
+  --color-tag-text: #6c4823;
 
-  --shadow-near: light-dark(rgba(74, 54, 30, 0.05), rgba(0, 0, 0, 0.4));
-  --shadow-far: light-dark(rgba(74, 54, 30, 0.08), rgba(0, 0, 0, 0.35));
+  --shadow-near: rgba(74, 54, 30, 0.05);
+  --shadow-far: rgba(74, 54, 30, 0.08);
   --shadow: 0 1px 2px var(--shadow-near), 0 6px 20px var(--shadow-far);
+}
+
+/* dark: deep blue-grey */
+@supports (color: light-dark(#000, #fff)) {
+  :root {
+    --color-bg: light-dark(#f3ead4, #0d0f14);
+    --color-surface: light-dark(#fbf4e2, #151821);
+    --color-text: light-dark(#3f3628, #e7e9ee);
+    --color-muted: light-dark(#6f6250, #9aa2b1);
+    --color-border: light-dark(#e2d5b8, #262a35);
+    --color-border-control: light-dark(#948050, #5c6580);
+    --color-accent: light-dark(#8a4f2c, #6ea8ff);
+    --color-accent-contrast: light-dark(#fbf4e2, #0d0f14);
+    --color-tag-bg: light-dark(#eadfc4, #1c2230);
+    --color-tag-text: light-dark(#6c4823, #9db8ff);
+
+    --shadow-near: light-dark(rgba(74, 54, 30, 0.05), rgba(0, 0, 0, 0.4));
+    --shadow-far: light-dark(rgba(74, 54, 30, 0.08), rgba(0, 0, 0, 0.35));
+  }
 }
 
 /* An explicit choice pins the scheme; without one, the system preference decides. */

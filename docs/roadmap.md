@@ -83,9 +83,11 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         a secondary button was told apart from the page by a 1.21:1 outline, where
         WCAG 1.4.11 asks 3:1. `npm run check:contrast` (in CI) asserts every pair.
   - [x] Typography: self-hosted **Inter** (Astro's `fonts` API, local provider), cut to
-        Latin + Cyrillic — ~35 KB a weight, three weights, preloaded, with a
-        metric-matched fallback so the swap does not shift the page.
-        Re-subset with `scripts/subset-fonts.sh`.
+        Latin + Cyrillic — ~35 KB a weight, three weights, body weight preloaded.
+        Re-subset with `scripts/subset-fonts.sh`. Known limitation: Astro's
+        metric-matched fallback does not reach weight 700 (the bold family sits behind a
+        family that already covers 400/600, and font matching resolves a family before a
+        weight), so headings shift slightly when Inter lands.
 - [ ] **B3 — Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
 
 ---
