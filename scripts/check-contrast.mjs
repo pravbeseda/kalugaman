@@ -27,6 +27,10 @@ const PAIRS = [
   // buttons) sit on a card rather than on the page.
   ['focus ring on the page', 'color-accent', 'color-bg', LARGE],
   ['focus ring on a card', 'color-accent', 'color-surface', LARGE],
+  // The primary button is filled with the accent the ring is drawn in, so the ring is
+  // parted from the fill by a band (global.css). The band is what makes the indicator
+  // legible there, so it is the band that has to clear 3:1 against the fill.
+  ['focus band on a primary button', 'color-accent-contrast', 'color-accent', LARGE],
 ];
 
 const channel = (v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);

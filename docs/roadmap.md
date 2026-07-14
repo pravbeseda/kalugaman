@@ -20,7 +20,6 @@ Done:
 - [x] **Sitemap** (`@astrojs/sitemap`) with i18n links; the root is kept out of the index
 
 **Takeaway:** content is separated from code and the base is extensible. What's left:
-infrastructure (CI/CD, VPS), the missing small pieces (404, robots, mobile menu) and
 the PDF resume.
 
 ---
@@ -72,7 +71,11 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         the current job is an explicit `current` flag on an `id`-keyed experience entry,
         and `src/lib/content-checks.ts` requires the languages to agree on which job
         that is and on the set of jobs itself.
-- [ ] **B3 — Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
+- [x] **B3 — Mobile menu** — a burger below 560px, built on `<details>` rather than a
+      button: the browser owns the open state, the keyboard and `aria-expanded`, and the
+      menu still opens with JS off. The script adds only what the element lacks — Escape,
+      a click outside, and a viewport that grew past the breakpoint. A navigation swaps in
+      a fresh, closed `<details>`, so a click on a link needs no handling.
 - [x] **B2 — Theme tokens, contrast, typography**:
   - [x] `themes.css` deduplicated: every token is a `light-dark()` pair, so a theme is a
         `color-scheme` choice rather than a second set of overrides. The dark palette,
@@ -91,7 +94,20 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         metric-matched fallback does not reach weight 700 (the bold family sits behind a
         family that already covers 400/600, and font matching resolves a family before a
         weight), so headings shift slightly when Inter lands.
-- [ ] **B3 — Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
+- [x] **B3 — Accessibility**:
+  - [x] The skip link was hardcoded English and shipped that way on `/ru/`; it now comes
+        from the dictionaries, as does the `aria-label` of the nav. On the 404 — built in
+        one language and swapped on load — it rides the existing `data-i18n` mechanism.
+  - [x] Focus: the ring is the accent, and a primary button is _filled_ with the accent, so
+        the two read as one blob across the 2px gap. A band in the button's own label
+        colour now parts them (recolouring the ring cannot work: nothing that contrasts
+        with the accent fill also contrasts with the page the ring is drawn on).
+        `check:contrast` asserts the band, as it already did the ring.
+  - [x] The theme toggle now says which theme is in force (`aria-pressed`), written by
+        script because at build time the theme is the visitor's system preference. It is
+        also hidden without JS (`data-js`, set before first paint) — it was visible and
+        inert, promising a switch it could not perform.
+  - [x] `prefers-reduced-motion`: no smooth scroll, no theme crossfade, no button lift.
 
 ---
 

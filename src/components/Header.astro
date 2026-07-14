@@ -23,6 +23,59 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
 
 <header class="header">
   <div class="container header__inner">
+    {
+      /* <details> rather than a button: the browser owns the open state, the keyboard and
+        aria-expanded on the summary, and the menu still opens with JS off. The script
+        below only handles what the element does not — Escape, a click outside, and a
+        viewport that grew past the breakpoint. The links are rendered a second time
+        because only one of the two navs is ever displayed, and display:none keeps the
+        other out of the accessibility tree. */
+    }
+    <details class="menu" id="menu">
+      <summary class="menu__button" aria-label={t('nav.menu')} title={t('nav.menu')}>
+        <svg
+          class="menu__icon menu__icon--bars"
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"></path>
+        </svg>
+        <svg
+          class="menu__icon menu__icon--close"
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M6 6l12 12M18 6L6 18"></path>
+        </svg>
+      </summary>
+
+      <nav class="menu__panel" aria-label={t('nav.primary')}>
+        {
+          links.map((l) => (
+            <a
+              href={l.href}
+              class:list={['nav__link', { 'nav__link--active': isActive(l.href) }]}
+              aria-current={isActive(l.href) ? 'page' : undefined}
+            >
+              {l.label}
+            </a>
+          ))
+        }
+      </nav>
+    </details>
+
     <a class="brand" href={base}>
       <Image
         src={avatar}
@@ -35,7 +88,7 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
       <span class="brand__name">kalugaman<span>.ru</span></span>
     </a>
 
-    <nav class="nav" aria-label="Primary">
+    <nav class="nav" aria-label={t('nav.primary')}>
       {
         links.map((l) => (
           <a
@@ -71,11 +124,11 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
     border-bottom: var(--border-width) solid var(--color-border);
   }
   .header__inner {
+    position: relative;
     display: flex;
     align-items: center;
     gap: var(--space-4);
     min-height: 3.75rem;
-    flex-wrap: wrap;
   }
   .brand {
     display: flex;
@@ -126,11 +179,95 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
     gap: var(--space-2);
   }
 
+  .menu {
+    display: none;
+  }
+  .menu__button {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    border: var(--border-width) solid var(--color-border-control);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    /* Both rules: the marker is a ::marker in Firefox and a pseudo-element in Safari. */
+    list-style: none;
+  }
+  .menu__button::-webkit-details-marker {
+    display: none;
+  }
+  /* Both icons share the one grid cell, so swapping them cannot shift the button. */
+  .menu__icon {
+    grid-area: 1 / 1;
+  }
+  .menu__icon--close,
+  .menu[open] .menu__icon--bars {
+    display: none;
+  }
+  .menu[open] .menu__icon--close {
+    display: block;
+  }
+  .menu__panel {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-2);
+    background: var(--color-surface);
+    border-bottom: var(--border-width) solid var(--color-border);
+    box-shadow: var(--shadow);
+  }
+  .menu__panel .nav__link {
+    padding: var(--space-3);
+  }
+
+  /* Below the breakpoint the four links no longer fit next to the brand and the controls.
+     The JS below closes the menu when the viewport grows past it — keep the two in step. */
   @media (max-width: 560px) {
+    .menu {
+      display: block;
+    }
     .nav {
-      order: 3;
-      width: 100%;
-      justify-content: center;
+      display: none;
+    }
+    .brand {
+      margin-right: auto;
     }
   }
 </style>
+
+<script>
+  // Delegated on the document: bound once, survives ClientRouter navigation. A navigation
+  // swaps in a fresh <details>, which is closed — so a click on a link needs no handling.
+  const DESKTOP = '(min-width: 561px)';
+
+  const openMenu = () => {
+    const el = document.getElementById('menu');
+    return el instanceof HTMLDetailsElement && el.open ? el : null;
+  };
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const menu = openMenu();
+    if (!menu) return;
+    menu.open = false;
+    menu.querySelector('summary')?.focus();
+  });
+
+  document.addEventListener('click', (e) => {
+    const menu = openMenu();
+    if (!menu || !(e.target instanceof Node) || menu.contains(e.target)) return;
+    menu.open = false;
+  });
+
+  window.matchMedia(DESKTOP).addEventListener('change', (e) => {
+    if (!e.matches) return;
+    const menu = openMenu();
+    if (menu) menu.open = false;
+  });
+</script>

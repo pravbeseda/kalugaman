@@ -53,7 +53,9 @@ const t = useTranslations(lang);
   .theme-toggle {
     /* Both themes live behind @supports (see themes.css). A browser without light-dark()
        has one theme, so it gets no button promising to switch it — clicking it would do
-       nothing but quietly store a choice that never shows. */
+       nothing but quietly store a choice that never shows. The same goes for a browser
+       with no JS to switch it with: data-js is set by the inline script in Base, before
+       the first paint, so the button never appears and then dies. */
     display: none;
     place-items: center;
     width: 2.25rem;
@@ -66,7 +68,7 @@ const t = useTranslations(lang);
     line-height: 1;
   }
   @supports (color: light-dark(#000, #fff)) {
-    .theme-toggle {
+    :global(:root[data-js]) .theme-toggle {
       display: inline-grid;
     }
   }
@@ -103,19 +105,34 @@ const t = useTranslations(lang);
 </style>
 
 <script>
+  const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+
+  const isDark = () => {
+    const chosen = document.documentElement.getAttribute('data-theme');
+    return chosen === 'dark' || (!chosen && systemDark.matches);
+  };
+
+  // The icon names the theme in force; so must the button, for a reader who does not see
+  // the icon. Pressed = dark, and it is written by script rather than rendered, because at
+  // build time the theme is whatever the visitor's system says — unknowable from here.
+  const syncPressed = () => {
+    document.getElementById('theme-toggle')?.setAttribute('aria-pressed', String(isDark()));
+  };
+
   // Delegated handler on the document: bound once, works from first paint
   // (no astro:page-load gap) and survives ClientRouter navigation.
   document.addEventListener('click', (e) => {
     if (!(e.target instanceof Element) || !e.target.closest('#theme-toggle')) {
       return;
     }
-    const root = document.documentElement;
-    const isDark =
-      root.getAttribute('data-theme') === 'dark' ||
-      (!root.getAttribute('data-theme') &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const next = isDark ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
+    const next = isDark() ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
     localStorage.setItem('theme', next);
+    syncPressed();
   });
+
+  // A navigation swaps in a button without the attribute; a system that flips theme under
+  // a visitor who never chose one changes the answer without touching the button at all.
+  document.addEventListener('astro:page-load', syncPressed);
+  systemDark.addEventListener('change', syncPressed);
 </script>

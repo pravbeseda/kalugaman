@@ -72,6 +72,14 @@ h2 {
   outline-offset: 2px;
   border-radius: var(--radius-sm);
 }
+/* The ring is drawn in the accent — which is what a primary button is filled with, so on
+   that one button the two read as a single accent blob separated by 2px of page. The
+   box-shadow fills exactly that 2px gap with the button's own label colour, which parts
+   the ring from the fill. Recolouring the ring instead does not work: nothing that
+   contrasts with the accent fill also contrasts with the page it is drawn on. */
+.button--primary:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-accent-contrast);
+}
 
 /* layout helpers */
 .container {
@@ -141,6 +149,26 @@ h2 {
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
+}
+
+/* A reader who asked the system for less motion gets none of ours: the smooth scroll, the
+   theme crossfade on <body>, the button lift. !important because the declarations it
+   overrides live in component <style> blocks, whose specificity we do not control from
+   here. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .button:hover {
+    transform: none;
+  }
 }
 
 /* rendered markdown content */

@@ -14,7 +14,13 @@ const strings = Object.fromEntries(
     const tr = useTranslations(lang);
     return [
       lang,
-      { title: tr('notfound.title'), text: tr('notfound.text'), home: tr('notfound.home') },
+      {
+        title: tr('notfound.title'),
+        text: tr('notfound.text'),
+        home: tr('notfound.home'),
+        // The skip link is Base's, but it is text on this page like any other.
+        skip: tr('a11y.skip'),
+      },
     ];
   }),
 );

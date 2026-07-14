@@ -6,7 +6,7 @@ import { getEntry } from 'astro:content';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { locales, defaultLocale, ogLocales, type Locale } from '../i18n/config';
-import { switchLocalePath } from '../i18n/utils';
+import { switchLocalePath, useTranslations } from '../i18n/utils';
 import { ogImageUrl } from '../lib/og';
 import { CARD_SIZE } from '../lib/og-card';
 import { assertContentInvariants } from '../lib/content-checks';
@@ -42,6 +42,7 @@ const {
 // once per build rather than in any one page.
 await assertContentInvariants();
 
+const t = useTranslations(lang);
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site).href;
 const alternates = locales.map((l) => ({
@@ -132,14 +133,21 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
 
     {
       /* Apply theme before first paint (no FOUC); re-apply on client
-        navigation via astro:after-swap, before the new document paints. */
+        navigation via astro:after-swap, before the new document paints.
+
+        data-js rides along: it is what the theme toggle is shown behind (a button that
+        switches nothing is worse than no button), and it has to be set before the first
+        paint for the same reason the theme does — otherwise the button flashes in and
+        out. ClientRouter swaps the attributes of <html> too, so both are re-applied. */
     }
     <script is:inline>
       (() => {
         const applyTheme = () => {
+          const root = document.documentElement;
+          root.setAttribute('data-js', '');
           const saved = localStorage.getItem('theme');
           if (saved === 'dark' || saved === 'light') {
-            document.documentElement.setAttribute('data-theme', saved);
+            root.setAttribute('data-theme', saved);
           }
         };
         applyTheme();
@@ -148,7 +156,8 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    {/* data-i18n: the 404 is built in one language and swapped on load — see 404.astro. */}
+    <a class="skip-link" href="#main" data-i18n="skip">{t('a11y.skip')}</a>
     {!bare && <Header lang={lang} />}
     <main id="main">
       <slot />
