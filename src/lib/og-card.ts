@@ -130,9 +130,10 @@ function fits(lang: Locale, label: string, text: string, ...font: [number, numbe
   }
 }
 
-// Lives as long as the module does. That is one build, and in dev one content edit:
-// this module imports astro:content, so Vite invalidates it — cache and all — whenever
-// the resume changes. The card cannot go stale behind the data it quotes.
+// Lives as long as the module does — one build, or in dev until the content changes:
+// editing the resume tears this module down along with the cache (verified: the served
+// card and its hash both change without restarting the dev server). So the card cannot
+// go stale behind the data it quotes.
 const cards = new Map<Locale, Promise<Buffer>>();
 
 /** The card for a language. Drawn once: the endpoint and Base share the same bytes. */

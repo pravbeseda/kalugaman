@@ -5,8 +5,9 @@
 import { getCollection } from 'astro:content';
 import { locales } from '../i18n/config';
 
-// Same lifetime as the data: this module imports astro:content, so Vite invalidates it
-// when the content changes and the checks run again on the next request.
+// Same lifetime as the data: a content edit tears this module down with the memo, so the
+// checks run again on the next request (verified in dev — breaking the resume parity
+// turns the page 500 without a restart).
 let checked: Promise<void> | null = null;
 
 /** Runs once per build; every page awaits it through Base. */

@@ -47,6 +47,12 @@ const resume = defineCollection({
       // the flag exists to avoid.
       .refine((jobs) => jobs.filter((job) => job.current).length <= 1, {
         message: 'at most one experience entry may be marked `current`',
+      })
+      // The id identifies a job across languages, which it cannot do if two jobs share
+      // one: the cross-language checks would still line up and the lookups would fall
+      // back to file order.
+      .refine((jobs) => new Set(jobs.map((job) => job.id)).size === jobs.length, {
+        message: 'experience ids must be unique within a resume',
       }),
     skills: z.array(
       z.object({
