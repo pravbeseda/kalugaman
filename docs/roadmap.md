@@ -73,7 +73,19 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         and `src/lib/content-checks.ts` requires the languages to agree on which job
         that is and on the set of jobs itself.
 - [ ] **B3 — Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
-- [ ] **B2 — Tech debt**: duplicated values in `themes.css` (one shared token set → override only what actually differs).
+- [x] **B2 — Theme tokens, contrast, typography**:
+  - [x] `themes.css` deduplicated: every token is a `light-dark()` pair, so a theme is a
+        `color-scheme` choice rather than a second set of overrides. The dark palette,
+        previously written out twice (explicit toggle + `prefers-color-scheme`), now
+        exists once.
+  - [x] Contrast: muted text was below WCAG AA in the light theme (4.10 on the page,
+        4.48 on a card) and is now 4.95 / 5.41. Controls got their own border token —
+        a secondary button was told apart from the page by a 1.21:1 outline, where
+        WCAG 1.4.11 asks 3:1. `npm run check:contrast` (in CI) asserts every pair.
+  - [x] Typography: self-hosted **Inter** (Astro's `fonts` API, local provider), cut to
+        Latin + Cyrillic — ~35 KB a weight, three weights, preloaded, with a
+        metric-matched fallback so the swap does not shift the page.
+        Re-subset with `scripts/subset-fonts.sh`.
 - [ ] **B3 — Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
 
 ---
