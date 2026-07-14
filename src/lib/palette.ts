@@ -31,36 +31,58 @@ export type Palette = Record<Token, string>;
 const HEX = /^#[0-9a-f]{6}$/i;
 const LIGHT_DARK = /^light-dark\(\s*(#[0-9a-f]{6})\s*,\s*(#[0-9a-f]{6})\s*\)$/i;
 
+/** The two places a colour may be declared, as a full context chain. */
+const BASE = ':root';
+const PAIRED = /^@supports \(color: light-dark\(.*\)\) > :root$/;
+
 /**
  * Every `--color-*` declaration in the file, in source order, comments stripped.
  *
- * Only the `:root` blocks are read — the base one and the one inside @supports. A colour
- * declared anywhere else (a `[data-theme]` override, a `prefers-color-scheme` block, a
- * palette scoped to one section) is a hard error rather than a value silently folded into
- * the light palette, where it would leave the OG card and the contrast check running on
- * colours nobody sees.
+ * A colour is read from the base `:root` and from the `:root` inside the @supports block,
+ * and from nowhere else. Anywhere else — a `[data-theme]` override, a
+ * `prefers-color-scheme` block, a palette scoped to one section — is a hard error, not a
+ * value silently folded into the light palette where it would leave the OG card and the
+ * contrast check running on colours nobody sees.
+ *
+ * The context is the whole chain, not the innermost selector: inside
+ * `@media (prefers-color-scheme: dark)` the selector still reads `:root`, and matching on
+ * that alone would wave the block straight through.
  */
 function declarations(css: string): Array<[token: string, value: string]> {
   const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
   const found: Array<[string, string]> = [];
 
-  // Innermost blocks only: the body pattern excludes braces, so an @supports wrapper is
-  // stepped over and its inner `:root` is matched on its own.
-  for (const [, rawSelector, body] of withoutComments.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const selector = rawSelector.trim();
-    const colors = [...body.matchAll(/--(color-[\w-]+)\s*:\s*([^;]+);/g)];
-    if (colors.length === 0) continue;
+  const context: string[] = [];
+  let buffer = '';
 
-    if (selector !== ':root') {
+  const readColours = () => {
+    const colours = [...buffer.matchAll(/--(color-[\w-]+)\s*:\s*([^;]+);/g)];
+    if (colours.length === 0) return;
+
+    const chain = context.join(' > ');
+    if (chain !== BASE && !PAIRED.test(chain)) {
       throw new Error(
-        `src/styles/themes.css: colour tokens under \`${selector}\` are not read.\n` +
-          `The palette reader (src/lib/palette.ts) only knows the :root blocks. Teach it ` +
-          `this selector, or the OG card and the contrast check would run on a palette ` +
-          `that does not match the page.`,
+        `src/styles/themes.css: colour tokens under \`${chain}\` are not read.\n` +
+          `The palette reader (src/lib/palette.ts) knows the base :root block and the ` +
+          `:root inside @supports (color: light-dark(…)). Teach it this context, or the ` +
+          `OG card and the contrast check would run on a palette the page does not use.`,
       );
     }
 
-    for (const [, token, value] of colors) found.push([token, value.trim()]);
+    for (const [, token, value] of colours) found.push([token, value.trim()]);
+  };
+
+  for (const char of withoutComments) {
+    if (char === '{') {
+      context.push(buffer.trim().replace(/\s+/g, ' '));
+      buffer = '';
+    } else if (char === '}') {
+      readColours();
+      buffer = '';
+      context.pop();
+    } else {
+      buffer += char;
+    }
   }
 
   return found;
@@ -78,15 +100,31 @@ export function palettes(): { light: Palette; dark: Palette } {
   const light: Record<string, string> = {};
   const dark: Record<string, string> = {};
 
+  // What the plain declaration said, before the light-dark() pair re-declared the token.
+  const fallback: Record<string, string> = {};
+
   for (const [token, value] of declarations(css)) {
     if (HEX.test(value)) {
       // The plain declaration: the light theme, and all an old browser ever sees.
       light[token] = value;
+      fallback[token] = value;
       continue;
     }
 
     const pair = value.match(LIGHT_DARK);
     if (pair) {
+      // The light value is written twice — here and in the fallback above. Nobody with a
+      // current browser would ever see them disagree, which is exactly why the disagreement
+      // has to be an error: the readers it would hit are the ones we cannot look at.
+      if (fallback[token] && fallback[token].toLowerCase() !== pair[1].toLowerCase()) {
+        throw new Error(
+          `src/styles/themes.css: --${token} has two different light values — ` +
+            `${fallback[token]} in the fallback declaration and ${pair[1]} in light-dark().\n` +
+            `Browsers without light-dark() would get the first; everyone else, and the OG ` +
+            `card and the contrast check, the second.`,
+        );
+      }
+
       light[token] = pair[1];
       dark[token] = pair[2];
       continue;

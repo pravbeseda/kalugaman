@@ -136,8 +136,11 @@ function measure(text: string, font: Font): number {
  */
 function covered(lang: Locale, label: string, text: string, font: Font) {
   for (const char of text) {
-    // Spaces and combining marks legitimately draw nothing on their own.
-    if (/^[\s\p{M}]$/u.test(char)) continue;
+    // Whitespace is the only thing that legitimately draws nothing. Combining marks are
+    // *not* skipped: a supported one has ink of its own (U+0301 alone measures 8.1×6.1),
+    // an unsupported one has no box at all — so asking each mark on its own catches it,
+    // where skipping marks would have let it through to be dropped from the card.
+    if (/^\s$/u.test(char)) continue;
 
     if (!bbox(char, font)) {
       const codepoint = char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0');

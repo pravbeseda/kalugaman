@@ -23,7 +23,10 @@ const PAIRS = [
   // card border is deliberately absent — it decorates, it identifies nothing.
   ['button outline on the page', 'color-border-control', 'color-bg', LARGE],
   ['button outline on a card', 'color-border-control', 'color-surface', LARGE],
-  ['focus ring', 'color-accent', 'color-bg', LARGE],
+  // :focus-visible rings every focusable element, and plenty of them (project links,
+  // buttons) sit on a card rather than on the page.
+  ['focus ring on the page', 'color-accent', 'color-bg', LARGE],
+  ['focus ring on a card', 'color-accent', 'color-surface', LARGE],
 ];
 
 const channel = (v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
