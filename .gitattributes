@@ -1,0 +1,4 @@
+# Third-party files, kept byte-for-byte as their authors published them. The OFL text
+# shipped with JetBrains Mono carries trailing whitespace; that is theirs to have, not
+# ours to tidy, so git's whitespace rules do not apply here.
+src/assets/fonts/** -whitespace
