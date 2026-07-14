@@ -6,6 +6,7 @@ import Base from '../../layouts/Base.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { locales, type Locale } from '../../i18n/config';
 import { useTranslations } from '../../i18n/utils';
+import { personSchema } from '../../lib/schema';
 
 export function getStaticPaths() {
   return locales.map((lang) => ({ params: { lang } }));
@@ -22,13 +23,26 @@ const { Content } = await render(home);
 const resume = await getEntry('resume', lang);
 const displayName = resume?.data.name ?? 'kalugaman';
 
+const contacts = await getEntry('pages', `${lang}/contacts`);
+const schema =
+  resume && contacts
+    ? personSchema({
+        lang,
+        site: Astro.site!,
+        resume: resume.data,
+        contacts: contacts.data,
+        home: home.data,
+        image: portrait.src,
+      })
+    : null;
+
 const featured = (await getCollection('projects'))
   .filter((p) => p.id.startsWith(`${lang}/`) && p.data.featured)
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 3);
 ---
 
-<Base lang={lang} title={home.data.title} description={home.data.description}>
+<Base lang={lang} title={home.data.title} description={home.data.description} schema={schema}>
   <section class="hero section">
     <div class="container home__col">
       <div class="hero__intro">

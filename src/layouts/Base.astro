@@ -1,10 +1,14 @@
 ---
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import { getEntry } from 'astro:content';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import { locales, defaultLocale, type Locale } from '../i18n/config';
+import { locales, defaultLocale, ogLocales, type Locale } from '../i18n/config';
 import { switchLocalePath } from '../i18n/utils';
+import { ogImageUrl } from '../lib/og';
+import { CARD_SIZE } from '../lib/og-card';
+import { assertContentInvariants } from '../lib/content-checks';
 
 interface Props {
   lang: Locale;
@@ -20,6 +24,8 @@ interface Props {
   noCanonical?: boolean;
   /** Drop the site chrome. For pages that are not tied to one language (404). */
   bare?: boolean;
+  /** JSON-LD for the page (src/lib/schema.ts). Pages with nothing to declare pass none. */
+  schema?: object | null;
 }
 const {
   lang,
@@ -28,7 +34,12 @@ const {
   noindex = false,
   noCanonical = false,
   bare = false,
+  schema = null,
 } = Astro.props;
+
+// Cross-document content invariants: they hold for the whole site, so the check runs
+// once per build rather than in any one page.
+await assertContentInvariants();
 
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site).href;
@@ -36,6 +47,16 @@ const alternates = locales.map((l) => ({
   lang: l,
   href: new URL(switchLocalePath(path, l), Astro.site).href,
 }));
+
+// One card per language, drawn from the resume during the build (src/lib/og-card.ts).
+// The same card on every page, so its alt describes the card, not the page it is shared
+// from — and it quotes the resume, because that is what the card itself is drawn from.
+const ogImage = await ogImageUrl(lang, Astro.site!);
+const resume = await getEntry('resume', lang);
+const ogAlt = resume ? `${resume.data.name} — ${resume.data.role}` : title;
+
+// `<` cannot survive raw inside a <script> block — it would end the tag early.
+const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -73,10 +94,24 @@ const alternates = locales.map((l) => ({
       canonical, so a page without a URL of its own makes neither. */
     }
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="kalugaman.ru" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {!noCanonical && <meta property="og:url" content={canonical} />}
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:locale" content={ogLocales[lang]} />
+    {
+      locales
+        .filter((l) => l !== lang)
+        .map((l) => <meta property="og:locale:alternate" content={ogLocales[l]} />)
+    }
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content={String(CARD_SIZE.width)} />
+    <meta property="og:image:height" content={String(CARD_SIZE.height)} />
+    <meta property="og:image:alt" content={ogAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    {jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}
 
     {/* SPA-like navigation (no full reload) */}
     <ClientRouter />

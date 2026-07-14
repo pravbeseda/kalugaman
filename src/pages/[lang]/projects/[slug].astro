@@ -1,8 +1,9 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import Base from '../../../layouts/Base.astro';
 import type { Locale } from '../../../i18n/config';
 import { useTranslations } from '../../../i18n/utils';
+import { projectSchema } from '../../../lib/schema';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -17,9 +18,21 @@ const { entry } = Astro.props;
 const t = useTranslations(lang);
 const { Content } = await render(entry);
 const { title, description, tags, period, links } = entry.data;
+
+// Only projects with a public repository get markup — see src/lib/schema.ts.
+const resume = await getEntry('resume', lang);
+const schema = resume
+  ? projectSchema({
+      entry,
+      lang,
+      site: Astro.site!,
+      canonical: new URL(Astro.url.pathname, Astro.site).href,
+      authorName: resume.data.name,
+    })
+  : null;
 ---
 
-<Base lang={lang} title={`${title} · kalugaman`} description={description}>
+<Base lang={lang} title={`${title} · kalugaman`} description={description} schema={schema}>
   <article class="section">
     <div class="container narrow">
       <a class="back" href={`/${lang}/projects`}>← {t('projects.back')}</a>

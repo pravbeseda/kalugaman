@@ -5,6 +5,9 @@
 // collection is checked from the day it appears. Two shapes are supported:
 //   projects/{en,ru}/<slug>.md   — slug sets must match
 //   resume/{en,ru}.md            — both files must exist
+// What is inside a document is not this script's business: the frontmatter is checked
+// by the collection schema, and invariants that span documents (the `current` job, say)
+// by src/lib/content-checks.ts — both against parsed data, not raw text.
 import { readdirSync, existsSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { locales } from '../src/i18n/config.ts';

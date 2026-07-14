@@ -5,6 +5,7 @@ import portrait from '../../../assets/portrait.png';
 import Base from '../../../layouts/Base.astro';
 import { locales, type Locale } from '../../../i18n/config';
 import { useTranslations } from '../../../i18n/utils';
+import { personSchema } from '../../../lib/schema';
 
 export function getStaticPaths() {
   return locales.map((lang) => ({ params: { lang } }));
@@ -17,9 +18,27 @@ const resume = await getEntry('resume', lang);
 if (!resume) throw new Error(`Missing resume for ${lang}`);
 const { Content } = await render(resume);
 const { name, role, location, experience, skills, education, languages } = resume.data;
+
+const description = `${role}, ${location}`;
+
+// The Person node is the same on every page of a language, so it takes its
+// description from the home page — the one place that describes the person.
+const contacts = await getEntry('pages', `${lang}/contacts`);
+const home = await getEntry('pages', `${lang}/home`);
+const schema =
+  contacts && home
+    ? personSchema({
+        lang,
+        site: Astro.site!,
+        resume: resume.data,
+        contacts: contacts.data,
+        home: home.data,
+        image: portrait.src,
+      })
+    : null;
 ---
 
-<Base lang={lang} title={`${name} — ${role}`} description={`${role}, ${location}`}>
+<Base lang={lang} title={`${name} — ${role}`} description={description} schema={schema}>
   <section class="section">
     <div class="container narrow">
       <header class="head">

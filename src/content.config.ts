@@ -28,14 +28,32 @@ const resume = defineCollection({
     name: z.string(),
     role: z.string(),
     location: z.string(),
-    experience: z.array(
-      z.object({
-        company: z.string(),
-        position: z.string(),
-        period: z.string(),
-        highlights: z.array(z.string()),
+    experience: z
+      .array(
+        z.object({
+          // Language-independent handle for the job. Company names are translated, so
+          // nothing else identifies the same entry across the two resumes.
+          id: z.string(),
+          company: z.string(),
+          position: z.string(),
+          period: z.string(),
+          // The job still held. `period` is free-form prose, so being current cannot be
+          // read off it, and it must not be inferred from the order of the entries.
+          current: z.boolean().default(false),
+          highlights: z.array(z.string()),
+        }),
+      )
+      // Two current jobs would make `worksFor` fall back to file order — the very thing
+      // the flag exists to avoid.
+      .refine((jobs) => jobs.filter((job) => job.current).length <= 1, {
+        message: 'at most one experience entry may be marked `current`',
+      })
+      // The id identifies a job across languages, which it cannot do if two jobs share
+      // one: the cross-language checks would still line up and the lookups would fall
+      // back to file order.
+      .refine((jobs) => new Set(jobs.map((job) => job.id)).size === jobs.length, {
+        message: 'experience ids must be unique within a resume',
       }),
-    ),
     skills: z.array(
       z.object({
         group: z.string(),

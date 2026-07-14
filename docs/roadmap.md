@@ -50,14 +50,31 @@ Open questions (not blocking):
 
 Goal: make it look and behave like a product.
 
-- [ ] **Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
-- [ ] **404 page** (`src/pages/404.astro`) — bilingual, links home.
-- [ ] **SEO leftovers**:
-  - [ ] `public/robots.txt` (+ a link to the sitemap)
-  - [ ] OG images (static, or generated with satori at build time)
-  - [ ] JSON-LD `Person` (home/resume), `SoftwareSourceCode` (projects) — optional
-- [ ] **Tech debt**: duplicated values in `themes.css` (one shared token set → override only what actually differs).
-- [ ] **Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
+Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens**,
+**B3 navigation + accessibility**.
+
+- [x] **404 page** (`src/pages/404.astro`) — bilingual, links home.
+- [x] **B1 — SEO** ✅ (PR #10):
+  - [x] `public/robots.txt` (+ a link to the sitemap)
+  - [x] OG images — one card per language, drawn from the resume collection during the
+        build (`src/lib/og-card.ts`, served by `src/pages/og-[lang].jpg.ts`), so it
+        cannot drift from the role it quotes; `og:image` carries a hash of the bytes,
+        because scrapers cache the URL for a long time. JPEG on purpose: the consumers
+        are social scrapers, and LinkedIn is unreliable with webp. The text is drawn by
+        resvg from the fonts in `src/assets/fonts/` with the system fonts off, so the
+        card renders identically on any machine. A name or role too wide for the card
+        fails the build rather than being drawn across the portrait.
+  - [x] JSON-LD `Person` on home/resume (`sameAs` ties the site to GitHub /
+        LinkedIn / Telegram), one entity per language. `SoftwareSourceCode` renders only
+        for projects that declare `links.repo` — it is a claim about readable source, so
+        the current (closed, commercial) three get no markup.
+  - [x] Content invariants the markup relies on now fail the build instead of drifting:
+        the current job is an explicit `current` flag on an `id`-keyed experience entry,
+        and `src/lib/content-checks.ts` requires the languages to agree on which job
+        that is and on the set of jobs itself.
+- [ ] **B3 — Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
+- [ ] **B2 — Tech debt**: duplicated values in `themes.css` (one shared token set → override only what actually differs).
+- [ ] **B3 — Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
 
 ---
 

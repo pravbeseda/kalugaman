@@ -12,12 +12,16 @@ const PROJECTS = new URL('../src/content/projects/', import.meta.url).pathname;
 
 const ROUTES = ['', 'resume', 'projects', 'contacts'];
 
-const expected = ['index.html', '404.html', 'sitemap-index.xml'];
+const expected = ['index.html', '404.html', 'sitemap-index.xml', 'robots.txt'];
 
 for (const lang of locales) {
   for (const route of ROUTES) {
     expected.push(join(lang, route, 'index.html'));
   }
+
+  // The share cards come out of the og-[lang].jpg endpoint during the build, so they
+  // are worth asserting: a missing card means every shared link loses its preview.
+  expected.push(`og-${lang}.jpg`);
 
   const slugs = readdirSync(join(PROJECTS, lang))
     .filter((f) => f.endsWith('.md'))
@@ -50,4 +54,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(`dist/ smoke check OK (${expected.length} pages, assets present)`);
+console.log(`dist/ smoke check OK (${expected.length} files, assets present)`);
