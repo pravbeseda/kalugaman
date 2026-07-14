@@ -1,11 +1,13 @@
 ---
 import '../styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import { getEntry } from 'astro:content';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { locales, defaultLocale, ogLocales, type Locale } from '../i18n/config';
-import { switchLocalePath, useTranslations } from '../i18n/utils';
+import { switchLocalePath } from '../i18n/utils';
 import { ogImageUrl } from '../lib/og';
+import { assertContentInvariants } from '../lib/content-checks';
 
 interface Props {
   lang: Locale;
@@ -34,6 +36,10 @@ const {
   schema = null,
 } = Astro.props;
 
+// Cross-document content invariants: they hold for the whole site, so the check runs
+// once per build rather than in any one page.
+await assertContentInvariants();
+
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site).href;
 const alternates = locales.map((l) => ({
@@ -41,10 +47,12 @@ const alternates = locales.map((l) => ({
   href: new URL(switchLocalePath(path, l), Astro.site).href,
 }));
 
-// One card per language, drawn from the resume by scripts/generate-og.mjs. The same
-// card on every page, so its alt describes the card, not the page it is shared from.
-const t = useTranslations(lang);
-const ogImage = ogImageUrl(lang, Astro.site!);
+// One card per language, drawn from the resume during the build (src/lib/og-card.ts).
+// The same card on every page, so its alt describes the card, not the page it is shared
+// from — and it quotes the resume, because that is what the card itself is drawn from.
+const ogImage = await ogImageUrl(lang, Astro.site!);
+const resume = await getEntry('resume', lang);
+const ogAlt = resume ? `${resume.data.name} — ${resume.data.role}` : title;
 
 // `<` cannot survive raw inside a <script> block — it would end the tag early.
 const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
@@ -99,7 +107,7 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={t('og.alt')} />
+    <meta property="og:image:alt" content={ogAlt} />
     <meta name="twitter:card" content="summary_large_image" />
 
     {jsonLd && <script type="application/ld+json" is:inline set:html={jsonLd} />}

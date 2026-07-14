@@ -8,26 +8,24 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "npm run og",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
     "check:i18n": "node scripts/check-i18n-parity.mjs",
     "check:dist": "node scripts/check-dist.mjs",
-    "og": "node scripts/generate-og.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
-    "astro": "^7.0.7"
+    "@resvg/resvg-js": "^2.6.2",
+    "astro": "^7.0.7",
+    "sharp": "^0.35.3"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@resvg/resvg-js": "^2.6.2",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
-    "sharp": "^0.35.3",
     "typescript": "^6.0.3"
   }
 }
