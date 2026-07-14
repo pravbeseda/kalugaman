@@ -16,6 +16,7 @@ import sharp from 'sharp';
 import { getEntry } from 'astro:content';
 import { join } from 'node:path';
 import type { Locale } from '../i18n/config';
+import { palettes } from './palette';
 
 // Modules are bundled into chunks, so import.meta.url says nothing about the source
 // tree. Both `astro build` and `astro dev` run from the project root.
@@ -27,12 +28,14 @@ export const CARD_SIZE = { width: 1200, height: 630 } as const;
 const WIDTH = CARD_SIZE.width;
 const HEIGHT = CARD_SIZE.height;
 
-// Light ("reader") palette — src/styles/themes.css
-const BG = '#f3ead4';
-const TEXT = '#3f3628';
-const MUTED = '#7c6f59';
-const ACCENT = '#8a4f2c';
-const BORDER = '#e2d5b8';
+// The card wears the light ("reader") theme, read from the stylesheet that defines it —
+// a copy of the hex values here would fall behind the site the first time one changed.
+const { light } = palettes();
+const BG = light['color-bg'];
+const TEXT = light['color-text'];
+const MUTED = light['color-muted'];
+const ACCENT = light['color-accent'];
+const BORDER = light['color-border'];
 
 const SANS = 'Inter';
 const MONO = 'JetBrains Mono';

@@ -4,25 +4,10 @@
 //
 // The pairs are the combinations the markup actually produces (global.css). A new pair
 // in the CSS is not discovered automatically — add it below.
-import { readFileSync } from 'node:fs';
-
-const THEMES = new URL('../src/styles/themes.css', import.meta.url);
+import { palettes } from '../src/lib/palette.ts';
 
 const AA = 4.5; // normal-size text
 const LARGE = 3; // >= 24px, or >= 18.66px bold
-
-/** Every token the pairs below rely on. A missing one is an error, not an empty check. */
-const REQUIRED = [
-  'color-bg',
-  'color-surface',
-  'color-text',
-  'color-muted',
-  'color-border-control',
-  'color-accent',
-  'color-accent-contrast',
-  'color-tag-bg',
-  'color-tag-text',
-];
 
 const PAIRS = [
   ['body text on the page', 'color-text', 'color-bg', AA],
@@ -52,31 +37,6 @@ function luminance(hex) {
 function contrast(a, b) {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
-}
-
-/** `--color-bg: light-dark(#f3ead4, #0d0f14);` → { light: '#f3ead4', dark: '#0d0f14' } */
-function palettes() {
-  const css = readFileSync(THEMES, 'utf8');
-  const light = {};
-  const dark = {};
-
-  for (const match of css.matchAll(
-    /--([\w-]+):\s*light-dark\(\s*(#[0-9a-f]{6})\s*,\s*(#[0-9a-f]{6})\s*\)/gi,
-  )) {
-    const [, token, lightValue, darkValue] = match;
-    light[token] = lightValue;
-    dark[token] = darkValue;
-  }
-
-  const missing = REQUIRED.filter((token) => !(token in light));
-  if (missing.length > 0) {
-    console.error('Contrast check cannot read the palette from themes.css.');
-    console.error(`Missing (or no longer a light-dark() hex pair): ${missing.join(', ')}`);
-    console.error('Fix the check rather than let it pass over a palette it cannot see.');
-    process.exit(1);
-  }
-
-  return { light, dark };
 }
 
 const themes = palettes();

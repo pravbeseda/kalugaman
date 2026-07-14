@@ -5,6 +5,11 @@ const { lang } = Astro.props as { lang: Locale };
 const t = useTranslations(lang);
 ---
 
+{
+  /* SVG rather than ☀/☾: Inter has no moon at all (nor does most of the Latin web),
+    so a glyph would be drawn by whatever symbol font the OS happens to have — a
+    different moon on every platform, next to a sun from Inter. */
+}
 <button
   id="theme-toggle"
   class="theme-toggle"
@@ -12,8 +17,36 @@ const t = useTranslations(lang);
   aria-label={t('theme.toggle')}
   title={t('theme.toggle')}
 >
-  <span class="theme-toggle__sun" aria-hidden="true">☀︎</span>
-  <span class="theme-toggle__moon" aria-hidden="true">☾</span>
+  <svg
+    class="theme-toggle__icon theme-toggle__sun"
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4.5"></circle>
+    <path
+      d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+    ></path>
+  </svg>
+  <svg
+    class="theme-toggle__icon theme-toggle__moon"
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"></path>
+  </svg>
 </button>
 
 <style>
@@ -23,21 +56,41 @@ const t = useTranslations(lang);
     width: 2.25rem;
     height: 2.25rem;
     border-radius: 999px;
-    border: var(--border-width) solid var(--color-border);
+    border: var(--border-width) solid var(--color-border-control);
     background: var(--color-surface);
     color: var(--color-text);
     cursor: pointer;
-    font-size: 1rem;
     line-height: 1;
+  }
+  /* Both icons share the one grid cell, so swapping them cannot shift the layout. */
+  .theme-toggle__icon {
+    grid-area: 1 / 1;
   }
   .theme-toggle__moon {
     display: none;
+  }
+
+  /* The icon names the theme in force. Without an explicit choice that is the system's,
+     which the attribute cannot tell us — hence the media query. */
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme])) .theme-toggle__sun {
+      display: none;
+    }
+    :global(:root:not([data-theme])) .theme-toggle__moon {
+      display: block;
+    }
   }
   :global(:root[data-theme='dark']) .theme-toggle__sun {
     display: none;
   }
   :global(:root[data-theme='dark']) .theme-toggle__moon {
-    display: inline;
+    display: block;
+  }
+  :global(:root[data-theme='light']) .theme-toggle__sun {
+    display: block;
+  }
+  :global(:root[data-theme='light']) .theme-toggle__moon {
+    display: none;
   }
 </style>
 
