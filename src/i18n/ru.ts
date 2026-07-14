@@ -5,7 +5,7 @@ const ru: Record<keyof typeof en, string> = {
   'nav.resume': 'Резюме',
   'nav.projects': 'Проекты',
   'nav.contacts': 'Контакты',
-  'nav.primary': 'Основная навигация',
+  'nav.primary': 'Основная',
   'nav.menu': 'Меню',
   'a11y.skip': 'Перейти к содержимому',
   'home.cta.projects': 'Смотреть проекты',

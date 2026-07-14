@@ -3,6 +3,8 @@ export default {
   'nav.resume': 'Resume',
   'nav.projects': 'Projects',
   'nav.contacts': 'Contacts',
+  // Names a landmark, so it does not name the role: the screen reader appends that itself
+  // ("Primary" → "Primary navigation"). The Russian label follows the same rule.
   'nav.primary': 'Primary',
   'nav.menu': 'Menu',
   'a11y.skip': 'Skip to content',

@@ -73,7 +73,7 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         the current job is an explicit `current` flag on an `id`-keyed experience entry,
         and `src/lib/content-checks.ts` requires the languages to agree on which job
         that is and on the set of jobs itself.
-- [x] **B3 — Mobile menu** — a burger below 560px, built on `<details>` rather than a
+- [x] **B3 — Mobile menu** — a burger at 700px and below, built on `<details>` rather than a
       button: the browser owns the open state, the keyboard and `aria-expanded`, and the
       menu still opens with JS off. The script adds only what the element lacks: Escape
       (restoring focus only if focus was still inside the panel — nothing traps it there),
@@ -81,7 +81,10 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
       breakpoint (listening on the CSS breakpoint itself, so no width matches neither).
       The link could have been left to the navigation, which swaps in a fresh, closed
       `<details>` — but that is a fact about the router, and closing the menu is the menu's
-      own business.
+      own business. 700px rather than 560: below that the links only fit by wrapping into
+      two cramped lines beside the brand (measured — the header grew to 82px). The wordmark
+      goes below 420px, where the row overflowed a 320px phone by 47px; the avatar keeps
+      the link, named by an `aria-label`.
 - [x] **B2 — Theme tokens, contrast, typography**:
   - [x] `themes.css` deduplicated: every token is a `light-dark()` pair, so a theme is a
         `color-scheme` choice rather than a second set of overrides. The dark palette,

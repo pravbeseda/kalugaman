@@ -76,7 +76,11 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
       </nav>
     </details>
 
-    <a class="brand" href={base}>
+    {
+      /* The wordmark is dropped on a narrow phone (see the styles), where the row has no
+        room for it — so the link is named here rather than by its text. */
+    }
+    <a class="brand" href={base} aria-label="kalugaman.ru">
       <Image
         src={avatar}
         alt=""
@@ -226,9 +230,11 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
     padding: var(--space-3);
   }
 
-  /* Below the breakpoint the four links no longer fit next to the brand and the controls.
-     The JS below closes the menu when the viewport grows past it — keep the two in step. */
-  @media (max-width: 560px) {
+  /* 700px, not 560: below that the four links do fit in the row, but only by wrapping into
+     two cramped lines beside the brand (measured: the header grows to 82px between 561 and
+     ~660). One row of links or a burger — never a squeezed double row. The JS below closes
+     the menu when the viewport grows past this width; keep the two in step. */
+  @media (max-width: 700px) {
     .menu {
       display: block;
     }
@@ -239,13 +245,27 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
       margin-right: auto;
     }
   }
+
+  /* On a narrow phone the row is burger + brand + language + theme, and the wordmark is
+     what does not fit: at 320px the header overflowed the viewport by 47px (38px on /ru/,
+     whose language switch is the shorter word). The avatar carries the link, which is
+     named by the aria-label rather than by this text. */
+  @media (max-width: 420px) {
+    .brand__name {
+      display: none;
+    }
+  }
 </style>
 
 <script>
   // Delegated on the document: bound once, survives ClientRouter navigation.
   // The same query the CSS shows the burger with, so there is no width that matches
   // neither (fractional widths are real: zoom, fractional DPR). Keep the two in step.
-  const MOBILE = '(max-width: 560px)';
+  // Held in a const, not created inline for the listener below: an unreferenced
+  // MediaQueryList has been collected along with its listener in the past (WebKit), and
+  // the failure that would cause — a menu that stops closing after a while — is not one
+  // worth betting on a garbage collector for.
+  const mobile = window.matchMedia('(max-width: 700px)');
 
   const openMenu = () => {
     const el = document.getElementById('menu');
@@ -279,7 +299,7 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
 
   // The burger is gone at this width, so an open menu would be an invisible one — and it
   // would still be open on the way back down.
-  window.matchMedia(MOBILE).addEventListener('change', (e) => {
+  mobile.addEventListener('change', (e) => {
     if (e.matches) return;
     const menu = openMenu();
     if (menu) menu.open = false;
