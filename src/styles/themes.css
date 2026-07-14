@@ -17,8 +17,11 @@
    than swapped whole; its geometry is one set for both themes (it used to differ by 2px). */
 
 :root {
-  /* light: warm paper, reader-style (sepia) */
-  color-scheme: light dark;
+  /* light: warm paper, reader-style (sepia). A browser that stops here has one theme, so
+     it says so: `light` keeps the scrollbars, form controls and autofill in step with the
+     page. Claiming `light dark` here would give a dark-preferring system dark chrome
+     around a sepia page. */
+  color-scheme: light;
 
   --color-bg: #f3ead4;
   --color-surface: #fbf4e2;
@@ -42,9 +45,13 @@
   --shadow: 0 1px 2px var(--shadow-near), 0 6px 20px var(--shadow-far);
 }
 
-/* dark: deep blue-grey */
+/* dark: deep blue-grey. Everything about having two themes lives in here — the palette,
+   the scheme, and the toggle — so a browser without light-dark() is consistently in the
+   light one rather than half-switched. */
 @supports (color: light-dark(#000, #fff)) {
   :root {
+    color-scheme: light dark;
+
     --color-bg: light-dark(#f3ead4, #0d0f14);
     --color-surface: light-dark(#fbf4e2, #151821);
     --color-text: light-dark(#3f3628, #e7e9ee);
@@ -59,12 +66,12 @@
     --shadow-near: light-dark(rgba(74, 54, 30, 0.05), rgba(0, 0, 0, 0.4));
     --shadow-far: light-dark(rgba(74, 54, 30, 0.08), rgba(0, 0, 0, 0.35));
   }
-}
 
-/* An explicit choice pins the scheme; without one, the system preference decides. */
-:root[data-theme='light'] {
-  color-scheme: light;
-}
-:root[data-theme='dark'] {
-  color-scheme: dark;
+  /* An explicit choice pins the scheme; without one, the system preference decides. */
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
 }
