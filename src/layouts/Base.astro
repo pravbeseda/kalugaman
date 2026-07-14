@@ -132,22 +132,17 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     <ClientRouter />
 
     {
-      /* Apply theme before first paint (no FOUC); re-apply on client
-        navigation via astro:after-swap, before the new document paints.
-
-        data-js rides along: it is what the theme toggle is shown behind (a button that
-        switches nothing is worse than no button), and it has to be set before the first
-        paint for the same reason the theme does — otherwise the button flashes in and
-        out. ClientRouter swaps the attributes of <html> too, so both are re-applied. */
+      /* Apply theme before first paint (no FOUC); re-apply on client navigation via
+        astro:after-swap, before the new document paints (ClientRouter swaps the attributes
+        of <html> too). Nothing else rides along: whether the toggle is usable is not this
+        script's to say — the module that gives the button its behaviour reveals it. */
     }
     <script is:inline>
       (() => {
         const applyTheme = () => {
-          const root = document.documentElement;
-          root.setAttribute('data-js', '');
           const saved = localStorage.getItem('theme');
           if (saved === 'dark' || saved === 'light') {
-            root.setAttribute('data-theme', saved);
+            document.documentElement.setAttribute('data-theme', saved);
           }
         };
         applyTheme();

@@ -23,10 +23,14 @@ export default {
   'projects.back': 'Back to projects',
   'contacts.title': 'Get in touch',
   'contacts.email': 'Email',
-  // Names the theme the button turns on, not the act of switching: it is a toggle button,
-  // and aria-pressed says whether that theme is the one in force. A name that named the
-  // action ("Switch to light theme") would contradict the state it is paired with.
+  // The button's *name*: the theme it turns on, not the act of switching — it is a toggle
+  // button, and aria-pressed says whether that theme is the one in force. A name that named
+  // the action ("Switch to light theme") would contradict the state it is paired with.
   'theme.dark': 'Dark theme',
+  // The button's *tooltip*, which is a different audience: a sighted mouse user, who never
+  // hears aria-pressed and can already see the theme in the icon. What they lack is the
+  // knowledge that the icon is a control at all — so the tooltip names the action.
+  'theme.toggle': 'Toggle theme',
   'lang.switch': 'Русский',
   'notfound.title': 'Page not found',
   'notfound.text': 'The page you are looking for does not exist, or has moved.',

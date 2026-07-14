@@ -24,6 +24,7 @@ const ru: Record<keyof typeof en, string> = {
   'contacts.title': 'Связаться',
   'contacts.email': 'Почта',
   'theme.dark': 'Тёмная тема',
+  'theme.toggle': 'Сменить тему',
   'lang.switch': 'English',
   'notfound.title': 'Страница не найдена',
   'notfound.text': 'Такой страницы нет — возможно, она переехала или в ссылке опечатка.',

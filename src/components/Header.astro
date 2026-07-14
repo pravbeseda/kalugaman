@@ -213,18 +213,27 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
   .menu[open] .menu__icon--close {
     display: block;
   }
+  /* The closed panel is hidden here rather than left to the UA. Engines do hide the
+     contents of a closed <details> themselves — and none of the three renders this one
+     (measured in Chromium, Firefox and WebKit: no box, no hit, not focusable) — but they
+     do it through machinery that a display on a direct child is one step away from
+     overriding. The failure would be silent: four absolutely-positioned links hanging
+     under the header for good. */
   .menu__panel {
+    display: none;
     position: absolute;
     top: 100%;
     left: 0;
     right: 0;
-    display: flex;
     flex-direction: column;
     gap: var(--space-1);
     padding: var(--space-2);
     background: var(--color-surface);
     border-bottom: var(--border-width) solid var(--color-border);
     box-shadow: var(--shadow);
+  }
+  .menu[open] .menu__panel {
+    display: flex;
   }
   .menu__panel .nav__link {
     padding: var(--space-3);
@@ -285,23 +294,60 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
     if (hadFocus) menu.querySelector('summary')?.focus();
   });
 
-  // A click outside closes the menu; so does a link inside it. The link could be left to
-  // the navigation, which swaps in a fresh, closed <details> — but that is a fact about
-  // the router (it swaps even a same-URL navigation, unless the link carries a hash), and
-  // closing the menu is the menu's own business.
-  document.addEventListener('click', (e) => {
+  // Pointerdown, not click: iOS Safari does not dispatch a click that reaches the document
+  // for a tap on a plain, non-clickable element, and this handler only ever runs on a
+  // phone — the platform where it would silently do nothing.
+  document.addEventListener('pointerdown', (e) => {
     const menu = openMenu();
-    if (!menu || !(e.target instanceof Node)) return;
-    const inside = menu.contains(e.target);
-    const onLink = e.target instanceof Element && e.target.closest('.menu__panel a');
-    if (!inside || onLink) menu.open = false;
+    if (!menu || !(e.target instanceof Node) || menu.contains(e.target)) return;
+    menu.open = false;
   });
 
-  // The burger is gone at this width, so an open menu would be an invisible one — and it
-  // would still be open on the way back down.
-  mobile.addEventListener('change', (e) => {
-    if (e.matches) return;
+  // A link inside the panel closes it too — but on click, not on pointerdown: closing the
+  // menu takes the link out of the render tree, and the browser would never get to the
+  // click that follows, so the navigation would not happen at all.
+  //
+  // The navigation would close the menu anyway, by swapping in a fresh <details> (the
+  // router swaps even a same-URL navigation, unless the link carries a hash). But that is
+  // a fact about the router, and closing the menu is the menu's own business.
+  document.addEventListener('click', (e) => {
     const menu = openMenu();
-    if (menu) menu.open = false;
+    if (!menu || !(e.target instanceof Element) || !e.target.closest('.menu__panel a')) return;
+    menu.open = false;
+  });
+
+  // Where the keyboard was, remembered as it happens. By the time the breakpoint fires, the
+  // element that had focus is already hidden and activeElement is back to <body> — asking
+  // then is too late to learn where the reader was.
+  let lastInHeader: HTMLElement | null = null;
+  document.addEventListener('focusin', (e) => {
+    lastInHeader =
+      e.target instanceof HTMLElement && e.target.closest('.nav, .menu') ? e.target : null;
+  });
+
+  // Crossing the breakpoint swaps one nav for the other, and whichever is leaving is hidden
+  // with display:none — taking the keyboard position with it, though the reader never moved
+  // it. (Zooming is how this is reached in earnest: it is the keyboard user who zooms.) So
+  // focus is carried to the counterpart, and only when it was about to be dropped — the
+  // same rule as Escape.
+  mobile.addEventListener('change', (e) => {
+    const menu = document.getElementById('menu');
+    const nav = document.querySelector('.nav');
+    const dropped = document.activeElement === document.body ? lastInHeader : null;
+
+    if (e.matches) {
+      // To the burger. Its panel is closed, so there is nowhere inside to land: the button
+      // that opens it is the nearest thing to where the reader was.
+      if (nav?.contains(dropped)) menu?.querySelector('summary')?.focus();
+      return;
+    }
+
+    // To the full nav. Land on the same link, matched by href, rather than at the start.
+    if (menu instanceof HTMLDetailsElement) menu.open = false;
+    if (!menu?.contains(dropped)) return;
+    const href = dropped instanceof HTMLAnchorElement ? dropped.getAttribute('href') : null;
+    const twin = href && nav?.querySelector(`a[href="${href}"]`);
+    if (twin instanceof HTMLElement) twin.focus();
+    else nav?.querySelector('a')?.focus();
   });
 </script>

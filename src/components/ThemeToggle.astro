@@ -15,7 +15,7 @@ const t = useTranslations(lang);
   class="theme-toggle"
   type="button"
   aria-label={t('theme.dark')}
-  title={t('theme.dark')}
+  title={t('theme.toggle')}
 >
   <svg
     class="theme-toggle__icon theme-toggle__sun"
@@ -53,9 +53,7 @@ const t = useTranslations(lang);
   .theme-toggle {
     /* Both themes live behind @supports (see themes.css). A browser without light-dark()
        has one theme, so it gets no button promising to switch it — clicking it would do
-       nothing but quietly store a choice that never shows. The same goes for a browser
-       with no JS to switch it with: data-js is set by the inline script in Base, before
-       the first paint, so the button never appears and then dies. */
+       nothing but quietly store a choice that never shows. */
     display: none;
     place-items: center;
     width: 2.25rem;
@@ -68,8 +66,21 @@ const t = useTranslations(lang);
     line-height: 1;
   }
   @supports (color: light-dark(#000, #fff)) {
-    :global(:root[data-js]) .theme-toggle {
+    /* Hidden until the script that gives the button its behaviour has run, and revealed by
+       that script itself (data-theme-ready) — not by an inline script elsewhere, which
+       would only prove that *some* JS ran: a module that never executes (a dropped chunk,
+       a CSP that allows inline and blocks the bundle) would leave the button visible and
+       inert, which is the thing this gate exists to prevent.
+
+       visibility, not display: the button keeps its 2.25rem of the row from the first
+       paint, so appearing cannot shove the language switch sideways. Where there is no JS
+       at all, that leaves an empty slot — cheaper than a header that jumps. */
+    .theme-toggle {
       display: inline-grid;
+      visibility: hidden;
+    }
+    :global(:root[data-theme-ready]) .theme-toggle {
+      visibility: visible;
     }
   }
   /* Both icons share the one grid cell, so swapping them cannot shift the layout. */
@@ -123,6 +134,9 @@ const t = useTranslations(lang);
   // running this module, which is deferred — hence the call below, not just the listeners.
   const syncPressed = () => {
     document.getElementById('theme-toggle')?.setAttribute('aria-pressed', String(isDark()));
+    // Reveals the button (see the styles). Set from here, because this module is what makes
+    // the button do anything; a flag set anywhere else would only say that some other JS ran.
+    document.documentElement.setAttribute('data-theme-ready', '');
   };
 
   // Delegated handler on the document: bound once, works from first paint
@@ -139,8 +153,11 @@ const t = useTranslations(lang);
 
   syncPressed();
 
-  // A navigation swaps in a button without the attribute; a system that flips theme under
-  // a visitor who never chose one changes the answer without touching the button at all.
-  document.addEventListener('astro:page-load', syncPressed);
+  // A navigation swaps in a button without the attribute, and takes data-theme-ready off
+  // <html> with the rest of its attributes; astro:after-swap runs before the new document
+  // paints, so neither the state nor the button itself flickers. (astro:page-load would be
+  // too late for the button — it fires after that paint.) A system that flips theme under a
+  // visitor who never chose one changes the answer without touching the button at all.
+  document.addEventListener('astro:after-swap', syncPressed);
   systemDark.addEventListener('change', syncPressed);
 </script>
