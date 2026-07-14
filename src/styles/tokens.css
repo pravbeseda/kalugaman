@@ -1,8 +1,12 @@
 /* Design tokens: the only place with raw values.
    A theme overrides these variables (see themes.css). */
 :root {
-  /* typography */
-  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  /* typography. --font-inter is emitted by Astro's <Font> in Base and ends in fallbacks
+     whose metrics match Inter at 400 and 600 (see the note in Base: 700 does not get
+     one). The system stack sits *inside* var(): a page rendered without <Font> leaves the
+     variable undefined, and a bare var() would take the whole declaration down with it —
+     font-family would fall back not to system-ui but to the browser's default serif. */
+  --font-sans: var(--font-inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif);
   --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
 
   /* fluid type scale */

@@ -57,12 +57,17 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
 </header>
 
 <style>
+  /* Opaque, not frosted glass. At 85% the page's own text scrolling underneath dragged
+     the effective background to #d8cfba, leaving the muted nav text at 3.83:1 and the
+     active link at 4.19:1 — under AA, and invisible to a contrast check that assumes an
+     opaque background. Keeping AA in the worst case needs 95%, where the effect is gone
+     anyway; so the header simply is the page colour, which is also what the check
+     asserts. */
   .header {
     position: sticky;
     top: 0;
     z-index: 10;
-    background: color-mix(in srgb, var(--color-bg) 85%, transparent);
-    backdrop-filter: blur(10px);
+    background: var(--color-bg);
     border-bottom: var(--border-width) solid var(--color-border);
   }
   .header__inner {
@@ -76,7 +81,7 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
     display: flex;
     align-items: center;
     gap: var(--space-2);
-    font-weight: 800;
+    font-weight: 700;
     letter-spacing: -0.03em;
     font-size: var(--text-lg);
     color: var(--color-text);

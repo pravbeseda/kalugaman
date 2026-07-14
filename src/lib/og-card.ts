@@ -16,6 +16,7 @@ import sharp from 'sharp';
 import { getEntry } from 'astro:content';
 import { join } from 'node:path';
 import type { Locale } from '../i18n/config';
+import { palettes } from './palette';
 
 // Modules are bundled into chunks, so import.meta.url says nothing about the source
 // tree. Both `astro build` and `astro dev` run from the project root.
@@ -27,12 +28,11 @@ export const CARD_SIZE = { width: 1200, height: 630 } as const;
 const WIDTH = CARD_SIZE.width;
 const HEIGHT = CARD_SIZE.height;
 
-// Light ("reader") palette — src/styles/themes.css
-const BG = '#f3ead4';
-const TEXT = '#3f3628';
-const MUTED = '#7c6f59';
-const ACCENT = '#8a4f2c';
-const BORDER = '#e2d5b8';
+// The card wears the light ("reader") theme, read from the stylesheet that defines it —
+// a copy of the hex values here would fall behind the site the first time one changed.
+// Read when a card is first drawn, not when the module is imported: importing a module
+// should not touch the disk.
+const colors = () => palettes().light;
 
 const SANS = 'Inter';
 const MONO = 'JetBrains Mono';
@@ -67,7 +67,10 @@ async function portraitHref(): Promise<string> {
   return `data:image/png;base64,${png.toString('base64')}`;
 }
 
-const svg = (name: string, role: string, portrait: string) => `
+const svg = (name: string, role: string, portrait: string) => {
+  const c = colors();
+
+  return `
   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
        width="${WIDTH}" height="${HEIGHT}">
     <defs>
@@ -76,51 +79,98 @@ const svg = (name: string, role: string, portrait: string) => `
       </clipPath>
     </defs>
 
-    <rect width="${WIDTH}" height="${HEIGHT}" fill="${BG}"/>
-    <rect width="14" height="${HEIGHT}" fill="${ACCENT}"/>
+    <rect width="${WIDTH}" height="${HEIGHT}" fill="${c['color-bg']}"/>
+    <rect width="14" height="${HEIGHT}" fill="${c['color-accent']}"/>
 
     <text x="${MARGIN}" y="250" font-family="${SANS}" font-size="60" font-weight="700"
-          fill="${TEXT}">${escape(name)}</text>
+          fill="${c['color-text']}">${escape(name)}</text>
     <text x="${MARGIN}" y="316" font-family="${SANS}" font-size="34" font-weight="600"
-          fill="${ACCENT}">${escape(role)}</text>
+          fill="${c['color-accent']}">${escape(role)}</text>
     <text x="${MARGIN}" y="382" font-family="${MONO}" font-size="22" letter-spacing="1"
-          fill="${MUTED}">${escape(TAGLINE)}</text>
+          fill="${c['color-muted']}">${escape(TAGLINE)}</text>
 
-    <line x1="${MARGIN}" y1="470" x2="${MARGIN + 160}" y2="470" stroke="${BORDER}" stroke-width="2"/>
+    <line x1="${MARGIN}" y1="470" x2="${MARGIN + 160}" y2="470"
+          stroke="${c['color-border']}" stroke-width="2"/>
     <text x="${MARGIN}" y="524" font-family="${MONO}" font-size="24" letter-spacing="2"
-          fill="${MUTED}">kalugaman.ru</text>
+          fill="${c['color-muted']}">kalugaman.ru</text>
 
     <image xlink:href="${portrait}" clip-path="url(#round)"
            x="${PORTRAIT_CX - PORTRAIT_SIZE / 2}" y="${PORTRAIT_CY - PORTRAIT_SIZE / 2}"
            width="${PORTRAIT_SIZE}" height="${PORTRAIT_SIZE}"/>
     <circle cx="${PORTRAIT_CX}" cy="${PORTRAIT_CY}" r="${PORTRAIT_SIZE / 2 + 6}"
-            fill="none" stroke="${BORDER}" stroke-width="3"/>
+            fill="none" stroke="${c['color-border']}" stroke-width="3"/>
   </svg>
 `;
+};
 
-/** Width of one line as resvg will actually draw it, fonts and all. */
-function measure(text: string, size: number, weight: number, family: string): number {
+type Font = [size: number, weight: number, family: string];
+
+/** Bounding box of one line as resvg will actually draw it, fonts and all. */
+function bbox(text: string, [size, weight, family]: Font) {
   const line = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}">
       <text x="0" y="${size}" font-family="${family}" font-size="${size}"
             font-weight="${weight}">${escape(text)}</text>
     </svg>
   `;
+  return new Resvg(line, { font: FONT }).getBBox();
+}
 
-  // No bbox means resvg drew nothing — a font without the glyphs, say. That is a blank
-  // line on the card, not a line of zero width, so it must not read as "it fits".
-  const bbox = new Resvg(line, { font: FONT }).getBBox();
-  if (!bbox) {
+/** Width of one line. No bbox means resvg drew nothing — a blank line, not a zero-width one. */
+function measure(text: string, font: Font): number {
+  const box = bbox(text, font);
+  if (!box) {
     throw new Error(
       `OG card: "${text}" could not be measured — resvg drew nothing for it. ` +
         `Do the fonts in src/assets/fonts cover this script?`,
     );
   }
-  return bbox.width;
+  return box.width;
 }
 
-function fits(lang: Locale, label: string, text: string, ...font: [number, number, string]) {
-  const width = Math.ceil(measure(text, ...font));
+/**
+ * The fonts are subset to Latin and Cyrillic, and resvg does not draw a .notdef box for a
+ * character they do not have — it drops it. A single foreign character therefore vanishes
+ * from an otherwise ordinary line, which no width check can see (measured: "Ivanov 漢" is
+ * exactly as wide as "Ivanov"). So each character is asked for its own box.
+ */
+function covered(lang: Locale, label: string, text: string, font: Font) {
+  for (const char of text) {
+    // Whitespace is the only thing that legitimately draws nothing. Combining marks are
+    // *not* skipped: a supported one has ink of its own (U+0301 alone measures 8.1×6.1),
+    // an unsupported one has no box at all — so asking each mark on its own catches it,
+    // where skipping marks would have let it through to be dropped from the card.
+    if (/^\s$/u.test(char)) continue;
+
+    if (bbox(char, font)) continue;
+
+    const codepoint = char.codePointAt(0)!.toString(16).toUpperCase().padStart(4, '0');
+
+    // A soft hyphen, a zero-width space, a stray variation selector: these have no box
+    // either, but no font ever will draw them, so blaming the subset would send the next
+    // reader off to widen ranges that cannot help. They are copy-paste debris — usually
+    // out of a Word CV — and they have no business in a name.
+    if (/^[\p{Cf}\u{FE00}-\u{FE0F}]$/u.test(char)) {
+      throw new Error(
+        `OG card (${lang}): the ${label} contains an invisible character (U+${codepoint}) — ` +
+          `a soft hyphen, zero-width space or the like. It draws nothing, in any font, so ` +
+          `no subset can fix it. Remove it from the resume.`,
+      );
+    }
+
+    throw new Error(
+      `OG card (${lang}): the ${label} contains "${char}" (U+${codepoint}), which the ` +
+        `fonts in src/assets/fonts do not have — resvg would drop it and the card would ` +
+        `ship with the character missing. Widen the ranges in scripts/subset-fonts.sh, ` +
+        `if the typeface has the glyph at all.`,
+    );
+  }
+}
+
+function fits(lang: Locale, label: string, text: string, font: Font) {
+  covered(lang, label, text, font);
+
+  const width = Math.ceil(measure(text, font));
   if (width > TEXT_COLUMN) {
     throw new Error(
       `OG card (${lang}): the ${label} "${text}" is ${width}px wide and the card allows ` +
@@ -130,14 +180,21 @@ function fits(lang: Locale, label: string, text: string, ...font: [number, numbe
   }
 }
 
-// Lives as long as the module does — one build, or in dev until the content changes:
-// editing the resume tears this module down along with the cache (verified: the served
-// card and its hash both change without restarting the dev server). So the card cannot
-// go stale behind the data it quotes.
+// Editing the resume tears this module down (it imports astro:content) and the memo with
+// it. Editing themes.css does not — the colours are read from disk, not imported — so the
+// memo is dropped by hand when the palette changes, and a card cannot keep colours the
+// stylesheet no longer has.
 const cards = new Map<Locale, Promise<Buffer>>();
+let drawnWith = '';
 
 /** The card for a language. Drawn once: the endpoint and Base share the same bytes. */
 export function ogCard(lang: Locale): Promise<Buffer> {
+  const palette = Object.values(colors()).join(',');
+  if (palette !== drawnWith) {
+    cards.clear();
+    drawnWith = palette;
+  }
+
   if (!cards.has(lang)) {
     cards.set(lang, draw(lang));
   }
@@ -149,8 +206,11 @@ async function draw(lang: Locale): Promise<Buffer> {
   if (!resume) throw new Error(`Missing resume for ${lang} — the OG card quotes it`);
 
   const { name, role } = resume.data;
-  fits(lang, 'name', name, 60, 700, SANS);
-  fits(lang, 'role', role, 34, 600, SANS);
+  fits(lang, 'name', name, [60, 700, SANS]);
+  fits(lang, 'role', role, [34, 600, SANS]);
+  // Fixed strings, but they are drawn from the same subset fonts as the resume is.
+  covered(lang, 'tagline', TAGLINE, [22, 400, MONO]);
+  covered(lang, 'domain', 'kalugaman.ru', [24, 400, MONO]);
 
   const png = new Resvg(svg(name, role, await portraitHref()), { font: FONT }).render().asPng();
 

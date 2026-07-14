@@ -32,6 +32,9 @@ jobs:
       - name: Language parity
         run: npm run check:i18n
 
+      - name: Contrast (WCAG)
+        run: npm run check:contrast
+
       - name: Build
         run: npm run build
 
