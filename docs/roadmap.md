@@ -135,11 +135,26 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
 
 Goal: a downloadable, clean PDF built from the same source as the web resume (plan §6).
 
-- [ ] `PrintResume.astro` — print layout: single column, `@page` margins, no navigation, `noindex`.
-- [ ] Pages `/[lang]/resume/print` — the PDF source (content from the `resume` collection).
-- [ ] `scripts/generate-pdf.mjs` — Playwright: `preview` → `page.pdf()` → `dist/cv/cv-en.pdf`, `cv-ru.pdf`.
-- [ ] "Download PDF" buttons on `/resume` linking to `/cv/cv-<lang>.pdf`.
-- [ ] Wire into the pipeline: a PDF step in `deploy.yml` (cache the Playwright browser).
+- [x] `Print.astro` — a layout of its own, not `Base`: no chrome, no ClientRouter, no theme,
+      and not the sepia palette (on paper that is a full-bleed block of ink). It keeps the
+      typeface, and sizes type in points — the site's scale is `clamp(… vw)`, and paper has
+      no viewport. `@page` A4, headings and jobs kept off the fold.
+- [x] Pages `/[lang]/resume/print` — the source `page.pdf()` renders. Left published:
+      `noindex`, canonical to `/resume`, and it is what a browser's own Ctrl+P prints.
+      Contacts come from `pages/contacts.md` — the single source the JSON-LD `Person` is
+      already built from, rather than a second copy of the email in the resume schema.
+- [x] `scripts/generate-pdf.mjs` (`npm run build:pdf`) — Playwright: `preview` →
+      `page.pdf()` → `dist/cv/cv-en.pdf`, `cv-ru.pdf`. Deliberately not a step of
+      `astro build`: that runs on every PR, and a PR has no use for a 150MB browser.
+      Verified: a real text layer (Latin and Cyrillic both extract), A4, contacts included.
+- [x] "Download PDF" buttons on `/resume` linking to `/cv/cv-<lang>.pdf` (the button
+      predated the file; now the file exists).
+- [x] Wire into the pipeline: `deploy.yml` installs Chromium (cached on the lockfile),
+      renders the PDF, and `check:dist --pdf` asserts it shipped. Without the flag — on a
+      PR, where no PDF is built — the check does not ask for one.
+- [ ] Fit: the resume currently runs to two A4 pages, the second nearly empty. Deferred
+      until the content settles — squeezing type to fit a page count that is about to
+      change is work done twice.
 - [ ] While Playwright is there anyway: 3–4 e2e smoke tests (page loads, theme toggles, LangSwitch goes where it should).
 
 ---

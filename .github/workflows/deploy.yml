@@ -45,8 +45,23 @@ jobs:
       - name: Build
         run: npm run build
 
+      # The PDF resume is rendered from the print pages by a real browser, so the deploy is
+      # where it happens: a PR build has no use for a 150MB Chromium. The cache is keyed on
+      # the lockfile, which is what pins the Playwright version the browser must match.
+      - name: Cache Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: PDF resume
+        run: npm run build:pdf
+
       - name: Smoke check dist/
-        run: npm run check:dist
+        run: npm run check:dist -- --pdf
 
       - name: Setup SSH
         uses: shimataro/ssh-key-action@v2
