@@ -16,6 +16,10 @@ const PAIRS = [
   ['muted text on a card', 'color-muted', 'color-surface', AA],
   ['links on the page', 'color-accent', 'color-bg', AA],
   ['links on a card', 'color-accent', 'color-surface', AA],
+  // Two things at once: the label on a primary button, and the band that parts the focus
+  // ring from the fill it is drawn on (global.css) — the band is that same colour on that
+  // same accent. AA here is the stricter of the two demands (the band needs 3:1), so this
+  // one row covers both; a second row for the band could never fail while this one passes.
   ['primary button label', 'color-accent-contrast', 'color-accent', AA],
   ['tag text', 'color-tag-text', 'color-tag-bg', AA],
   // Not text, so WCAG 1.4.11 governs: 3:1 for anything that identifies a control. A
@@ -24,7 +28,9 @@ const PAIRS = [
   ['button outline on the page', 'color-border-control', 'color-bg', LARGE],
   ['button outline on a card', 'color-border-control', 'color-surface', LARGE],
   // :focus-visible rings every focusable element, and plenty of them (project links,
-  // buttons) sit on a card rather than on the page.
+  // buttons) sit on a card rather than on the page. Outwards from a ringed control the
+  // pixels run fill, band (primary buttons only), ring, page — so these two rows and the
+  // label row above cover every edge the ring actually has.
   ['focus ring on the page', 'color-accent', 'color-bg', LARGE],
   ['focus ring on a card', 'color-accent', 'color-surface', LARGE],
 ];

@@ -6,7 +6,7 @@ import { getEntry } from 'astro:content';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { locales, defaultLocale, ogLocales, type Locale } from '../i18n/config';
-import { switchLocalePath } from '../i18n/utils';
+import { switchLocalePath, useTranslations } from '../i18n/utils';
 import { ogImageUrl } from '../lib/og';
 import { CARD_SIZE } from '../lib/og-card';
 import { assertContentInvariants } from '../lib/content-checks';
@@ -42,6 +42,7 @@ const {
 // once per build rather than in any one page.
 await assertContentInvariants();
 
+const t = useTranslations(lang);
 const path = Astro.url.pathname;
 const canonical = new URL(path, Astro.site).href;
 const alternates = locales.map((l) => ({
@@ -131,8 +132,10 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     <ClientRouter />
 
     {
-      /* Apply theme before first paint (no FOUC); re-apply on client
-        navigation via astro:after-swap, before the new document paints. */
+      /* Apply theme before first paint (no FOUC); re-apply on client navigation via
+        astro:after-swap, before the new document paints (ClientRouter swaps the attributes
+        of <html> too). Nothing else rides along: whether the toggle is usable is not this
+        script's to say — the module that gives the button its behaviour reveals it. */
     }
     <script is:inline>
       (() => {
@@ -148,7 +151,8 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     </script>
   </head>
   <body>
-    <a class="skip-link" href="#main">Skip to content</a>
+    {/* data-i18n: the 404 is built in one language and swapped on load — see 404.astro. */}
+    <a class="skip-link" href="#main" data-i18n="skip">{t('a11y.skip')}</a>
     {!bare && <Header lang={lang} />}
     <main id="main">
       <slot />

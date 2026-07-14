@@ -19,9 +19,10 @@ Done:
 - [x] **View Transitions** (`<ClientRouter />`) — no-reload navigation; scripts hook into `astro:page-load` / `astro:after-swap`
 - [x] **Sitemap** (`@astrojs/sitemap`) with i18n links; the root is kept out of the index
 
-**Takeaway:** content is separated from code and the base is extensible. What's left:
-infrastructure (CI/CD, VPS), the missing small pieces (404, robots, mobile menu) and
-the PDF resume.
+**Takeaway:** content is separated from code and the base is extensible. The
+infrastructure shipped (Phase E' — the site is live and deploys itself) and so did the
+polish (Phase B — 404, robots, SEO, theme tokens, mobile menu, accessibility). What's
+left: the PDF resume.
 
 ---
 
@@ -72,7 +73,18 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         the current job is an explicit `current` flag on an `id`-keyed experience entry,
         and `src/lib/content-checks.ts` requires the languages to agree on which job
         that is and on the set of jobs itself.
-- [ ] **B3 — Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
+- [x] **B3 — Mobile menu** — a burger at 700px and below, built on `<details>` rather than a
+      button: the browser owns the open state, the keyboard and `aria-expanded`, and the
+      menu still opens with JS off. The script adds only what the element lacks: Escape
+      (restoring focus only if focus was still inside the panel — nothing traps it there),
+      a click outside, a click on a link inside, and a viewport that grew past the
+      breakpoint (listening on the CSS breakpoint itself, so no width matches neither).
+      The link could have been left to the navigation, which swaps in a fresh, closed
+      `<details>` — but that is a fact about the router, and closing the menu is the menu's
+      own business. 700px rather than 560: below that the links only fit by wrapping into
+      two cramped lines beside the brand (measured — the header grew to 82px). The wordmark
+      goes below 420px, where the row overflowed a 320px phone by 47px; the avatar keeps
+      the link, named by an `aria-label`.
 - [x] **B2 — Theme tokens, contrast, typography**:
   - [x] `themes.css` deduplicated: every token is a `light-dark()` pair, so a theme is a
         `color-scheme` choice rather than a second set of overrides. The dark palette,
@@ -91,7 +103,31 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         metric-matched fallback does not reach weight 700 (the bold family sits behind a
         family that already covers 400/600, and font matching resolves a family before a
         weight), so headings shift slightly when Inter lands.
-- [ ] **B3 — Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
+- [x] **B3 — Accessibility**:
+  - [x] The skip link was hardcoded English and shipped that way on `/ru/`; it now comes
+        from the dictionaries, as does the `aria-label` of the nav. On the 404 — built in
+        one language and swapped on load — it rides the existing `data-i18n` mechanism.
+  - [x] Focus: the ring is the accent, and a primary button is _filled_ with the accent, so
+        the two read as one blob across the 2px gap. A band in the button's own label
+        colour now parts them (recolouring the ring cannot work: nothing that contrasts
+        with the accent fill also contrasts with the page the ring is drawn on).
+        `check:contrast` asserts the band, as it already did the ring.
+  - [x] The theme toggle says what a click will do — icon, name and tooltip alike (moon in
+        the light theme, "Switch to dark theme"), and no `aria-pressed`. It used to report
+        the theme in force instead, which is defensible on its own (it is a toggle button)
+        but not next to the language switch: that one is a link, and a link names where it
+        goes, not where you are. Two identical chips side by side cannot be read by two
+        opposite rules — so both name the action now. Written by script, because at build
+        time the theme is the visitor's system preference and a name shipped in the markup
+        would be a guess.
+  - [x] The button is revealed by the very script that gives it behaviour
+        (`data-theme-ready`), not by an inline flag saying "some JS ran": a module that
+        never executes would otherwise leave it visible and inert — the thing the gate
+        exists to prevent. Hidden with `visibility`, so it holds its place in the row and
+        cannot shove the language switch sideways when it appears.
+  - [x] `prefers-reduced-motion`: no smooth scroll, no theme crossfade, and no lift under
+        the cursor — on the project cards as well as the buttons, since it is the same
+        gesture and must answer the setting the same way.
 
 ---
 

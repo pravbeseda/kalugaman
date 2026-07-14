@@ -3,6 +3,11 @@ export default {
   'nav.resume': 'Resume',
   'nav.projects': 'Projects',
   'nav.contacts': 'Contacts',
+  // Names a landmark, so it does not name the role: the screen reader appends that itself
+  // ("Primary" → "Primary navigation"). The Russian label follows the same rule.
+  'nav.primary': 'Primary',
+  'nav.menu': 'Menu',
+  'a11y.skip': 'Skip to content',
   'home.cta.projects': 'View projects',
   'home.cta.resume': 'Read resume',
   'home.featured': 'Featured projects',
@@ -18,7 +23,12 @@ export default {
   'projects.back': 'Back to projects',
   'contacts.title': 'Get in touch',
   'contacts.email': 'Email',
+  // The toggle names what a click does, like the language switch beside it ("Русский" is
+  // where you go, not where you are). Which of the two applies depends on the theme in
+  // force, so the script picks; 'theme.toggle' is the neutral form rendered before it runs.
   'theme.toggle': 'Toggle theme',
+  'theme.toDark': 'Switch to dark theme',
+  'theme.toLight': 'Switch to light theme',
   'lang.switch': 'Русский',
   'notfound.title': 'Page not found',
   'notfound.text': 'The page you are looking for does not exist, or has moved.',
