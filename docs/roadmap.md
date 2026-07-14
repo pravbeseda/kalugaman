@@ -54,7 +54,7 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
 **B3 navigation + accessibility**.
 
 - [x] **404 page** (`src/pages/404.astro`) — bilingual, links home.
-- [x] **B1 — SEO**:
+- [x] **B1 — SEO** ✅ (PR #10):
   - [x] `public/robots.txt` (+ a link to the sitemap)
   - [x] OG images — one card per language, drawn from the resume collection during the
         build (`src/lib/og-card.ts`, served by `src/pages/og-[lang].jpg.ts`), so it
@@ -65,9 +65,13 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
         card renders identically on any machine. A name or role too wide for the card
         fails the build rather than being drawn across the portrait.
   - [x] JSON-LD `Person` on home/resume (`sameAs` ties the site to GitHub /
-        LinkedIn / Telegram). `SoftwareSourceCode` renders only for projects that
-        declare `links.repo` — it is a claim about readable source, so the current
-        (closed, commercial) three get no markup.
+        LinkedIn / Telegram), one entity per language. `SoftwareSourceCode` renders only
+        for projects that declare `links.repo` — it is a claim about readable source, so
+        the current (closed, commercial) three get no markup.
+  - [x] Content invariants the markup relies on now fail the build instead of drifting:
+        the current job is an explicit `current` flag on an `id`-keyed experience entry,
+        and `src/lib/content-checks.ts` requires the languages to agree on which job
+        that is and on the set of jobs itself.
 - [ ] **B3 — Mobile menu** — the header nav links currently just squeeze together. Build a burger (vanilla-JS island, `aria-expanded`).
 - [ ] **B2 — Tech debt**: duplicated values in `themes.css` (one shared token set → override only what actually differs).
 - [ ] **B3 — Accessibility**: contrast in both themes, focus styles, `aria` on the menu and toggles, keyboard navigation, `prefers-reduced-motion`.
