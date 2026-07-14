@@ -19,8 +19,8 @@ for (const lang of locales) {
     expected.push(join(lang, route, 'index.html'));
   }
 
-  // Drawn by prebuild, not committed — a missing card means every shared link
-  // would render without a preview.
+  // The share cards come out of the og-[lang].jpg endpoint during the build, so they
+  // are worth asserting: a missing card means every shared link loses its preview.
   expected.push(`og-${lang}.jpg`);
 
   const slugs = readdirSync(join(PROJECTS, lang))

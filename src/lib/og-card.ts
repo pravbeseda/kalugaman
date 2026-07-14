@@ -21,8 +21,11 @@ import type { Locale } from '../i18n/config';
 // tree. Both `astro build` and `astro dev` run from the project root.
 const file = (path: string) => join(process.cwd(), path);
 
-const WIDTH = 1200;
-const HEIGHT = 630;
+/** The card's dimensions are also claimed in the og:image meta — one source for both. */
+export const CARD_SIZE = { width: 1200, height: 630 } as const;
+
+const WIDTH = CARD_SIZE.width;
+const HEIGHT = CARD_SIZE.height;
 
 // Light ("reader") palette — src/styles/themes.css
 const BG = '#f3ead4';
@@ -103,7 +106,17 @@ function measure(text: string, size: number, weight: number, family: string): nu
             font-weight="${weight}">${escape(text)}</text>
     </svg>
   `;
-  return new Resvg(line, { font: FONT }).getBBox()?.width ?? 0;
+
+  // No bbox means resvg drew nothing — a font without the glyphs, say. That is a blank
+  // line on the card, not a line of zero width, so it must not read as "it fits".
+  const bbox = new Resvg(line, { font: FONT }).getBBox();
+  if (!bbox) {
+    throw new Error(
+      `OG card: "${text}" could not be measured — resvg drew nothing for it. ` +
+        `Do the fonts in src/assets/fonts cover this script?`,
+    );
+  }
+  return bbox.width;
 }
 
 function fits(lang: Locale, label: string, text: string, ...font: [number, number, string]) {
@@ -117,9 +130,12 @@ function fits(lang: Locale, label: string, text: string, ...font: [number, numbe
   }
 }
 
+// Lives as long as the module does. That is one build, and in dev one content edit:
+// this module imports astro:content, so Vite invalidates it — cache and all — whenever
+// the resume changes. The card cannot go stale behind the data it quotes.
 const cards = new Map<Locale, Promise<Buffer>>();
 
-/** The card for a language. Drawn once per build: the endpoint and Base share it. */
+/** The card for a language. Drawn once: the endpoint and Base share the same bytes. */
 export function ogCard(lang: Locale): Promise<Buffer> {
   if (!cards.has(lang)) {
     cards.set(lang, draw(lang));

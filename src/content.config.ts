@@ -31,6 +31,9 @@ const resume = defineCollection({
     experience: z
       .array(
         z.object({
+          // Language-independent handle for the job. Company names are translated, so
+          // nothing else identifies the same entry across the two resumes.
+          id: z.string(),
           company: z.string(),
           position: z.string(),
           period: z.string(),

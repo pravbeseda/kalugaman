@@ -7,6 +7,7 @@ import Footer from '../components/Footer.astro';
 import { locales, defaultLocale, ogLocales, type Locale } from '../i18n/config';
 import { switchLocalePath } from '../i18n/utils';
 import { ogImageUrl } from '../lib/og';
+import { CARD_SIZE } from '../lib/og-card';
 import { assertContentInvariants } from '../lib/content-checks';
 
 interface Props {
@@ -105,8 +106,8 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     }
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
+    <meta property="og:image:width" content={String(CARD_SIZE.width)} />
+    <meta property="og:image:height" content={String(CARD_SIZE.height)} />
     <meta property="og:image:alt" content={ogAlt} />
     <meta name="twitter:card" content="summary_large_image" />
 
