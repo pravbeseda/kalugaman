@@ -13,6 +13,20 @@
 
 html {
   scroll-behavior: smooth;
+  /* Room for the scrollbar whether or not the page needs one. Some pages scroll (the
+     resume, the home page) and some do not (projects, contacts), so where the scrollbar
+     takes space — a classic one, not the overlay kind — the layout was ~15px narrower on
+     one page than the next, and the header jumped sideways on every navigation.
+
+     Where scrollbars overlay the content this reserves nothing and changes nothing. Safari
+     only learned scrollbar-gutter in 18.2, hence the fallback: an always-on scrollbar,
+     which reserves the same room the older way. */
+  scrollbar-gutter: stable;
+}
+@supports not (scrollbar-gutter: stable) {
+  html {
+    overflow-y: scroll;
+  }
 }
 
 body {
