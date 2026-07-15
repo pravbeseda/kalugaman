@@ -218,16 +218,6 @@ h2 {
   body {
     font-size: 11pt;
     line-height: 1.45;
-    /* Chrome writes each kerned glyph as its own positioned show operator in the PDF, and a
-       PDF viewer snaps every glyph origin to the pixel grid — rounding each one independently
-       makes the inter-letter gaps drift ("floating" spacing), worst on small text. Dropping
-       kerning and ligatures lets Chrome emit whole words as one run carried by the font's own
-       advance widths, so the viewer rounds a word's origin once instead of every letter. */
-    font-kerning: none;
-    font-feature-settings:
-      'kern' 0,
-      'liga' 0,
-      'clig' 0;
   }
   /* A button is an action, and paper has no actions — every .button on any page (the CV
      download, the home CTAs) is a dead link once printed. Hidden site-wide rather than
