@@ -86,7 +86,13 @@ const server = await startPreview();
 let browser;
 
 try {
-  browser = await chromium.launch();
+  // --font-render-hinting=none is load-bearing, not cosmetic. With hinting on (the default on
+  // Linux, where CI and deploy run), FreeType snaps each glyph's advance to a whole pixel, so
+  // the PDF carries integer inter-letter offsets and every viewer renders visibly uneven,
+  // "floating" spacing. macOS uses CoreText and ignores the flag, which is why the same script
+  // produces clean, fractional advances locally and floating ones on CI. Disabling hinting
+  // keeps advances fractional on every platform, so the paper matches what we see locally.
+  browser = await chromium.launch({ args: ['--font-render-hinting=none'] });
   await mkdir(OUT_DIR, { recursive: true });
 
   for (const lang of locales) {
