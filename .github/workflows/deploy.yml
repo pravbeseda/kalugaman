@@ -63,6 +63,12 @@ jobs:
       - name: Smoke check dist/
         run: npm run check:dist -- --pdf
 
+      # The client scripts (theme toggle, language switch) have no other coverage, and the
+      # browser is already here for the PDF. Gates the deploy: a page that fails to render or
+      # a broken toggle stops the ship before the swap.
+      - name: E2E smoke tests
+        run: npm run test:e2e
+
       - name: Setup SSH
         uses: shimataro/ssh-key-action@v2
         with:
