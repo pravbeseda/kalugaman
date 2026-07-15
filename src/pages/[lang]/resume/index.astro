@@ -333,5 +333,16 @@ const schema = home
     .skills__group {
       break-inside: avoid;
     }
+    /* --font-mono is a system stack with no Cyrillic guarantee, and the PDF ships from a
+       runner whose fonts we do not control. Anything monospace that can hold Cyrillic must
+       therefore render in the self-hosted Inter in print, so every glyph in the file comes
+       from an embedded font rather than the build machine: the dates (Russian months —
+       \"март 2013\") and the skill tags (one of which is \"Unit-тесты\"). Verified by
+       inspecting the fonts the PDF actually embeds — with this off, both fell to a system
+       monospace. */
+    .period,
+    .tag {
+      font-family: var(--font-sans);
+    }
   }
 </style>

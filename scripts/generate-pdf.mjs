@@ -5,52 +5,69 @@
 // Not a step of `astro build`: that runs on every PR, and a PR has no use for a 150MB
 // browser. `npm run build:pdf` runs after a build, locally on demand and on deploy.
 import { spawn } from 'node:child_process';
+import { connect } from 'node:net';
 import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { locales } from '../src/i18n/config.ts';
 
+const HOST = '127.0.0.1';
+const PORT = 4325;
+const ORIGIN = `http://${HOST}:${PORT}`;
 const OUT_DIR = 'dist/cv';
-// A hint, not a promise: astro preview takes the next free port when this one is busy, so
-// the port the browser is pointed at is read back from the server, never assumed.
-const PORT_HINT = 4325;
 
 // The astro binary directly, not `npx astro`: npx spawns astro as a child, and a signal to
 // npx is not guaranteed to reach that child — a preview would outlive this script and keep
-// holding its port, which is exactly what would then confuse the next run about which
-// server is answering. detached puts astro at the head of its own process group so the
-// cleanup can sweep the whole tree.
+// holding its port. detached puts astro at the head of its own process group so cleanup can
+// sweep the whole tree.
 const ASTRO = new URL('../node_modules/.bin/astro', import.meta.url).pathname;
 
-/** Serve the built site, and resolve with the origin the server actually bound to. */
-function startPreview() {
-  const server = spawn(ASTRO, ['preview', '--port', String(PORT_HINT)], {
-    stdio: ['ignore', 'pipe', 'inherit'],
+/** Is something already listening on the port? A successful connect says yes. */
+function portInUse() {
+  return new Promise((resolve) => {
+    const socket = connect({ host: HOST, port: PORT });
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.on('error', () => resolve(false));
+  });
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Serve the built site on a fixed host and port. The port is pinned rather than read back
+ * from astro's stdout: that would couple the deploy to the exact wording of a log line
+ * ("http://localhost:"), which is UI, not a contract. So the port is checked free first —
+ * a busy port is a hard error, not a silent move to another one that would then render
+ * whatever is squatting there — and readiness is an HTTP poll on the address we chose.
+ */
+async function startPreview() {
+  if (await portInUse()) {
+    throw new Error(`${HOST}:${PORT} is already in use — stop whatever is on it and retry.`);
+  }
+
+  const server = spawn(ASTRO, ['preview', '--host', HOST, '--port', String(PORT)], {
+    stdio: ['ignore', 'ignore', 'inherit'],
     detached: true,
   });
 
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => {
-      stop(server);
-      reject(new Error('astro preview printed no URL within 30s'));
-    }, 30_000);
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    if (server.exitCode !== null) {
+      throw new Error(`astro preview exited with code ${server.exitCode} before serving`);
+    }
+    try {
+      const res = await fetch(`${ORIGIN}/${locales[0]}/resume`);
+      if (res.ok) return server;
+    } catch {
+      // not listening yet
+    }
+    await sleep(200);
+  }
 
-    let out = '';
-    server.stdout.on('data', (chunk) => {
-      out += chunk;
-      // The port astro chose, from its own mouth — the one guard against rendering a PDF of
-      // whatever else happened to be sitting on the hinted port.
-      const match = out.match(/http:\/\/localhost:(\d+)/);
-      if (match) {
-        clearTimeout(timer);
-        resolve({ server, origin: `http://localhost:${match[1]}` });
-      }
-    });
-
-    server.on('exit', (code) => {
-      clearTimeout(timer);
-      reject(new Error(`astro preview exited with code ${code} before serving`));
-    });
-  });
+  stop(server);
+  throw new Error(`astro preview did not answer on ${ORIGIN} within 30s`);
 }
 
 /** Kill the whole process group, not just the leader — so nothing is left holding the port. */
@@ -62,15 +79,19 @@ function stop(server) {
   }
 }
 
-const { server, origin } = await startPreview();
-const browser = await chromium.launch();
+// The browser launch is inside the try: it can fail (an incompatible or missing browser),
+// and if it did before the try, the finally that stops the preview would not be in force —
+// leaving the detached server holding the port, the very leak this script otherwise guards.
+const server = await startPreview();
+let browser;
 
 try {
+  browser = await chromium.launch();
   await mkdir(OUT_DIR, { recursive: true });
 
   for (const lang of locales) {
     const page = await browser.newPage();
-    const url = `${origin}/${lang}/resume`;
+    const url = `${ORIGIN}/${lang}/resume`;
     // Print media before navigating, so the page lays out for paper from the first render
     // rather than being restyled after. printBackground keeps the accent rules and tags.
     await page.emulateMedia({ media: 'print' });
@@ -83,7 +104,7 @@ try {
     await page.close();
   }
 } finally {
-  await browser.close();
+  await browser?.close();
   stop(server);
 }
 
