@@ -175,11 +175,22 @@ Goal: a downloadable, clean PDF built from the same source as the web resume (pl
 
 ## Phase F — Launch and beyond
 
-- [ ] **Lighthouse** ≥ 95 across the board (Perf/A11y/Best/SEO); optionally Lighthouse CI as a gate.
-- [ ] Check **ATS parsing** of the PDF (text is extractable).
-- [ ] Verify hreflang/canonical in Google Search Console; submit the sitemap.
-- [ ] Monitoring: uptime ping (e.g. UptimeRobot), TLS expiry alert.
-- [ ] Project README: how to add a project / language / theme.
+- [x] **Lighthouse** ≥ 95 across the board — home, resume and projects score 100/100/100/100 on
+      both mobile and desktop (measured locally against the built site with Chromium). The one
+      gap found and fixed: the projects list jumped from the page `h1` straight to the cards'
+      `h3` (an `heading-order` a11y fail, 98) — `ProjectCard` now takes a `titleTag`, so it is an
+      `h2` under the projects `h1` and an `h3` under the home page's "Featured" `h2`. Lighthouse
+      CI as a gate not added: scores are perfect and the site is static, so a per-PR browser run
+      earns little over the smoke tests already there.
+- [x] **ATS parsing** of the PDF verified: `pdftotext` extracts a clean text layer from both
+      CVs in reading order (name → role → location → contacts → summary → experience → jobs),
+      the email and Telegram handle come out as text, and Cyrillic extracts intact from the
+      Russian one.
+- [ ] Verify hreflang/canonical in Google Search Console; submit the sitemap. _(external — needs
+      the site's Google account)_
+- [ ] Monitoring: uptime ping (e.g. UptimeRobot), TLS expiry alert. _(external — needs an
+      account on the monitoring service)_
+- [x] Project README (`README.md`): stack, local dev, and how to add a project / language / theme.
 
 ---
 
