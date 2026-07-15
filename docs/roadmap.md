@@ -163,7 +163,13 @@ Goal: a downloadable, clean PDF built from the same source as the web resume (pl
 - [ ] Fit: the resume currently runs to two A4 pages, the second nearly empty. Deferred
       until the content settles — squeezing type to fit a page count that is about to
       change is work done twice.
-- [ ] While Playwright is there anyway: 3–4 e2e smoke tests (page loads, theme toggles, LangSwitch goes where it should).
+- [x] While Playwright is there anyway: 4 e2e smoke tests (`tests/e2e.test.mjs`, `npm run test:e2e`)
+      — every page renders in both languages, the theme toggle flips and persists across a
+      reload, the theme survives a ClientRouter navigation, and the language switch lands on the
+      same page in the other locale. Built on `node:test` + Playwright (no test-runner
+      dependency), served by the same preview helper the PDF uses (`scripts/lib/preview.mjs`),
+      on a separate port. Gates the deploy, where the browser already exists for the PDF; a PR
+      has no browser and does not run them.
 
 ---
 
@@ -192,4 +198,4 @@ automatically. B and C are independent — order between them is a matter of tas
 - Playwright in CI pulls chromium (~1 min) → cache the browser in Actions.
 - Translation parity is easy to lose → the parity script in CI (phase E').
 - A VPS needs maintenance → keep the surface minimal: nginx + static files, no runtimes.
-- No tests, and none planned: there is no logic here, and `astro check` covers types and content schemas. No unit tests; e2e only alongside the Playwright work in phase C.
+- No unit tests, and none planned: there is no logic here, and `astro check` covers types and content schemas. The only tests are the e2e smoke suite (phase C), which exercises the client scripts nothing else touches.
