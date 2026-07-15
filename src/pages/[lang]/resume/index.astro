@@ -268,14 +268,12 @@ const schema = home
     border-bottom: var(--border-width) solid var(--color-border);
   }
 
-  /* On paper the download button is a dead link to the very file being printed, and the
-     page's screen padding is wasted margin. The fluid h1 is sized for a viewport that is
-     not there, so it is pinned. Fitting the CV to a page count is deferred until the
-     content settles (see the roadmap) — this is only what a readable sheet needs. */
+  /* The page's screen padding is wasted margin on paper, and the fluid h1 is sized for a
+     viewport that is not there, so it is pinned. (The download button is a dead link to the
+     very file being printed — but it is a .button, hidden with the rest of them in
+     global.css, not here.) Fitting the CV to a page count is deferred until the content
+     settles (see the roadmap) — this is only what a readable sheet needs. */
   @media print {
-    .download {
-      display: none;
-    }
     .section {
       padding-block: 0;
     }

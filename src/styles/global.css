@@ -219,6 +219,12 @@ h2 {
     font-size: 10.5pt;
     line-height: 1.45;
   }
+  /* A button is an action, and paper has no actions — every .button on any page (the CV
+     download, the home CTAs) is a dead link once printed. Hidden site-wide rather than
+     page by page. */
+  .button {
+    display: none;
+  }
 }
 
 /* rendered markdown content */
