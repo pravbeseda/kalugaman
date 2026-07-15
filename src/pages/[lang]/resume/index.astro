@@ -34,6 +34,16 @@ if (!email) throw new Error(`Missing email in contacts for ${lang}`);
 // so what is shown has to be the thing a reader retypes.
 const bare = (url: string) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
+// The header carries only direct-contact channels — email and messaging — so it does not
+// open with a wall of links. Profiles (GitHub, LinkedIn) move to the foot of the CV; they
+// still reach the reader, just not before the name. Split by host, so a channel added to
+// contacts.md later defaults to the foot rather than crowding the top. (This is display
+// only: the JSON-LD Person still lists every social in `sameAs`, from the same source.)
+const DIRECT_HOSTS = new Set(['t.me']);
+const host = (url: string) => new URL(url).host;
+const directSocials = socials.filter((s) => DIRECT_HOSTS.has(host(s.url)));
+const profileSocials = socials.filter((s) => !DIRECT_HOSTS.has(host(s.url)));
+
 // The Person node is the same on every page of a language, so it takes its
 // description from the home page — the one place that describes the person.
 const home = await getEntry('pages', `${lang}/home`);
@@ -69,7 +79,7 @@ const schema = home
             <ul class="contacts">
               <li><a href={`mailto:${email}`}>{email}</a></li>
               {
-                socials.map((s) => (
+                directSocials.map((s) => (
                   <li>
                     <a href={s.url}>{bare(s.url)}</a>
                   </li>
@@ -151,6 +161,18 @@ const schema = home
           </ul>
         </div>
       </div>
+
+      {
+        profileSocials.length > 0 && (
+          <ul class="profiles">
+            {profileSocials.map((s) => (
+              <li>
+                <a href={s.url}>{bare(s.url)}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
     </div>
   </section>
 </Base>
@@ -266,6 +288,22 @@ const schema = home
     justify-content: space-between;
     padding-block: var(--space-2);
     border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  /* Profiles at the foot: the links that are not direct contact, kept off the top. A rule
+     above sets them apart from the last section without shouting a heading for two URLs. */
+  .profiles {
+    list-style: none;
+    padding: var(--space-4) 0 0;
+    margin-top: var(--space-8);
+    border-top: var(--border-width) solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    font-size: var(--text-sm);
+  }
+  .profiles a {
+    color: var(--color-accent);
   }
 
   /* The page's screen padding is wasted margin on paper, and the fluid h1 is sized for a
