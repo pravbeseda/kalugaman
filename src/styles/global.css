@@ -189,6 +189,38 @@ h2 {
   }
 }
 
+/* Paper. A third palette, flattening the sepia to black on white — on a sheet that sepia is
+   a full-bleed block of ink — and keeping the accent, the one colour that carries meaning
+   (the role, the section rules). It has to beat an explicit dark choice too: someone reading
+   in the dark theme still prints on white. `:root[data-theme='dark']` (themes.css) outranks
+   a plain `:root`, so this is the one place !important is the honest rule — print is the
+   last word. The type is sized in points, because the body's own size is rem on a fluid
+   scale meant for a screen; chrome is hidden in Header/Footer; the resume adds its own tuning. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 15mm;
+  }
+  :root {
+    color-scheme: light !important;
+    --color-bg: #fff !important;
+    --color-surface: #fff !important;
+    --color-text: #1a1a1a !important;
+    --color-muted: #55534e !important;
+    --color-border: #d4d0c8 !important;
+    --color-border-control: #b8b2a6 !important;
+    --color-accent: #8a4f2c !important;
+    --color-accent-contrast: #fff !important;
+    --color-tag-bg: #f0ece2 !important;
+    --color-tag-text: #1a1a1a !important;
+    --shadow: none !important;
+  }
+  body {
+    font-size: 10.5pt;
+    line-height: 1.45;
+  }
+}
+
 /* rendered markdown content */
 .prose > * + * {
   margin-top: var(--space-4);

@@ -82,3 +82,8 @@
     color-scheme: dark;
   }
 }
+
+/* The print palette lives in global.css, not here: this file is the screen palette, and
+   palette.ts reads every --color-* in it as one of these two themes — the set the OG card
+   and the contrast check run on. A print colour has no business in that set, so it is
+   declared with the rest of the print rules instead. */

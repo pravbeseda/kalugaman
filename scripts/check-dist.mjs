@@ -15,7 +15,7 @@ const PROJECTS = new URL('../src/content/projects/', import.meta.url).pathname;
 // this check with --pdf, a PR build does not.
 const withPdf = process.argv.includes('--pdf');
 
-const ROUTES = ['', 'resume', 'resume/print', 'projects', 'contacts'];
+const ROUTES = ['', 'resume', 'projects', 'contacts'];
 
 const expected = ['index.html', '404.html', 'sitemap-index.xml', 'robots.txt'];
 

@@ -21,21 +21,32 @@ const { name, role, location, experience, skills, education, languages } = resum
 
 const description = `${role}, ${location}`;
 
+// Contacts render on the page and in the printed CV, and they are the same single source
+// the JSON-LD Person is built from. A resume with no way to reach its author is unusable —
+// on paper especially — so a missing contact file or email fails the build rather than
+// printing `mailto:undefined` into a PDF someone downloads.
+const contacts = await getEntry('pages', `${lang}/contacts`);
+if (!contacts) throw new Error(`Missing contacts for ${lang}`);
+const { email, socials = [] } = contacts.data;
+if (!email) throw new Error(`Missing email in contacts for ${lang}`);
+
+// The URL is printed, not hidden behind a label: on paper a hyperlink cannot be followed,
+// so what is shown has to be the thing a reader retypes.
+const bare = (url: string) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
 // The Person node is the same on every page of a language, so it takes its
 // description from the home page — the one place that describes the person.
-const contacts = await getEntry('pages', `${lang}/contacts`);
 const home = await getEntry('pages', `${lang}/home`);
-const schema =
-  contacts && home
-    ? personSchema({
-        lang,
-        site: Astro.site!,
-        resume: resume.data,
-        contacts: contacts.data,
-        home: home.data,
-        image: portrait.src,
-      })
-    : null;
+const schema = home
+  ? personSchema({
+      lang,
+      site: Astro.site!,
+      resume: resume.data,
+      contacts: contacts.data,
+      home: home.data,
+      image: portrait.src,
+    })
+  : null;
 ---
 
 <Base lang={lang} title={`${name} — ${role}`} description={description} schema={schema}>
@@ -55,10 +66,20 @@ const schema =
             <h1>{name}</h1>
             <p class="role">{role}</p>
             <p class="muted">{location}</p>
+            <ul class="contacts">
+              <li><a href={`mailto:${email}`}>{email}</a></li>
+              {
+                socials.map((s) => (
+                  <li>
+                    <a href={s.url}>{bare(s.url)}</a>
+                  </li>
+                ))
+              }
+            </ul>
           </div>
         </div>
-        {/* PDF is not generated yet — the button points to a future file (plan §6) */}
-        <a class="button" href={`/cv/cv-${lang}.pdf`}>{t('resume.download')}</a>
+        {/* The button is for the screen — on paper it prints as a dead link to itself. */}
+        <a class="button download" href={`/cv/cv-${lang}.pdf`}>{t('resume.download')}</a>
       </header>
 
       <div class="prose summary">
@@ -165,6 +186,18 @@ const schema =
     color: var(--color-accent);
     font-weight: 600;
   }
+  .contacts {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+  }
+  .contacts a {
+    color: var(--color-accent);
+  }
   .summary {
     margin-bottom: var(--space-12);
   }
@@ -233,5 +266,36 @@ const schema =
     justify-content: space-between;
     padding-block: var(--space-2);
     border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  /* On paper the download button is a dead link to the very file being printed, and the
+     page's screen padding is wasted margin. The fluid h1 is sized for a viewport that is
+     not there, so it is pinned. Fitting the CV to a page count is deferred until the
+     content settles (see the roadmap) — this is only what a readable sheet needs. */
+  @media print {
+    .download {
+      display: none;
+    }
+    .section {
+      padding-block: 0;
+    }
+    .head {
+      margin-bottom: var(--space-6);
+    }
+    h1 {
+      font-size: 22pt;
+    }
+    /* A section heading stranded at the foot of a page, its content overleaf, is the
+       classic print defect; a job split across the fold is the same thing one level down.
+       A job longer than a page still breaks — forbidding that outright leaves a blank
+       half-page — but the ones that fit stay whole. */
+    h2 {
+      margin-top: var(--space-8);
+      break-after: avoid;
+    }
+    .job,
+    .skills__group {
+      break-inside: avoid;
+    }
   }
 </style>

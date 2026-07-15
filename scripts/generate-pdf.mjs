@@ -1,5 +1,6 @@
-// The PDF resume, rendered from the print pages the build already produced — so the paper
-// and the web CV cannot say different things: both are the `resume` collection.
+// The PDF resume, rendered from the resume page itself under print emulation — so the
+// paper and the web CV are the one page, not two that can drift apart. The print styling
+// (chrome hidden, sepia flattened to black on white) lives in the components' @media print.
 //
 // Not a step of `astro build`: that runs on every PR, and a PR has no use for a 150MB
 // browser. `npm run build:pdf` runs after a build, locally on demand and on deploy.
@@ -8,35 +9,60 @@ import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { locales } from '../src/i18n/config.ts';
 
-const PORT = 4325;
-const ORIGIN = `http://localhost:${PORT}`;
 const OUT_DIR = 'dist/cv';
+// A hint, not a promise: astro preview takes the next free port when this one is busy, so
+// the port the browser is pointed at is read back from the server, never assumed.
+const PORT_HINT = 4325;
 
-/** The built site, served as the browser will meet it — fonts and all. */
-async function startPreview() {
-  const server = spawn('npx', ['astro', 'preview', '--port', String(PORT)], {
-    stdio: ['ignore', 'ignore', 'inherit'],
+// The astro binary directly, not `npx astro`: npx spawns astro as a child, and a signal to
+// npx is not guaranteed to reach that child — a preview would outlive this script and keep
+// holding its port, which is exactly what would then confuse the next run about which
+// server is answering. detached puts astro at the head of its own process group so the
+// cleanup can sweep the whole tree.
+const ASTRO = new URL('../node_modules/.bin/astro', import.meta.url).pathname;
+
+/** Serve the built site, and resolve with the origin the server actually bound to. */
+function startPreview() {
+  const server = spawn(ASTRO, ['preview', '--port', String(PORT_HINT)], {
+    stdio: ['ignore', 'pipe', 'inherit'],
+    detached: true,
   });
 
-  const deadline = Date.now() + 30_000;
-  while (Date.now() < deadline) {
-    if (server.exitCode !== null) {
-      throw new Error(`astro preview exited with code ${server.exitCode}`);
-    }
-    try {
-      const res = await fetch(`${ORIGIN}/${locales[0]}/resume/print`);
-      if (res.ok) return server;
-    } catch {
-      // not up yet
-    }
-    await new Promise((r) => setTimeout(r, 200));
-  }
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      stop(server);
+      reject(new Error('astro preview printed no URL within 30s'));
+    }, 30_000);
 
-  server.kill();
-  throw new Error(`astro preview did not answer on ${ORIGIN} within 30s`);
+    let out = '';
+    server.stdout.on('data', (chunk) => {
+      out += chunk;
+      // The port astro chose, from its own mouth — the one guard against rendering a PDF of
+      // whatever else happened to be sitting on the hinted port.
+      const match = out.match(/http:\/\/localhost:(\d+)/);
+      if (match) {
+        clearTimeout(timer);
+        resolve({ server, origin: `http://localhost:${match[1]}` });
+      }
+    });
+
+    server.on('exit', (code) => {
+      clearTimeout(timer);
+      reject(new Error(`astro preview exited with code ${code} before serving`));
+    });
+  });
 }
 
-const server = await startPreview();
+/** Kill the whole process group, not just the leader — so nothing is left holding the port. */
+function stop(server) {
+  try {
+    process.kill(-server.pid, 'SIGTERM');
+  } catch {
+    // already gone
+  }
+}
+
+const { server, origin } = await startPreview();
 const browser = await chromium.launch();
 
 try {
@@ -44,13 +70,12 @@ try {
 
   for (const lang of locales) {
     const page = await browser.newPage();
-    const url = `${ORIGIN}/${lang}/resume/print`;
+    const url = `${origin}/${lang}/resume`;
+    // Print media before navigating, so the page lays out for paper from the first render
+    // rather than being restyled after. printBackground keeps the accent rules and tags.
+    await page.emulateMedia({ media: 'print' });
     const res = await page.goto(url, { waitUntil: 'networkidle' });
     if (!res?.ok()) throw new Error(`${url} answered ${res?.status()}`);
-
-    // The print page is styled for paper, not for a screen that happens to be printed —
-    // so the emulation is print, and the backgrounds (the accent rules) are kept.
-    await page.emulateMedia({ media: 'print' });
     const path = `${OUT_DIR}/cv-${lang}.pdf`;
     await page.pdf({ path, format: 'A4', printBackground: true });
 
@@ -59,7 +84,7 @@ try {
   }
 } finally {
   await browser.close();
-  server.kill();
+  stop(server);
 }
 
 console.log(`\nPDF resume written to ${OUT_DIR}/ (${locales.join(', ')})\n`);
