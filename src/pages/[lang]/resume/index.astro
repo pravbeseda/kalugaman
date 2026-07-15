@@ -21,21 +21,42 @@ const { name, role, location, experience, skills, education, languages } = resum
 
 const description = `${role}, ${location}`;
 
+// Contacts render on the page and in the printed CV, and they are the same single source
+// the JSON-LD Person is built from. A resume with no way to reach its author is unusable —
+// on paper especially — so a missing contact file or email fails the build rather than
+// printing `mailto:undefined` into a PDF someone downloads.
+const contacts = await getEntry('pages', `${lang}/contacts`);
+if (!contacts) throw new Error(`Missing contacts for ${lang}`);
+const { email, socials = [] } = contacts.data;
+if (!email) throw new Error(`Missing email in contacts for ${lang}`);
+
+// The URL is printed, not hidden behind a label: on paper a hyperlink cannot be followed,
+// so what is shown has to be the thing a reader retypes.
+const bare = (url: string) => url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+// The header carries only direct-contact channels — email and messaging — so it does not
+// open with a wall of links. Profiles (GitHub, LinkedIn) move to the foot of the CV; they
+// still reach the reader, just not before the name. Split by host, so a channel added to
+// contacts.md later defaults to the foot rather than crowding the top. (This is display
+// only: the JSON-LD Person still lists every social in `sameAs`, from the same source.)
+const DIRECT_HOSTS = new Set(['t.me']);
+const host = (url: string) => new URL(url).host;
+const directSocials = socials.filter((s) => DIRECT_HOSTS.has(host(s.url)));
+const profileSocials = socials.filter((s) => !DIRECT_HOSTS.has(host(s.url)));
+
 // The Person node is the same on every page of a language, so it takes its
 // description from the home page — the one place that describes the person.
-const contacts = await getEntry('pages', `${lang}/contacts`);
 const home = await getEntry('pages', `${lang}/home`);
-const schema =
-  contacts && home
-    ? personSchema({
-        lang,
-        site: Astro.site!,
-        resume: resume.data,
-        contacts: contacts.data,
-        home: home.data,
-        image: portrait.src,
-      })
-    : null;
+const schema = home
+  ? personSchema({
+      lang,
+      site: Astro.site!,
+      resume: resume.data,
+      contacts: contacts.data,
+      home: home.data,
+      image: portrait.src,
+    })
+  : null;
 ---
 
 <Base lang={lang} title={`${name} — ${role}`} description={description} schema={schema}>
@@ -55,10 +76,20 @@ const schema =
             <h1>{name}</h1>
             <p class="role">{role}</p>
             <p class="muted">{location}</p>
+            <ul class="contacts">
+              <li><a href={`mailto:${email}`}>{email}</a></li>
+              {
+                directSocials.map((s) => (
+                  <li>
+                    <a href={s.url}>{bare(s.url)}</a>
+                  </li>
+                ))
+              }
+            </ul>
           </div>
         </div>
-        {/* PDF is not generated yet — the button points to a future file (plan §6) */}
-        <a class="button" href={`/cv/cv-${lang}.pdf`}>{t('resume.download')}</a>
+        {/* The button is for the screen — on paper it prints as a dead link to itself. */}
+        <a class="button download" href={`/cv/cv-${lang}.pdf`}>{t('resume.download')}</a>
       </header>
 
       <div class="prose summary">
@@ -130,6 +161,18 @@ const schema =
           </ul>
         </div>
       </div>
+
+      {
+        profileSocials.length > 0 && (
+          <ul class="profiles">
+            {profileSocials.map((s) => (
+              <li>
+                <a href={s.url}>{bare(s.url)}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
     </div>
   </section>
 </Base>
@@ -164,6 +207,18 @@ const schema =
     font-size: var(--text-lg);
     color: var(--color-accent);
     font-weight: 600;
+  }
+  .contacts {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+  }
+  .contacts a {
+    color: var(--color-accent);
   }
   .summary {
     margin-bottom: var(--space-12);
@@ -233,5 +288,61 @@ const schema =
     justify-content: space-between;
     padding-block: var(--space-2);
     border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  /* Profiles at the foot: the links that are not direct contact, kept off the top. A rule
+     above sets them apart from the last section without shouting a heading for two URLs. */
+  .profiles {
+    list-style: none;
+    padding: var(--space-4) 0 0;
+    margin-top: var(--space-8);
+    border-top: var(--border-width) solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    font-size: var(--text-sm);
+  }
+  .profiles a {
+    color: var(--color-accent);
+  }
+
+  /* The page's screen padding is wasted margin on paper, and the fluid h1 is sized for a
+     viewport that is not there, so it is pinned. (The download button is a dead link to the
+     very file being printed — but it is a .button, hidden with the rest of them in
+     global.css, not here.) Fitting the CV to a page count is deferred until the content
+     settles (see the roadmap) — this is only what a readable sheet needs. */
+  @media print {
+    .section {
+      padding-block: 0;
+    }
+    .head {
+      margin-bottom: var(--space-6);
+    }
+    h1 {
+      font-size: 22pt;
+    }
+    /* A section heading stranded at the foot of a page, its content overleaf, is the
+       classic print defect; a job split across the fold is the same thing one level down.
+       A job longer than a page still breaks — forbidding that outright leaves a blank
+       half-page — but the ones that fit stay whole. */
+    h2 {
+      margin-top: var(--space-8);
+      break-after: avoid;
+    }
+    .job,
+    .skills__group {
+      break-inside: avoid;
+    }
+    /* --font-mono is a system stack with no Cyrillic guarantee, and the PDF ships from a
+       runner whose fonts we do not control. Anything monospace that can hold Cyrillic must
+       therefore render in the self-hosted Inter in print, so every glyph in the file comes
+       from an embedded font rather than the build machine: the dates (Russian months —
+       \"март 2013\") and the skill tags (one of which is \"Unit-тесты\"). Verified by
+       inspecting the fonts the PDF actually embeds — with this off, both fell to a system
+       monospace. */
+    .period,
+    .tag {
+      font-family: var(--font-sans);
+    }
   }
 </style>

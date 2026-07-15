@@ -18,6 +18,11 @@ const year = new Date().getFullYear();
     border-top: var(--border-width) solid var(--color-border);
     margin-top: var(--space-16);
   }
+  @media print {
+    .footer {
+      display: none;
+    }
+  }
   .footer__inner {
     display: flex;
     justify-content: space-between;

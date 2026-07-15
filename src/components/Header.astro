@@ -127,6 +127,13 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
     background: var(--color-bg);
     border-bottom: var(--border-width) solid var(--color-border);
   }
+  /* Chrome does not print. Hidden in the component that owns it, so the rule sits at the
+     same specificity as the ones it overrides rather than shouting from a global sheet. */
+  @media print {
+    .header {
+      display: none;
+    }
+  }
   .header__inner {
     position: relative;
     display: flex;

@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:pdf": "node scripts/generate-pdf.mjs",
     "preview": "astro preview",
     "check": "astro check",
     "check:i18n": "node scripts/check-i18n-parity.mjs",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "playwright": "^1.61.1",
     "prettier": "^3.9.5",
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^6.0.3"

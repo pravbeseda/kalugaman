@@ -135,11 +135,34 @@ Grouped into three deliverables, one branch each: **B1 SEO**, **B2 theme tokens*
 
 Goal: a downloadable, clean PDF built from the same source as the web resume (plan §6).
 
-- [ ] `PrintResume.astro` — print layout: single column, `@page` margins, no navigation, `noindex`.
-- [ ] Pages `/[lang]/resume/print` — the PDF source (content from the `resume` collection).
-- [ ] `scripts/generate-pdf.mjs` — Playwright: `preview` → `page.pdf()` → `dist/cv/cv-en.pdf`, `cv-ru.pdf`.
-- [ ] "Download PDF" buttons on `/resume` linking to `/cv/cv-<lang>.pdf`.
-- [ ] Wire into the pipeline: a PDF step in `deploy.yml` (cache the Playwright browser).
+- [x] The resume prints itself — no separate print route. `@media print` hides the chrome
+      (in Header/Footer), flattens the sepia palette to black on white (a third set of
+      token values in `global.css`, keeping only the accent), and sizes type in points; the
+      resume page adds its own tuning (`@page` A4, download button hidden, headings and jobs
+      kept off the fold). A dedicated `/resume/print` route was built first and then removed:
+      it was a page that had to be `noindex`, kept out of the sitemap, and canonicalised —
+      all to serve a document that `/resume` already is, minus its chrome. Collapsing it
+      also means a visitor's own Ctrl+P on `/resume` finally prints something clean.
+- [x] Contacts render on `/resume` for everyone (the web resume did not show them before),
+      from `pages/contacts.md` — the single source the JSON-LD `Person` is already built
+      from, not a second copy of the email in the resume schema. A missing email fails the
+      build rather than printing `mailto:undefined` into a downloaded PDF.
+- [x] `scripts/generate-pdf.mjs` (`npm run build:pdf`) — Playwright drives `/resume` under
+      print emulation → `dist/cv/cv-en.pdf`, `cv-ru.pdf`. Not a step of `astro build`: that
+      runs on every PR, and a PR has no use for a 150MB browser. The preview is spawned as
+      the `astro` binary directly (not via `npx`, whose child outlives a signal to the
+      parent) in its own process group, and the browser is pointed at the port astro
+      _reports_, not a guessed one — so a busy port yields our site on another port, never a
+      stranger's. Verified: a real text layer (Latin and Cyrillic both extract), A4, contacts
+      in it, the port released on exit, and a decoy on the hinted port not captured.
+- [x] "Download PDF" buttons on `/resume` linking to `/cv/cv-<lang>.pdf` (the button
+      predated the file; now the file exists).
+- [x] Wire into the pipeline: `deploy.yml` installs Chromium (cached on the lockfile),
+      renders the PDF, and `check:dist --pdf` asserts it shipped. Without the flag — on a
+      PR, where no PDF is built — the check does not ask for one.
+- [ ] Fit: the resume currently runs to two A4 pages, the second nearly empty. Deferred
+      until the content settles — squeezing type to fit a page count that is about to
+      change is work done twice.
 - [ ] While Playwright is there anyway: 3–4 e2e smoke tests (page loads, theme toggles, LangSwitch goes where it should).
 
 ---
