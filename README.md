@@ -62,7 +62,8 @@ links: # optional
   repo: https://github.com/...
   demo: https://...
 ---
-The Markdown body is the detailed write-up on /projects/my-project.
+The Markdown body is the detailed write-up on /en/projects/my-project (routes are
+locale-prefixed; there is no unprefixed /projects path).
 ```
 
 `featured: true` surfaces the project on the home page (as an `h3` under the "Featured" `h2`);
@@ -71,15 +72,24 @@ generated automatically.
 
 ### A language
 
+More than a config edit: a few places still assume exactly the two locales, so plan on code
+changes, not just content. The `[lang]` routes and their `hreflang` do come from the config;
+the rest below does not.
+
 1. Add the locale to [`src/i18n/config.ts`](src/i18n/config.ts) (`locales`, and `ogLocales`
    with a territory-qualified tag like `de_DE`).
 2. Add a dictionary `src/i18n/<lang>.ts` — a full translation of `src/i18n/en.ts` (it is the
    typed source of truth; a missing key is a type error).
-3. Add content folders for every collection: `projects/<lang>/`, `pages/<lang>/`, and
+3. Wire the dictionary in [`src/i18n/utils.ts`](src/i18n/utils.ts): add it to the `dictionaries`
+   map, and widen the `switchLocalePath` regex (`/^\/(en|ru)/`) to match the new prefix —
+   otherwise `npm run check` fails and locale-swapping links break.
+4. Add the locale to the sitemap `i18n.locales` map in
+   [`astro.config.mjs`](astro.config.mjs), so its pages get `hreflang` alternates.
+5. Rework [`src/components/LangSwitch.astro`](src/components/LangSwitch.astro): it currently
+   toggles between exactly two locales (`lang === 'en' ? 'ru' : 'en'`). Three or more need a
+   real switcher (a menu, or one link per other locale), not a binary toggle.
+6. Add content folders for every collection: `projects/<lang>/`, `pages/<lang>/`, and
    `resume/<lang>.md`, mirroring the existing slugs.
-
-The `[lang]` routes, `hreflang`, sitemap and language switch pick the new locale up from the
-config — no routing changes needed.
 
 ### A theme
 
