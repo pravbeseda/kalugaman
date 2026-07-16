@@ -101,10 +101,12 @@ const schema = home
         {
           experience.map((job) => (
             <div class="job">
-              <div class="job__meta">
-                <strong>{job.position}</strong>
-                <span class="muted">{job.company}</span>
-                <span class="muted period">{job.period}</span>
+              <div class="job__head">
+                <div class="job__title">
+                  <strong>{job.position}</strong>
+                  <span class="muted job__company">{job.company}</span>
+                </div>
+                <span class="job__period">{job.period}</span>
               </div>
               <ul>
                 {job.highlights.map((h) => (
@@ -231,17 +233,41 @@ const schema = home
   .timeline {
     margin-top: var(--space-6);
   }
-  .job__meta {
+  /* Position and company on the left, the period pinned top-right as a pill. The period is
+     kept out of the title's flow entirely, so it never wraps into the position/company line
+     the way a shared inline run did — its place is fixed regardless of how long they are. */
+  .job__head {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: var(--space-2) var(--space-3);
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-4);
     margin-bottom: var(--space-2);
+  }
+  .job__company {
+    display: block;
+    margin-top: var(--space-1);
+  }
+  .job__period {
+    flex-shrink: 0;
+    margin-top: 3px;
+    padding: 3px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    white-space: nowrap;
+    color: var(--color-tag-text);
+    background: var(--color-tag-bg);
+    border-radius: 999px;
+  }
+  /* On a narrow screen the pill drops under the title instead of squeezing it. */
+  @media (max-width: 560px) {
+    .job__head {
+      flex-direction: column;
+      gap: var(--space-1);
+    }
   }
   .period {
     font-family: var(--font-mono);
     font-size: var(--text-sm);
-    margin-left: auto;
   }
   .job ul {
     padding-left: var(--space-6);
@@ -341,6 +367,7 @@ const schema = home
        inspecting the fonts the PDF actually embeds — with this off, both fell to a system
        monospace. */
     .period,
+    .job__period,
     .tag {
       font-family: var(--font-sans);
     }
