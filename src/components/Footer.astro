@@ -3,13 +3,20 @@ import { useTranslations } from '../i18n/utils';
 import type { Locale } from '../i18n/config';
 const { lang } = Astro.props as { lang: Locale };
 const t = useTranslations(lang);
-const year = new Date().getFullYear();
+const now = new Date();
+const year = now.getFullYear();
+const locale = lang === 'ru' ? 'ru-RU' : 'en-US';
+const updated = new Intl.DateTimeFormat(locale, {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+}).format(now);
 ---
 
 <footer class="footer">
   <div class="container footer__inner">
-    <span>© {year} kalugaman</span>
-    <span class="muted">{t('footer.built')}</span>
+    <span class="footer__copyright">© {t('footer.name')}, {year}</span>
+    <span class="muted">{t('footer.updated')} {updated}</span>
   </div>
 </footer>
 
@@ -30,5 +37,10 @@ const year = new Date().getFullYear();
     gap: var(--space-2);
     padding-block: var(--space-6);
     font-size: var(--text-sm);
+  }
+  @media (max-width: 420px) {
+    .footer__copyright {
+      display: none;
+    }
   }
 </style>
