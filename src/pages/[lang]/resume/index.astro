@@ -63,7 +63,36 @@ const schema = home
   <section class="section">
     <div class="container narrow">
       <header class="head">
-        <div class="head__identity">
+        {
+          /* Source order is the reading order for assistive tech: the name and details come
+            first, the photo and download action last, so the heading is announced before the
+            action rather than after it. The visual order is restored per breakpoint below —
+            the photo/button aside is pulled to the left with `order` on narrow screens and
+            placed by grid areas on wide ones — so DOM order and visuals still agree. */
+        }
+        <div class="head__text">
+          <h1>{name}</h1>
+          <p class="role">{role}</p>
+          <p class="muted">{location}</p>
+          <ul class="contacts">
+            <li><a href={`mailto:${email}`}>{email}</a></li>
+            {
+              directSocials.map((s) => (
+                <li>
+                  <a href={s.url}>{bare(s.url)}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        {
+          /* Photo and download button share a column. On a wide screen the aside is
+            `display: contents`, so both become grid items of the header and the button lifts
+            to the top-right of the name with its label. On a narrow screen the aside is a
+            real flex column: the button drops under the photo as a compact "PDF" pill, and
+            the name gets the full width of the text column beside it. */
+        }
+        <div class="head__aside">
           <Image
             src={portrait}
             alt={name}
@@ -72,24 +101,33 @@ const schema = home
             class="portrait"
             loading="eager"
           />
-          <div>
-            <h1>{name}</h1>
-            <p class="role">{role}</p>
-            <p class="muted">{location}</p>
-            <ul class="contacts">
-              <li><a href={`mailto:${email}`}>{email}</a></li>
-              {
-                directSocials.map((s) => (
-                  <li>
-                    <a href={s.url}>{bare(s.url)}</a>
-                  </li>
-                ))
-              }
-            </ul>
-          </div>
+          {/* The button is for the screen — on paper it prints as a dead link to itself. */}
+          <a class="button download" href={`/cv/cv-${lang}.pdf`} aria-label={t('resume.download')}>
+            <svg
+              class="download__icon"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3v11"></path>
+              <path d="M8 11l4 4 4-4"></path>
+              <path d="M5 20h14"></path>
+            </svg>
+            {
+              /* Full label on wide screens; a short, language-neutral "PDF" on narrow ones
+                where the button sits under the photo. The link's accessible name comes from
+                aria-label above, so the short text is decorative. */
+            }
+            <span class="download__label">{t('resume.download')}</span>
+            <span class="download__short" aria-hidden="true">PDF</span>
+          </a>
         </div>
-        {/* The button is for the screen — on paper it prints as a dead link to itself. */}
-        <a class="button download" href={`/cv/cv-${lang}.pdf`}>{t('resume.download')}</a>
       </header>
 
       <div class="prose summary">
@@ -183,18 +221,43 @@ const schema = home
   .narrow {
     max-width: 48rem;
   }
+  /* Default (narrow): photo and button stack in a column beside the text. The button is a
+     compact "PDF" pill under the photo, so the name gets the full text column beside it.
+     The aside comes after the text in the DOM (reading order), so `order` pulls it back to
+     the left of the row visually. */
   .head {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
     gap: var(--space-4);
-    flex-wrap: wrap;
     margin-bottom: var(--space-8);
   }
-  .head__identity {
+  .head__aside {
+    order: -1;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: var(--space-4);
+    gap: var(--space-3);
+    flex-shrink: 0;
+  }
+  .head__text {
+    min-width: 0;
+  }
+  /* A lighter weight and a size a notch below the site h1: on paper and screen the name
+     should read as a heading without shouting. */
+  .head h1 {
+    font-weight: 500;
+    font-size: clamp(1.75rem, 1.3rem + 2vw, 2.5rem);
+  }
+  .download__icon {
+    display: block;
+  }
+  .download {
+    padding: var(--space-1) var(--space-3);
+    border-radius: 999px;
+    font-size: var(--text-sm);
+  }
+  .download__label {
+    display: none;
   }
   .portrait {
     width: 88px;
@@ -203,12 +266,44 @@ const schema = home
     object-position: 50% 20%;
     border-radius: var(--radius);
     border: var(--border-width) solid var(--color-border);
-    flex-shrink: 0;
   }
   .role {
     font-size: var(--text-lg);
     color: var(--color-accent);
     font-weight: 600;
+  }
+  /* From ~700px there is room for the name and the labelled button on one line, so the head
+     becomes a three-column grid: the aside dissolves (`display: contents`) and its photo and
+     button become grid items — the photo on the left, the button back up in the top-right
+     corner with its "Download PDF" label. */
+  @media (min-width: 701px) {
+    .head {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: 'photo text pdf';
+      align-items: start;
+    }
+    .head__aside {
+      display: contents;
+    }
+    .portrait {
+      grid-area: photo;
+    }
+    .head__text {
+      grid-area: text;
+    }
+    .download {
+      grid-area: pdf;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-sm);
+      font-size: var(--text-base);
+    }
+    .download__label {
+      display: inline;
+    }
+    .download__short {
+      display: none;
+    }
   }
   .contacts {
     list-style: none;
@@ -347,8 +442,12 @@ const schema = home
     .head {
       margin-bottom: var(--space-6);
     }
-    h1 {
+    /* The screen name is set on `.head h1` (0-1-1), which out-specifies a bare `h1` here, so
+       the print pin has to match that selector to win — otherwise the name prints at the
+       screen clamp() and lighter weight instead of a fixed sheet size. */
+    .head h1 {
       font-size: 22pt;
+      font-weight: 700;
     }
     /* A section heading stranded at the foot of a page, its content overleaf, is the
        classic print defect; a job split across the fold is the same thing one level down.
