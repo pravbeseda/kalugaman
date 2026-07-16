@@ -247,12 +247,15 @@ const schema = home
     display: block;
     margin-top: var(--space-1);
   }
+  /* Same pill as .tag (global.css) — kept on the same spacing/type tokens so the two do not
+     drift apart. The extra properties here are layout only: it sits in a flex row, must not
+     shrink, and its date must not wrap. */
   .job__period {
     flex-shrink: 0;
     margin-top: 3px;
-    padding: 3px 10px;
+    padding: 2px var(--space-2);
     font-family: var(--font-mono);
-    font-size: 0.78rem;
+    font-size: var(--text-sm);
     white-space: nowrap;
     color: var(--color-tag-text);
     background: var(--color-tag-bg);
