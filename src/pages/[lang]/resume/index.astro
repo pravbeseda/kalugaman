@@ -63,11 +63,13 @@ const schema = home
   <section class="section">
     <div class="container narrow">
       <header class="head">
-        {/* Photo and download button share a column. On a wide screen the aside is
+        {
+          /* Photo and download button share a column. On a wide screen the aside is
             `display: contents`, so both become grid items of the header and the button lifts
             to the top-right of the name with its label. On a narrow screen the aside is a
             real flex column: the button drops under the photo as a compact "PDF" pill, and
-            the name gets the full width of the text column beside it. */}
+            the name gets the full width of the text column beside it. */
+        }
         <div class="head__aside">
           <Image
             src={portrait}
@@ -91,13 +93,15 @@ const schema = home
               stroke-linejoin="round"
               aria-hidden="true"
             >
-              <path d="M12 3v11" />
-              <path d="M8 11l4 4 4-4" />
-              <path d="M5 20h14" />
+              <path d="M12 3v11"></path>
+              <path d="M8 11l4 4 4-4"></path>
+              <path d="M5 20h14"></path>
             </svg>
-            {/* Full label on wide screens; a short, language-neutral "PDF" on narrow ones
+            {
+              /* Full label on wide screens; a short, language-neutral "PDF" on narrow ones
                 where the button sits under the photo. The link's accessible name comes from
-                aria-label above, so the short text is decorative. */}
+                aria-label above, so the short text is decorative. */
+            }
             <span class="download__label">{t('resume.download')}</span>
             <span class="download__short" aria-hidden="true">PDF</span>
           </a>
