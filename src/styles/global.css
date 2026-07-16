@@ -11,6 +11,18 @@
   margin: 0;
 }
 
+/* Mobile WebKit flashes a tap highlight on interactive elements that is always a
+   rectangle — it ignores border-radius, so on the round/pill controls (burger,
+   lang, theme) it bleeds past the shape. Suppressed here; the tap feedback these
+   controls do carry comes from their own :hover/:active styles. */
+a,
+button,
+summary,
+label,
+[role='button'] {
+  -webkit-tap-highlight-color: transparent;
+}
+
 html {
   scroll-behavior: smooth;
   /* Room for the scrollbar whether or not the page needs one. Some pages scroll (the
