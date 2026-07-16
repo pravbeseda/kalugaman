@@ -33,5 +33,6 @@ export default {
   'notfound.title': 'Page not found',
   'notfound.text': 'The page you are looking for does not exist, or has moved.',
   'notfound.home': 'Go to the homepage',
-  'footer.built': 'Built with Astro · content in Markdown',
+  'footer.name': 'Alexander Ivanov',
+  'footer.updated': 'Updated',
 } as const;

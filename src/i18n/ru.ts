@@ -30,7 +30,8 @@ const ru: Record<keyof typeof en, string> = {
   'notfound.title': 'Страница не найдена',
   'notfound.text': 'Такой страницы нет — возможно, она переехала или в ссылке опечатка.',
   'notfound.home': 'На главную',
-  'footer.built': 'Собрано на Astro · контент в Markdown',
+  'footer.name': 'Александр Иванов',
+  'footer.updated': 'Обновлено',
 };
 
 export default ru;
