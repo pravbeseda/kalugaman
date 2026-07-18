@@ -20,7 +20,7 @@ calls and file storage.
 voice, email and text queues, and statistics are collected. It runs both
 standalone and embedded inside Unite.
 
-## Platforms
+## Stack
 
 A web version on **Angular** (plus some legacy React) and a desktop app on
 **Electron**.
