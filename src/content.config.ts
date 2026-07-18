@@ -51,7 +51,10 @@ const resume = defineCollection({
           // a self-contained summary; the project page is the expanded case study. Omitted in
           // print, where a link cannot be followed. Language-independent: same slug both langs.
           projectSlug: z.string().optional(),
-          highlights: z.array(z.string()),
+          // The job's one-line summary, rendered as a lead paragraph above the bullets.
+          summary: z.string(),
+          // Achievement bullets under the summary. A job may have none (a one-line entry).
+          highlights: z.array(z.string()).default([]),
         }),
       )
       // Two current jobs would make `worksFor` fall back to file order — the very thing

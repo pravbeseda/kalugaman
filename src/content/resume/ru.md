@@ -9,8 +9,8 @@ experience:
     period: 'февраль 2022 — сейчас'
     current: true
     projectSlug: 'intermedia-unite'
+    summary: 'Разработка Intermedia Unite (бизнес-мессенджер: чаты, телефония, SMS, видеозвонки, файлы) — веб на Angular и десктоп на Electron.'
     highlights:
-      - 'Разработка Intermedia Unite (бизнес-мессенджер: чаты, телефония, SMS, видеозвонки, файлы) — веб на Angular и десктоп на Electron.'
       - 'Полностью переработал систему поиска в чате: декомпозировал монолит в лёгкие сервисы и небольшие компоненты — код стало проще поддерживать и тестировать.'
       - 'Сделал новую версию раздела мониторинга Контактного центра.'
       - 'Участвовал в разработке Unite Teams Integration — веб-приложения для Microsoft Teams.'
@@ -19,28 +19,25 @@ experience:
     company: 'Всероссийский Банковский Центр'
     position: 'Старший программист-разработчик'
     period: 'август 2019 — февраль 2022'
+    summary: 'Финтех-маркетплейс ВБЦ — банковский агрегатор с четырьмя кабинетами (клиент, оператор, агент, банк). Стек: Angular, RxJS, NgXS.'
     highlights:
-      - 'Финтех-маркетплейс ВБЦ — банковский агрегатор с четырьмя кабинетами (клиент, оператор, агент, банк). Стек: Angular, RxJS, NgXS.'
       - 'Перенос функционала из старого приложения, поддержка продуктов, рефакторинг, вёрстка по макетам Figma, интеграция REST API (Swagger).'
       - 'Проектировал новые версии: переход с Bootstrap на TailwindCSS, ui-kit на Storybook, методология Component-Driven Development.'
   - id: 'algont'
     company: 'АЛГОНТ'
     position: 'Инженер-программист'
     period: 'март 2013 — август 2019'
-    highlights:
-      - 'Frontend системы видеонаблюдения АССаД-Видео: JavaScript (jQuery, jQuery-ui, AngularJS, fabric.js), вёрстка HTML/CSS, Bootstrap; частично Java.'
+    summary: 'Frontend системы видеонаблюдения АССаД-Видео: JavaScript (jQuery, jQuery-ui, AngularJS, fabric.js), вёрстка HTML/CSS, Bootstrap; частично Java.'
   - id: 'rostelecom'
     company: 'ПАО «Ростелеком»'
     position: 'Системный администратор Unix'
     period: 'март 2002 — апрель 2012'
-    highlights:
-      - 'Администрирование серверов хостинга, почты и DNS; служебные скрипты и внутренние сайты (perl, php).'
+    summary: 'Администрирование серверов хостинга, почты и DNS; служебные скрипты и внутренние сайты (perl, php).'
   - id: 'kaluga-it-center'
     company: 'ИВЦ Департамента с/х Калужской области'
     position: 'Инженер-программист'
     period: 'февраль 2000 — март 2002'
-    highlights:
-      - 'Разработка системы кадрового учёта (Delphi).'
+    summary: 'Разработка системы кадрового учёта (Delphi).'
 skills:
   - group: 'Фронтенд'
     items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript', 'React']

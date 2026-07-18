@@ -123,3 +123,35 @@ test('the language switch goes to the same page in the other locale', async () =
     await page.close();
   }
 });
+
+test('a project reached from the résumé offers its way back — across a language switch', async () => {
+  const [first, second] = locales;
+  // Same project both ways; the resume links to it and the back-link script keys off the query.
+  const atProject = (lang) => (url) =>
+    url.pathname.replace(/\/$/, '') === `/${lang}/projects/intermedia-unite` &&
+    url.searchParams.get('from') === 'resume';
+  const backPointsTo = (expected) =>
+    document.querySelector('a.back')?.getAttribute('href') === expected;
+
+  const page = await browser.newPage();
+  try {
+    await page.goto(`${origin}/${first}/resume/`, { waitUntil: 'domcontentloaded' });
+
+    // Following the resume's "more about the project" link is what tags the visit with
+    // ?from=resume — the whole mechanism hangs off that query.
+    await page.locator('.job__more a').first().click();
+    await page.waitForURL(atProject(first));
+
+    // The back-link script (astro:page-load) swaps "back to projects" for "back to resume".
+    await page.waitForFunction(backPointsTo, `/${first}/resume`);
+
+    // Switching language must carry the from=resume context, so the other locale still offers
+    // the resume back link instead of resetting to the projects list.
+    await page.locator('.lang-switch').click();
+    await page.waitForURL(atProject(second));
+    assert.equal(await page.getAttribute('html', 'lang'), second);
+    await page.waitForFunction(backPointsTo, `/${second}/resume`);
+  } finally {
+    await page.close();
+  }
+});

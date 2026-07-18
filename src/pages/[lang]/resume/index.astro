@@ -165,11 +165,10 @@ const schema = home
                 </div>
                 <span class="job__period">{job.period}</span>
               </div>
-              {/* The first highlight is the job's summary line; the rest are the bullets under it. */}
-              {job.highlights[0] && <p class="job__lead">{job.highlights[0]}</p>}
-              {job.highlights.length > 1 && (
+              <p class="job__lead">{job.summary}</p>
+              {job.highlights.length > 0 && (
                 <ul>
-                  {job.highlights.slice(1).map((h) => (
+                  {job.highlights.map((h) => (
                     <li>{h}</li>
                   ))}
                 </ul>
