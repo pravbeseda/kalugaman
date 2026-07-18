@@ -174,15 +174,13 @@ const schema = home
                   ))}
                 </ul>
               )}
-              {
-                projectLinks.has(job.id) && (
-                  <p class="job__more">
-                    <a href={projectLinks.get(job.id)!.href}>
-                      {t('resume.project')}: {projectLinks.get(job.id)!.title} →
-                    </a>
-                  </p>
-                )
-              }
+              {projectLinks.has(job.id) && (
+                <p class="job__more">
+                  <a href={projectLinks.get(job.id)!.href}>
+                    {t('resume.project')}: {projectLinks.get(job.id)!.title} →
+                  </a>
+                </p>
+              )}
             </div>
           ))
         }
