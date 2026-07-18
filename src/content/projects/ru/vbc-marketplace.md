@@ -1,7 +1,7 @@
 ---
 title: 'Маркетплейс ВБЦ'
-description: 'Финтех-агрегатор банковских услуг с четырьмя кабинетами.'
-tags: ['Angular', 'RxJS', 'NgXS', 'TailwindCSS']
+description: 'Финтех-агрегатор банковских услуг.'
+tags: ['Angular', 'AngularJS']
 period: '2019 — 2022'
 links:
   - type: website

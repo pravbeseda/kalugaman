@@ -1,7 +1,7 @@
 ---
 title: 'VBC Marketplace'
-description: 'A fintech aggregator of banking services with four workspaces.'
-tags: ['Angular', 'RxJS', 'NgXS', 'TailwindCSS']
+description: 'A fintech aggregator of banking services.'
+tags: ['Angular', 'AngularJS']
 period: '2019 — 2022'
 links:
   - type: website
