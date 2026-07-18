@@ -45,18 +45,16 @@ const schema = resume
           {tags.map((tag) => <li class="tag">{tag}</li>)}
         </ul>
         {
-          (links.repo || links.demo) && (
+          links.length > 0 && (
             <div class="links">
-              {links.repo && (
-                <a class="button" href={links.repo}>
-                  {t('projects.repo')}
+              {links.map((link) => (
+                <a
+                  class:list={['button', { 'button--primary': link.type === 'website' }]}
+                  href={link.url}
+                >
+                  {link.label ?? t(`projects.${link.type}`)}
                 </a>
-              )}
-              {links.demo && (
-                <a class="button button--primary" href={links.demo}>
-                  {t('projects.demo')}
-                </a>
-              )}
+              ))}
             </div>
           )
         }

@@ -56,7 +56,9 @@ interface ProjectInput {
 
 export function projectSchema({ entry, lang, site, canonical, authorName }: ProjectInput) {
   const { title, description, tags, links } = entry.data;
-  if (!links.repo) return null;
+  const repo = links.find((link) => link.type === 'repo')?.url;
+  const website = links.find((link) => link.type === 'website')?.url;
+  if (!repo) return null;
 
   return {
     '@context': 'https://schema.org',
@@ -64,11 +66,11 @@ export function projectSchema({ entry, lang, site, canonical, authorName }: Proj
     name: title,
     description,
     url: canonical,
-    codeRepository: links.repo,
+    codeRepository: repo,
     // Tags are technologies, not languages — mostly libraries and frameworks. `keywords`
     // says exactly that; `programmingLanguage` would claim Tailwind is one.
     ...(tags.length > 0 && { keywords: tags }),
-    ...(links.demo && { targetProduct: { '@type': 'SoftwareApplication', url: links.demo } }),
+    ...(website && { targetProduct: { '@type': 'SoftwareApplication', url: website } }),
     author: { '@type': 'Person', '@id': personIdFor(site, lang), name: authorName },
   };
 }

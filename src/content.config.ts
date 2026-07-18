@@ -11,12 +11,18 @@ const projects = defineCollection({
     description: z.string(),
     tags: z.array(z.string()).default([]),
     period: z.string(),
+    // A button per link, rendered in array order. `type` drives the default label
+    // (i18n key `projects.<type>`) and the JSON-LD mapping in src/lib/schema.ts;
+    // `label` overrides the caption when the default does not fit.
     links: z
-      .object({
-        repo: z.url().optional(),
-        demo: z.url().optional(),
-      })
-      .default({}),
+      .array(
+        z.object({
+          type: z.enum(['repo', 'website', 'docs', 'article']),
+          url: z.url(),
+          label: z.string().optional(),
+        }),
+      )
+      .default([]),
     featured: z.boolean().default(false),
     order: z.number().default(0),
   }),

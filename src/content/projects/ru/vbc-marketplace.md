@@ -4,7 +4,8 @@ description: 'Финтех-агрегатор банковских услуг с
 tags: ['Angular', 'RxJS', 'NgXS', 'TailwindCSS']
 period: '2019 — 2022'
 links:
-  demo: 'https://vbankcenter.ru'
+  - type: website
+    url: 'https://vbankcenter.ru'
 featured: true
 order: 2
 ---
