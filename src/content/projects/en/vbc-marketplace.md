@@ -25,10 +25,12 @@ Frontend on **Angular** 12 (plus some legacy **AngularJS**), **RxJS**, **NgXS**.
 
 ## My part
 
-Implemented a wide range of tasks on developing and maintaining the app, including:
+Implemented a wide range of tasks aimed at developing and maintaining the app,
+including:
 
 - Migrated features from the legacy app, maintained products, fixed business logic
   per analysts' notes, refactored.
 - Built components from **Figma** designs, integrated REST APIs via **Swagger**.
-- **Designed the new versions**: moved from **Bootstrap** to **TailwindCSS**, a UI
-  kit with **Storybook.js**, and **Component-Driven Development**.
+- **Designed the new versions**: migrating from **Bootstrap** to **TailwindCSS**,
+  building a UI kit with **Storybook.js**, and introducing **Component-Driven
+  Development**.

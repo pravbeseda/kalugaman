@@ -23,7 +23,7 @@ experience:
     summary: 'Финтех-маркетплейс ВБЦ — банковский агрегатор: заявки на банковские услуги проходят скоринг и попадают в подходящие банки. Стек: Angular, RxJS, NgXS.'
     highlights:
       - 'Переносил функционал из старого приложения, поддерживал продукты, рефакторил, верстал по макетам Figma, интегрировал REST API (Swagger).'
-      - 'Проектировал новые версии: переход с Bootstrap на TailwindCSS, ui-kit на Storybook, методология Component-Driven Development.'
+      - 'Проектировал новые версии: переходил с Bootstrap на TailwindCSS, собирал ui-kit на Storybook, внедрял методологию Component-Driven Development.'
   - id: 'algont'
     company: 'АЛГОНТ'
     position: 'Инженер-программист'

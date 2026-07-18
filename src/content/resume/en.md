@@ -23,7 +23,7 @@ experience:
     summary: 'VBC Marketplace — a fintech banking aggregator: applications for banking services pass scoring and reach the matching banks. Stack: Angular, RxJS, NgXS.'
     highlights:
       - 'Migrated features from a legacy app, maintained products, refactored code, built UI from Figma, integrated REST APIs (Swagger).'
-      - 'Designed new app versions: moved from Bootstrap to TailwindCSS, built a UI kit in Storybook, adopted Component-Driven Development.'
+      - 'Designed new app versions: migrating from Bootstrap to TailwindCSS, building a UI kit in Storybook, introducing Component-Driven Development.'
   - id: 'algont'
     company: 'ALGONT'
     position: 'Software Engineer'

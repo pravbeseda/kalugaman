@@ -30,5 +30,5 @@ Frontend на **Angular** 12 (плюс немного legacy **AngularJS**), **R
 - Переносил функционал из старого приложения, поддерживал продукты, исправлял
   бизнес-логику по замечаниям аналитиков, рефакторил.
 - Верстал компоненты по макетам **Figma**, интегрировал REST API по **Swagger**.
-- **Проектировал новые версии**: переход с **Bootstrap** на **TailwindCSS**, ui-kit
-  на **Storybook.js**, методология **Component-Driven Development**.
+- **Проектировал новые версии**: переходил с **Bootstrap** на **TailwindCSS**, собирал
+  ui-kit на **Storybook.js**, внедрял методологию **Component-Driven Development**.
