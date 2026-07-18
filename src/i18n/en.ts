@@ -16,6 +16,7 @@ export default {
   'resume.education': 'Education',
   'resume.languages': 'Languages',
   'resume.download': 'Download PDF',
+  'resume.project': 'More about the project',
   'projects.all': 'All projects',
   'projects.tags': 'Stack',
   'projects.repo': 'Source',
@@ -23,6 +24,7 @@ export default {
   'projects.docs': 'Documentation',
   'projects.article': 'Article',
   'projects.back': 'Back to projects',
+  'projects.backToResume': 'Back to resume',
   'contacts.title': 'Get in touch',
   'contacts.email': 'Email',
   // The toggle names what a click does, like the language switch beside it ("Русский" is

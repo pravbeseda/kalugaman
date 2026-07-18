@@ -35,7 +35,13 @@ const schema = resume
 <Base lang={lang} title={`${title} · kalugaman`} description={description} schema={schema}>
   <article class="section">
     <div class="container narrow">
-      <a class="back" href={`/${lang}/projects`}>← {t('projects.back')}</a>
+      <a
+        class="back"
+        href={`/${lang}/projects`}
+        data-resume-href={`/${lang}/resume`}
+        data-resume-label={t('projects.backToResume')}
+        >← {t('projects.back')}</a
+      >
 
       <header class="head">
         <h1>{title}</h1>
@@ -68,6 +74,38 @@ const schema = resume
     </div>
   </article>
 </Base>
+
+<script>
+  // The project page is prerendered, so it cannot know at build time whether it was reached
+  // from the projects list or from the resume. When the resume links here it appends
+  // `?from=resume` (document.referrer is unreliable under the ClientRouter), and this swaps
+  // the default "back to projects" link for one back to the resume. Bound to astro:page-load
+  // so it runs on the first load and after every client-side navigation.
+  function adaptFromResume() {
+    const fromResume = new URLSearchParams(location.search).get('from') === 'resume';
+    if (!fromResume) return;
+
+    const back = document.querySelector('a.back[data-resume-href]');
+    if (back instanceof HTMLAnchorElement) {
+      const href = back.dataset.resumeHref;
+      const label = back.dataset.resumeLabel;
+      if (href && label) {
+        back.href = href;
+        back.textContent = `← ${label}`;
+      }
+    }
+
+    // The language switch is built server-side without the query, so switching languages
+    // would drop the `from` context and reset the back link. Carry it across the switch.
+    const langSwitch = document.querySelector('a.lang-switch');
+    if (langSwitch instanceof HTMLAnchorElement) {
+      const url = new URL(langSwitch.href);
+      url.searchParams.set('from', 'resume');
+      langSwitch.href = url.href;
+    }
+  }
+  document.addEventListener('astro:page-load', adaptFromResume);
+</script>
 
 <style>
   .narrow {

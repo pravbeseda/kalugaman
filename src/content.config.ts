@@ -46,6 +46,11 @@ const resume = defineCollection({
           // The job still held. `period` is free-form prose, so being current cannot be
           // read off it, and it must not be inferred from the order of the entries.
           current: z.boolean().default(false),
+          // Slug of a related project page (`src/content/projects/<lang>/<slug>`). When set,
+          // the CV shows a screen-only "more about the project" link — the resume entry stays
+          // a self-contained summary; the project page is the expanded case study. Omitted in
+          // print, where a link cannot be followed. Language-independent: same slug both langs.
+          projectSlug: z.string().optional(),
           highlights: z.array(z.string()),
         }),
       )

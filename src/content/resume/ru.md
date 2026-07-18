@@ -8,12 +8,13 @@ experience:
     position: 'Senior Software Developer'
     period: 'февраль 2022 — сейчас'
     current: true
+    projectSlug: 'intermedia-unite'
     highlights:
-      - 'Разработка Intermedia Unite (бизнес-мессенджер: чаты, телефония, SMS, видеозвонки, файлы) и Contact Center — веб на Angular (плюс немного legacy React) и десктоп на Electron.'
+      - 'Разработка Intermedia Unite (бизнес-мессенджер: чаты, телефония, SMS, видеозвонки, файлы) — веб на Angular и десктоп на Electron.'
       - 'Полностью переработал систему поиска в чате: декомпозировал монолит в лёгкие сервисы и небольшие компоненты — код стало проще поддерживать и тестировать.'
       - 'Сделал новую версию раздела мониторинга Контактного центра.'
-      - 'С лета 2024 — в команде Unite Teams Integration: интеграция функционала Contact Center прямо в Microsoft Teams.'
-      - 'Покрываю написанный код unit-тестами и Cypress.'
+      - 'Участвовал в разработке Unite Teams Integration — веб-приложения для Microsoft Teams.'
+      - 'Покрываю код unit-тестами и Cypress; построил CI-систему e2e на Playwright для Unite Teams Integration.'
   - id: 'vbc'
     company: 'Всероссийский Банковский Центр'
     position: 'Старший программист-разработчик'

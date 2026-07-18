@@ -8,12 +8,13 @@ experience:
     position: 'Senior Software Developer'
     period: 'Feb 2022 — now'
     current: true
+    projectSlug: 'intermedia-unite'
     highlights:
-      - 'Develop Intermedia Unite (a business messenger: chats, telephony, SMS, video calls, file storage) and Contact Center — web on Angular (plus some legacy React) and desktop on Electron.'
-      - 'Reworked the chat search from the ground up: decomposed a monolith into small services and components, making it far easier to maintain and test.'
-      - 'Built a new version of the Contact Center monitoring module.'
-      - 'Since summer 2024, on the Unite Teams Integration team — embedding Contact Center features directly into Microsoft Teams.'
-      - 'Cover shipped code with unit tests and Cypress.'
+      - 'Developing Intermedia Unite (a business messenger: chats, telephony, SMS, video calls, file storage) — web on Angular and desktop on Electron.'
+      - 'Reworked the chat search end to end: decomposed a monolith into lightweight services and small components — easier to maintain and test.'
+      - 'Built a new version of the Contact Center monitoring section.'
+      - 'Contributed to Unite Teams Integration — a web app for Microsoft Teams.'
+      - 'Cover the code with unit tests and Cypress; built a CI e2e testing system on Playwright for Unite Teams Integration.'
   - id: 'vbc'
     company: 'All-Russian Banking Center (VBC)'
     position: 'Senior Software Developer'

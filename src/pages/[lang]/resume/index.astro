@@ -19,6 +19,25 @@ if (!resume) throw new Error(`Missing resume for ${lang}`);
 const { Content } = await render(resume);
 const { name, role, location, experience, skills, education, languages } = resume.data;
 
+// A job may point to a project page (screen-only "more" link, see the schema). Resolve the
+// slug to the project's own title in this language, so the link carries the case study's
+// name rather than repeating the company. A dangling slug is a build error — the same
+// fail-fast stance as the other cross-collection lookups on this page.
+const projectLinks = new Map<string, { href: string; title: string }>();
+for (const job of experience) {
+  if (!job.projectSlug) continue;
+  const project = await getEntry('projects', `${lang}/${job.projectSlug}`);
+  if (!project) throw new Error(`Missing project '${job.projectSlug}' linked from resume ${lang}`);
+  projectLinks.set(job.id, {
+    // `from=resume` lets the project page offer a "back to resume" link instead of its
+    // default "back to projects" — read client-side, since the page is static (see the
+    // script there). Harmless without JS: the query is ignored and the default back link
+    // to the projects list still applies.
+    href: `/${lang}/projects/${job.projectSlug}?from=resume`,
+    title: project.data.title,
+  });
+}
+
 const description = `${role}, ${location}`;
 
 // Contacts render on the page and in the printed CV, and they are the same single source
@@ -146,11 +165,24 @@ const schema = home
                 </div>
                 <span class="job__period">{job.period}</span>
               </div>
-              <ul>
-                {job.highlights.map((h) => (
-                  <li>{h}</li>
-                ))}
-              </ul>
+              {/* The first highlight is the job's summary line; the rest are the bullets under it. */}
+              {job.highlights[0] && <p class="job__lead">{job.highlights[0]}</p>}
+              {job.highlights.length > 1 && (
+                <ul>
+                  {job.highlights.slice(1).map((h) => (
+                    <li>{h}</li>
+                  ))}
+                </ul>
+              )}
+              {
+                projectLinks.has(job.id) && (
+                  <p class="job__more">
+                    <a href={projectLinks.get(job.id)!.href}>
+                      {t('resume.project')}: {projectLinks.get(job.id)!.title} →
+                    </a>
+                  </p>
+                )
+              }
             </div>
           ))
         }
@@ -367,8 +399,28 @@ const schema = home
     font-family: var(--font-mono);
     font-size: var(--text-sm);
   }
+  /* Summary line of the job, above the achievement bullets. */
+  .job__lead {
+    margin: 0 0 var(--space-2);
+  }
   .job ul {
     padding-left: var(--space-6);
+  }
+  /* Screen-only pointer to the full case study. It is an affordance, not body text, so it
+     keeps the plain (un-underlined) link form until hover — like .back and .project-card.
+     Set apart by spacing alone — no rule, which would read as the divider between jobs
+     (.job + .job). Hidden in print — a link cannot be followed on paper, and the entry
+     reads as a complete summary without it. */
+  .job__more {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+  }
+  .job__more a {
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .job__more a:hover {
+    text-decoration: underline;
   }
   .job + .job {
     margin-top: var(--space-6);
@@ -460,6 +512,11 @@ const schema = home
     .job,
     .skills__group {
       break-inside: avoid;
+    }
+    /* The "more about the project" link is a screen affordance — on paper it points nowhere,
+       and the entry above it already reads as a complete summary. */
+    .job__more {
+      display: none;
     }
     /* --font-mono is a system stack with no Cyrillic guarantee, and the PDF ships from a
        runner whose fonts we do not control. Anything monospace that can hold Cyrillic must
