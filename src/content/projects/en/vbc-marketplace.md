@@ -4,7 +4,8 @@ description: 'A fintech aggregator of banking services with four workspaces.'
 tags: ['Angular', 'RxJS', 'NgXS', 'TailwindCSS']
 period: '2019 — 2022'
 links:
-  demo: 'https://vbankcenter.ru'
+  - type: website
+    url: 'https://vbankcenter.ru'
 featured: true
 order: 2
 ---

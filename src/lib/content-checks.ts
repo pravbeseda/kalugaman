@@ -27,9 +27,13 @@ async function runChecks(): Promise<void> {
 
   sameJobsInEveryLanguage(perLocale);
   currentJobAgreesAcrossLanguages(perLocale);
+  projectLinkAgreesAcrossLanguages(perLocale);
 }
 
-type PerLocale = { lang: string; experience: { id: string; current: boolean }[] }[];
+type PerLocale = {
+  lang: string;
+  experience: { id: string; current: boolean; projectSlug?: string }[];
+}[];
 
 /** A job written up in one language only would silently vanish from the other resume. */
 function sameJobsInEveryLanguage(perLocale: PerLocale): void {
@@ -66,5 +70,33 @@ function currentJobAgreesAcrossLanguages(perLocale: PerLocale): void {
       `The resumes disagree about the current job (${shown}). \`current\` marks the job ` +
         `still held; it must be on the same job in every language.`,
     );
+  }
+}
+
+/**
+ * `projectSlug` links a job to its project case study and is language-independent, so it
+ * must match in every language. Set it in one language only, or to a different slug, and
+ * that locale's "more about the project" link would go missing or point elsewhere — a
+ * difference invisible on the built site. Compared by `id`; `sameJobsInEveryLanguage` has
+ * already guaranteed the id sets agree.
+ */
+function projectLinkAgreesAcrossLanguages(perLocale: PerLocale): void {
+  const slugsById = ({ experience }: PerLocale[number]) =>
+    new Map(experience.map((job) => [job.id, job.projectSlug]));
+
+  const [first, ...rest] = perLocale;
+  const expected = slugsById(first);
+
+  for (const other of rest) {
+    const slugs = slugsById(other);
+    for (const [id, slug] of expected) {
+      if (slugs.get(id) !== slug) {
+        throw new Error(
+          `The resumes disagree about the project link for job '${id}' ` +
+            `(${first.lang}: ${slug ?? 'none'} — ${other.lang}: ${slugs.get(id) ?? 'none'}). ` +
+            '`projectSlug` is language-independent and must match in every language.',
+        );
+      }
+    }
   }
 }

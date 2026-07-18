@@ -8,3 +8,12 @@ if [ "$branch" = "main" ]; then
 	echo "  Bypass (rare):     git commit --no-verify"
 	exit 1
 fi
+
+# Auto-format staged files with Prettier so a commit can't fail CI's format check.
+# Only staged, still-present files (ACMR); --ignore-unknown skips anything Prettier does not
+# handle. Re-stage what it rewrote. Note: a partially-staged file gets fully staged here.
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -n "$staged" ]; then
+	printf '%s\n' "$staged" | xargs npx prettier --write --ignore-unknown --log-level warn
+	printf '%s\n' "$staged" | xargs git add
+fi

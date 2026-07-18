@@ -8,38 +8,36 @@ experience:
     position: 'Senior Software Developer'
     period: 'Feb 2022 — now'
     current: true
+    projectSlug: 'intermedia-unite'
+    summary: 'Developing Intermedia Unite (a business messenger: chats, telephony, SMS, video calls, file storage) — web on Angular and desktop on Electron.'
     highlights:
-      - 'Develop Intermedia Unite (a business messenger: chats, telephony, SMS, video calls, file storage) and Contact Center — web on Angular (plus some legacy React) and desktop on Electron.'
-      - 'Reworked the chat search from the ground up: decomposed a monolith into small services and components, making it far easier to maintain and test.'
-      - 'Built a new version of the Contact Center monitoring module.'
-      - 'Since summer 2024, on the Unite Teams Integration team — embedding Contact Center features directly into Microsoft Teams.'
-      - 'Cover shipped code with unit tests and Cypress.'
+      - 'Reworked the chat search end to end: decomposed a monolith into lightweight services and small components — easier to maintain and test.'
+      - 'Built a new version of the Contact Center monitoring section.'
+      - 'Contributed to Unite Teams Integration — a web app for Microsoft Teams.'
+      - 'Cover the code with unit tests and Cypress; built a CI e2e testing system on Playwright for Unite Teams Integration.'
   - id: 'vbc'
     company: 'All-Russian Banking Center (VBC)'
     position: 'Senior Software Developer'
     period: 'Aug 2019 — Feb 2022'
+    summary: 'VBC Marketplace — a fintech banking aggregator with four workspaces (client, operator, agent, bank). Stack: Angular, RxJS, NgXS.'
     highlights:
-      - 'VBC Marketplace — a fintech banking aggregator with four workspaces (client, operator, agent, bank). Stack: Angular, RxJS, NgXS.'
       - 'Migrated features from a legacy app, maintained products, refactored code, built UI from Figma, integrated REST APIs (Swagger).'
       - 'Designed new app versions: moved from Bootstrap to TailwindCSS, built a UI kit in Storybook, adopted Component-Driven Development.'
   - id: 'algont'
     company: 'ALGONT'
     position: 'Software Engineer'
     period: 'Mar 2013 — Aug 2019'
-    highlights:
-      - 'Frontend of the ASSaD-Video surveillance system: JavaScript (jQuery, jQuery-ui, AngularJS, fabric.js), HTML/CSS, Bootstrap; some Java.'
+    summary: 'Frontend of the ASSaD-Video surveillance system: JavaScript (jQuery, jQuery-ui, AngularJS, fabric.js), HTML/CSS, Bootstrap; some Java.'
   - id: 'rostelecom'
     company: 'Rostelecom'
     position: 'Unix System Administrator'
     period: 'Mar 2002 — Apr 2012'
-    highlights:
-      - 'Administered hosting, mail and DNS servers; wrote utility scripts and internal sites (perl, php).'
+    summary: 'Administered hosting, mail and DNS servers; wrote utility scripts and internal sites (perl, php).'
   - id: 'kaluga-it-center'
     company: 'Kaluga Region Agriculture Dept. IT Center'
     position: 'Software Engineer'
     period: 'Feb 2000 — Mar 2002'
-    highlights:
-      - 'Built an HR records system (Delphi).'
+    summary: 'Built an HR records system (Delphi).'
 skills:
   - group: 'Frontend'
     items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript', 'React']

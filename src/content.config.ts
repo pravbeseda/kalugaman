@@ -11,12 +11,18 @@ const projects = defineCollection({
     description: z.string(),
     tags: z.array(z.string()).default([]),
     period: z.string(),
+    // A button per link, rendered in array order. `type` drives the default label
+    // (i18n key `projects.<type>`) and the JSON-LD mapping in src/lib/schema.ts;
+    // `label` overrides the caption when the default does not fit.
     links: z
-      .object({
-        repo: z.url().optional(),
-        demo: z.url().optional(),
-      })
-      .default({}),
+      .array(
+        z.object({
+          type: z.enum(['repo', 'website', 'docs', 'article']),
+          url: z.url(),
+          label: z.string().optional(),
+        }),
+      )
+      .default([]),
     featured: z.boolean().default(false),
     order: z.number().default(0),
   }),
@@ -40,7 +46,15 @@ const resume = defineCollection({
           // The job still held. `period` is free-form prose, so being current cannot be
           // read off it, and it must not be inferred from the order of the entries.
           current: z.boolean().default(false),
-          highlights: z.array(z.string()),
+          // Slug of a related project page (`src/content/projects/<lang>/<slug>`). When set,
+          // the CV shows a screen-only "more about the project" link — the resume entry stays
+          // a self-contained summary; the project page is the expanded case study. Omitted in
+          // print, where a link cannot be followed. Language-independent: same slug both langs.
+          projectSlug: z.string().optional(),
+          // The job's one-line summary, rendered as a lead paragraph above the bullets.
+          summary: z.string(),
+          // Achievement bullets under the summary. A job may have none (a one-line entry).
+          highlights: z.array(z.string()).default([]),
         }),
       )
       // Two current jobs would make `worksFor` fall back to file order — the very thing
