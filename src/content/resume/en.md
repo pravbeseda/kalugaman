@@ -16,7 +16,7 @@ experience:
       - 'Contributed to Unite Teams Integration — a web app for Microsoft Teams.'
       - 'Cover the code with unit tests and Cypress; built a CI e2e testing system on Playwright for Unite Teams Integration.'
   - id: 'vbc'
-    company: 'All-Russian Banking Center (VBC)'
+    company: 'All-Russian Business Center (VBC)'
     position: 'Senior Software Developer'
     period: 'Aug 2019 — Feb 2022'
     summary: 'VBC Marketplace — a fintech banking aggregator with four workspaces (client, operator, agent, bank). Stack: Angular, RxJS, NgXS.'

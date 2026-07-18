@@ -16,7 +16,7 @@ experience:
       - 'Участвовал в разработке Unite Teams Integration — веб-приложения для Microsoft Teams.'
       - 'Покрываю код unit-тестами и Cypress; построил CI-систему e2e на Playwright для Unite Teams Integration.'
   - id: 'vbc'
-    company: 'Всероссийский Банковский Центр'
+    company: 'Всероссийский Бизнес Центр'
     position: 'Старший программист-разработчик'
     period: 'август 2019 — февраль 2022'
     summary: 'Финтех-маркетплейс ВБЦ — банковский агрегатор с четырьмя кабинетами (клиент, оператор, агент, банк). Стек: Angular, RxJS, NgXS.'
