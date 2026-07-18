@@ -19,7 +19,8 @@ experience:
     company: 'All-Russian Business Center (VBC)'
     position: 'Senior Software Developer'
     period: 'Aug 2019 — Feb 2022'
-    summary: 'VBC Marketplace — a fintech banking aggregator with four workspaces (client, operator, agent, bank). Stack: Angular, RxJS, NgXS.'
+    projectSlug: 'vbc-marketplace'
+    summary: 'VBC Marketplace — a fintech banking aggregator: applications for banking services pass scoring and reach the matching banks. Stack: Angular, RxJS, NgXS.'
     highlights:
       - 'Migrated features from a legacy app, maintained products, refactored code, built UI from Figma, integrated REST APIs (Swagger).'
       - 'Designed new app versions: moved from Bootstrap to TailwindCSS, built a UI kit in Storybook, adopted Component-Driven Development.'
