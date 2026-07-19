@@ -10,7 +10,6 @@ export default {
   'a11y.skip': 'Skip to content',
   'home.cta.projects': 'View projects',
   'home.cta.resume': 'Read resume',
-  'home.featured': 'Featured projects',
   'resume.experience': 'Experience',
   'resume.skills': 'Skills',
   'resume.education': 'Education',
