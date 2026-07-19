@@ -6,7 +6,6 @@ period: '2019 — 2022'
 links:
   - type: website
     url: 'https://vbankcenter.ru'
-featured: true
 order: 2
 ---
 

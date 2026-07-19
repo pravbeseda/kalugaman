@@ -3,7 +3,6 @@ title: 'АССаД-Видео'
 description: 'Frontend системы видеонаблюдения, работающий в браузере.'
 tags: ['JavaScript', 'jQuery', 'AngularJS']
 period: '2013 — 2019'
-featured: false
 order: 3
 ---
 
