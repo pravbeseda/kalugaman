@@ -38,7 +38,7 @@ experience:
     company: 'Rostelecom'
     position: 'Unix System Administrator'
     period: 'Mar 2002 — Apr 2012'
-    summary: 'Administered hosting, mail and DNS servers; wrote utility scripts and internal sites (perl, php).'
+    summary: 'Administered hosting, mail and DNS servers (linux); wrote utility scripts and internal sites (perl, php).'
   - id: 'kaluga-it-center'
     company: 'Kaluga Region Agriculture Dept. IT Center'
     position: 'Software Engineer'

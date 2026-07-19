@@ -5,7 +5,7 @@ portfolio / resume. Repo: https://github.com/pravbeseda/kalugaman (public).
 
 ## Stack & architecture
 
-- **Astro 7** (SSG, zero client JS by default). Requires Node >= 22.12. Markdown is
+- **Astro 7** (SSG, zero client JS by default). Requires Node >= 22.18. Markdown is
   rendered by Sätteri (Astro's native pipeline, not remark/rehype); `compressHTML`
   defaults to `'jsx'`, so whitespace between inline elements is stripped.
 - **Content Collections (Content Layer) + zod 4** — all content is Markdown under
