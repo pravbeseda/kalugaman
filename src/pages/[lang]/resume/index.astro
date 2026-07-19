@@ -350,8 +350,9 @@ const schema = home
     margin-bottom: var(--space-12);
   }
   h2 {
-    margin-top: var(--space-12);
+    margin-top: var(--space-8);
     padding-bottom: var(--space-2);
+    font-size: clamp(1.375rem, 1.15rem + 0.9vw, 1.75rem);
     border-bottom: var(--border-width) solid var(--color-border);
   }
   .timeline {
@@ -427,8 +428,13 @@ const schema = home
   .skills {
     display: grid;
     gap: var(--space-6);
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+    grid-template-columns: 1fr;
     margin-top: var(--space-6);
+  }
+  @media (min-width: 640px) {
+    .skills {
+      grid-template-columns: 1fr 1fr;
+    }
   }
   .skills__group h3 {
     font-size: var(--text-base);
