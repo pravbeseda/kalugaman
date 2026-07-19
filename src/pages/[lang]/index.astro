@@ -21,6 +21,7 @@ const { Content } = await render(home);
 // Single source for the name: read it from the resume of the same locale
 const resume = await getEntry('resume', lang);
 const displayName = resume?.data.name ?? 'kalugaman';
+const currentJob = resume?.data.experience.find((job) => job.current);
 
 const contacts = await getEntry('pages', `${lang}/contacts`);
 const schema =
@@ -48,7 +49,17 @@ const schema =
           class="hero__avatar"
           loading="eager"
         />
-        <h1 class="hero__name">{displayName}</h1>
+        <div class="hero__heading">
+          <h1 class="hero__name">{displayName}</h1>
+          {
+            currentJob && (
+              <p class="hero__role">
+                <span class="hero__role-position">{currentJob.position}</span>
+                <span class="hero__role-company">{currentJob.company}</span>
+              </p>
+            )
+          }
+        </div>
       </div>
       {home.data.tagline && <p class="hero__tagline">{home.data.tagline}</p>}
       <div class="prose hero__body">
@@ -88,9 +99,33 @@ const schema =
     border: var(--border-width) solid var(--color-border);
     flex-shrink: 0;
   }
+  .hero__heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+  }
   .hero__name {
     font-size: var(--step-fluid-h2);
     line-height: 1.1;
+  }
+  .hero__role {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 0.5ch;
+    color: var(--color-muted);
+    font-size: var(--text-lg);
+  }
+  /* Keep the company name intact: it wraps to the next line as a whole
+     instead of breaking between words on narrow screens. */
+  .hero__role-company {
+    white-space: nowrap;
+  }
+  /* Separator stays glued to the position, so a wrapped company line
+     starts cleanly instead of with a leading dot. */
+  .hero__role-position::after {
+    content: '·';
+    margin-left: 0.5ch;
   }
   .hero__tagline {
     font-family: var(--font-mono);
@@ -109,5 +144,16 @@ const schema =
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-8);
+  }
+  /* On phones the avatar stacks above the name so the heading gets the full
+     width — enough room for the company name to sit on its own line intact. */
+  @media (max-width: 420px) {
+    .hero__intro {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .hero__role {
+      font-size: var(--text-base);
+    }
   }
 </style>

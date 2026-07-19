@@ -66,12 +66,7 @@ languages:
     level: 'A2'
 ---
 
-A developer with a strategic approach: I track milestones in project-management
-tools (Jira, Redmine) and hold to realistic deadlines. I follow **clean
-architecture** principles and enjoy refactoring to keep products maintainable and
-efficient. I learn constantly, and use AI to analyze and write code — always with
-quality control and code review.
-
-Responsible, organized, detail-oriented. I value the balance between professional
-and personal growth, and stay active. Open to new challenges and interesting
-projects — I'm driven by building solutions that bring real value to users.
+I build maintainable business apps in **Angular**: I decompose monoliths into
+lightweight services and small components, cover code with unit and
+e2e tests, and follow **clean architecture**. I use AI to analyze and write
+code — always with mandatory review and quality control.
