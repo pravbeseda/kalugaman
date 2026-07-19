@@ -56,19 +56,20 @@ title: 'My Project'
 description: 'One line, shown on the card and the detail page.'
 tags: ['Angular', 'RxJS']
 period: '2023 — 2024'
-featured: false # true → also shown on the home page
 order: 0 # lower sorts first
-links: # optional
-  repo: https://github.com/...
-  demo: https://...
+links: # optional; one button per entry, in order
+  - type: repo # repo | website | docs | article — sets the default label
+    url: 'https://github.com/...'
+  - type: website
+    url: 'https://...'
+    label: 'Live demo' # optional; overrides the default label
 ---
 The Markdown body is the detailed write-up on /en/projects/my-project (routes are
 locale-prefixed; there is no unprefixed /projects path).
 ```
 
-`featured: true` surfaces the project on the home page (as an `h3` under the "Featured" `h2`);
-the projects index lists all of them (as `h2` under the page `h1`). The detail route is
-generated automatically.
+The projects index lists every project (as `h2` under the page `h1`), sorted by `order`. The
+detail route is generated automatically.
 
 ### A language
 
