@@ -8,7 +8,7 @@ socials:
   - label: 'Telegram'
     url: 'https://t.me/pravbeseda'
   - label: 'LinkedIn'
-    url: 'https://www.linkedin.com/in/pravbeseda'
+    url: 'https://www.linkedin.com/in/kalugaman/'
 ---
 
 Быстрее всего написать на почту — читаю всё и отвечаю за день-два.
