@@ -55,6 +55,7 @@ const schema =
             currentJob && (
               <p class="hero__role">
                 <span class="hero__role-position">{currentJob.position}</span>
+                <span class="hero__role-sep">{' · '}</span>
                 <span class="hero__role-company">{currentJob.company}</span>
               </p>
             )
@@ -109,23 +110,14 @@ const schema =
     font-size: var(--step-fluid-h2);
     line-height: 1.1;
   }
+  /* flex-wrap keeps the company as one unit: when it doesn't fit beside the
+     position it drops to its own line, and only breaks by words on the very
+     narrowest screens instead of overflowing the viewport. */
   .hero__role {
     display: flex;
     flex-wrap: wrap;
-    column-gap: 0.5ch;
     color: var(--color-muted);
     font-size: var(--text-lg);
-  }
-  /* Keep the company name intact: it wraps to the next line as a whole
-     instead of breaking between words on narrow screens. */
-  .hero__role-company {
-    white-space: nowrap;
-  }
-  /* Separator stays glued to the position, so a wrapped company line
-     starts cleanly instead of with a leading dot. */
-  .hero__role-position::after {
-    content: '·';
-    margin-left: 0.5ch;
   }
   .hero__tagline {
     font-family: var(--font-mono);
