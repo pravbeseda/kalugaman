@@ -46,7 +46,7 @@ experience:
     summary: 'Built an HR records system (Delphi).'
 skills:
   - group: 'Frontend'
-    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript', 'React']
+    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript']
   - group: 'Desktop & Node'
     items: ['Electron', 'Node.js']
   - group: 'UI & testing'

@@ -46,7 +46,7 @@ experience:
     summary: 'Разрабатывал систему кадрового учёта (Delphi).'
 skills:
   - group: 'Фронтенд'
-    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript', 'React']
+    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript']
   - group: 'Десктоп и Node'
     items: ['Electron', 'Node.js']
   - group: 'UI и тесты'
