@@ -8,7 +8,7 @@ socials:
   - label: 'Telegram'
     url: 'https://t.me/pravbeseda'
   - label: 'LinkedIn'
-    url: 'https://www.linkedin.com/in/pravbeseda'
+    url: 'https://www.linkedin.com/in/kalugaman/'
 ---
 
 The fastest way to reach me is email — I read everything and reply within a day
