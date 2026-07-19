@@ -55,7 +55,7 @@ skills:
     items: ['Jira', 'Redmine', 'Figma', 'REST / Swagger', 'Git']
 education:
   - place: 'МГТУ им. Н.Э. Баумана'
-    degree: 'Инженер-исследователь, информационные технологии'
+    degree: 'Инженер-специалист / Инженер-исследователь, информационные технологии'
     period: '1993 — 2000'
 languages:
   - name: 'Русский'
