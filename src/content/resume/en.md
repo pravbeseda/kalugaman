@@ -46,13 +46,9 @@ experience:
     summary: 'Built an HR records system (Delphi).'
 skills:
   - group: 'Frontend'
-    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript', 'React']
-  - group: 'Desktop & Node'
-    items: ['Electron', 'Node.js']
-  - group: 'UI & testing'
-    items: ['TailwindCSS', 'Storybook', 'HTML/CSS', 'Cypress', 'Unit tests']
-  - group: 'Process'
-    items: ['Jira', 'Redmine', 'Figma', 'REST / Swagger', 'Git']
+    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript']
+  - group: 'Testing'
+    items: ['Cypress', 'Playwright', 'Jest']
 education:
   - place: 'Bauman Moscow State Technical University'
     degree: 'Specialist / Research Engineer, Information Technology'

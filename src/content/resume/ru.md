@@ -46,13 +46,9 @@ experience:
     summary: 'Разрабатывал систему кадрового учёта (Delphi).'
 skills:
   - group: 'Фронтенд'
-    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript', 'JavaScript', 'React']
-  - group: 'Десктоп и Node'
-    items: ['Electron', 'Node.js']
-  - group: 'UI и тесты'
-    items: ['TailwindCSS', 'Storybook', 'HTML/CSS', 'Cypress', 'Unit-тесты']
-  - group: 'Процесс'
-    items: ['Jira', 'Redmine', 'Figma', 'REST / Swagger', 'Git']
+    items: ['Angular', 'RxJS', 'NgXS', 'TypeScript']
+  - group: 'Тесты'
+    items: ['Cypress', 'Playwright', 'Jest']
 education:
   - place: 'МГТУ им. Н.Э. Баумана'
     degree: 'Инженер-специалист / Инженер-исследователь, информационные технологии'
