@@ -451,16 +451,28 @@ const schema = home
       grid-template-columns: 1fr 1fr;
     }
   }
+  /* Both columns of the two-col block breathe the same distance below their heading. */
+  .two-col .stack,
+  .langs {
+    margin-top: var(--space-6);
+  }
   .langs {
     list-style: none;
     padding: 0;
-    margin-top: var(--space-6);
   }
   .langs li {
     display: flex;
     justify-content: space-between;
     padding-block: var(--space-2);
     border-bottom: var(--border-width) solid var(--color-border);
+  }
+  /* Align the first row with the Education column, which starts flush under its
+     heading — no top padding — so both columns' first lines share a baseline. */
+  .langs li:first-child {
+    padding-top: 0;
+  }
+  .langs li:last-child {
+    border-bottom: none;
   }
 
   /* Profiles at the foot: the links that are not direct contact, kept off the top. A rule

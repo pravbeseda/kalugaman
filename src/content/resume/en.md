@@ -28,7 +28,12 @@ experience:
     company: 'ALGONT'
     position: 'Software Engineer'
     period: 'Mar 2013 — Aug 2019'
-    summary: 'Frontend of the ASSaD-Video surveillance system: JavaScript (jQuery, jQuery-ui, AngularJS, fabric.js), HTML/CSS, Bootstrap; some Java.'
+    projectSlug: 'assad-video'
+    summary: 'Frontend of the browser-based ASSaD-Video surveillance system. Stack: JavaScript, jQuery, AngularJS, fabric.js.'
+    highlights:
+      - 'Designed and implemented the video grid concept: video cells with "magnetic" edges that drag and resize freely in the editor.'
+      - 'Built the grid viewer and video archive sections from scratch; made the Floor Plan Editor in AngularJS.'
+      - 'Assembled the player as a set of jQuery plugins in a standalone bundle — easing engine swaps (VLC → HTML5/MSE over WebSockets → WebRTC) and analytics integration.'
   - id: 'rostelecom'
     company: 'Rostelecom'
     position: 'Unix System Administrator'
@@ -51,15 +56,14 @@ skills:
 education:
   - place: 'Bauman Moscow State Technical University'
     degree: 'Research Engineer, Information Technology'
-    period: '1999 — 2000'
-  - place: 'Bauman Moscow State Technical University'
-    degree: 'Specialist Engineer, Information Technology'
-    period: '1993 — 1999'
+    period: '1993 — 2000'
 languages:
   - name: 'Russian'
     level: 'Native'
   - name: 'English'
     level: 'B2'
+  - name: 'Georgian'
+    level: 'A2'
 ---
 
 A developer with a strategic approach: I track milestones in project-management
