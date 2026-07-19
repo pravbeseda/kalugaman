@@ -431,11 +431,6 @@ const schema = home
     grid-template-columns: 1fr;
     margin-top: var(--space-6);
   }
-  @media (min-width: 640px) {
-    .skills {
-      grid-template-columns: 1fr 1fr;
-    }
-  }
   .skills__group h3 {
     font-size: var(--text-base);
     margin-bottom: var(--space-3);
@@ -452,6 +447,7 @@ const schema = home
     grid-template-columns: 1fr;
   }
   @media (min-width: 640px) {
+    .skills,
     .two-col {
       grid-template-columns: 1fr 1fr;
     }
