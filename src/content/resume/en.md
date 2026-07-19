@@ -55,7 +55,7 @@ skills:
     items: ['Jira', 'Redmine', 'Figma', 'REST / Swagger', 'Git']
 education:
   - place: 'Bauman Moscow State Technical University'
-    degree: 'Research Engineer, Information Technology'
+    degree: 'Specialist / Research Engineer, Information Technology'
     period: '1993 — 2000'
 languages:
   - name: 'Russian'
