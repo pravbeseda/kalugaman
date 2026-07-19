@@ -1,9 +1,8 @@
 ---
-import { getCollection, getEntry, render } from 'astro:content';
+import { getEntry, render } from 'astro:content';
 import { Image } from 'astro:assets';
 import portrait from '../../assets/portrait.png';
 import Base from '../../layouts/Base.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
 import { locales, type Locale } from '../../i18n/config';
 import { useTranslations } from '../../i18n/utils';
 import { personSchema } from '../../lib/schema';
@@ -35,11 +34,6 @@ const schema =
         image: portrait.src,
       })
     : null;
-
-const featured = (await getCollection('projects'))
-  .filter((p) => p.id.startsWith(`${lang}/`) && p.data.featured)
-  .sort((a, b) => a.data.order - b.data.order)
-  .slice(0, 3);
 ---
 
 <Base lang={lang} title={home.data.title} description={home.data.description} schema={schema}>
@@ -68,28 +62,6 @@ const featured = (await getCollection('projects'))
       </div>
     </div>
   </section>
-
-  {
-    featured.length > 0 && (
-      <section class="section">
-        <div class="container home__col">
-          <h2>{t('home.featured')}</h2>
-          <div class="grid">
-            {featured.map((p) => (
-              <ProjectCard
-                lang={lang}
-                slug={p.id.replace(`${lang}/`, '')}
-                title={p.data.title}
-                description={p.data.description}
-                tags={p.data.tags}
-                period={p.data.period}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
-    )
-  }
 </Base>
 
 <style>
@@ -137,11 +109,5 @@ const featured = (await getCollection('projects'))
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-8);
-  }
-  .grid {
-    display: grid;
-    gap: var(--space-4);
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
-    margin-top: var(--space-6);
   }
 </style>
