@@ -6,7 +6,6 @@ period: '2022 — сейчас'
 links:
   - type: website
     url: 'https://www.intermedia.com/products/unite'
-featured: true
 order: 1
 ---
 

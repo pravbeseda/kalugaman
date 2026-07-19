@@ -10,7 +10,6 @@ const ru: Record<keyof typeof en, string> = {
   'a11y.skip': 'Перейти к содержимому',
   'home.cta.projects': 'Смотреть проекты',
   'home.cta.resume': 'Читать резюме',
-  'home.featured': 'Избранные проекты',
   'resume.experience': 'Опыт',
   'resume.skills': 'Навыки',
   'resume.education': 'Образование',

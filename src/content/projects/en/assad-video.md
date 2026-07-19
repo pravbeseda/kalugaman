@@ -3,7 +3,6 @@ title: 'ASSaD-Video'
 description: 'Frontend of a browser-based video surveillance system.'
 tags: ['JavaScript', 'jQuery', 'AngularJS']
 period: '2013 — 2019'
-featured: false
 order: 3
 ---
 
