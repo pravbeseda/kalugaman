@@ -1,0 +1,68 @@
+---
+/**
+ * Yandex.Metrika, site-wide. Two parts:
+ *   - the counter's own snippet (verbatim), whose `init` reports the first pageview;
+ *   - a hit sent by hand on every client navigation, because the site moves between pages
+ *     via <ClientRouter /> without a full reload, and the snippet fires only once.
+ *
+ * Rendered for production builds only (see Base.astro), so local traffic never reaches the
+ * counter.
+ */
+---
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" is:inline>
+  (function (m, e, t, r, i, k, a) {
+    m[i] =
+      m[i] ||
+      function () {
+        (m[i].a = m[i].a || []).push(arguments);
+      };
+    m[i].l = 1 * new Date();
+    for (var j = 0; j < document.scripts.length; j++) {
+      if (document.scripts[j].src === r) {
+        return;
+      }
+    }
+    ((k = e.createElement(t)),
+      (a = e.getElementsByTagName(t)[0]),
+      (k.async = 1),
+      (k.src = r),
+      a.parentNode.insertBefore(k, a));
+  })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=110874245', 'ym');
+
+  ym(110874245, 'init', {
+    ssr: true,
+    webvisor: true,
+    clickmap: true,
+    ecommerce: 'dataLayer',
+    referrer: document.referrer,
+    url: location.href,
+    accurateTrackBounce: true,
+    trackLinks: true,
+  });
+</script>
+<noscript
+  ><div>
+    <img
+      src="https://mc.yandex.ru/watch/110874245"
+      style="position:absolute; left:-9999px;"
+      alt=""
+    />
+  </div></noscript
+>
+<!-- /Yandex.Metrika counter -->
+
+<script>
+  // Report client navigations by hand. astro:after-swap fires only when ClientRouter swaps
+  // in a new page — never on the initial load, which `init` above already counts — so the
+  // first pageview is not reported twice. Bound once on the document, it survives every
+  // swap. `location.href` is the destination by the time the event fires.
+  document.addEventListener('astro:after-swap', () => {
+    (window as unknown as { ym?: (...args: unknown[]) => void }).ym?.(
+      110874245,
+      'hit',
+      location.href,
+    );
+  });
+</script>
