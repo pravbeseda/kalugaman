@@ -17,6 +17,8 @@ export function assertContentInvariants(): Promise<void> {
 }
 
 async function runChecks(): Promise<void> {
+  await projectKindAgreesAcrossLanguages();
+
   const resumes = await getCollection('resume');
 
   const perLocale = locales.map((lang) => {
@@ -28,6 +30,39 @@ async function runChecks(): Promise<void> {
   sameJobsInEveryLanguage(perLocale);
   currentJobAgreesAcrossLanguages(perLocale);
   projectLinkAgreesAcrossLanguages(perLocale);
+}
+
+/**
+ * `kind` decides which group a project is listed under and is repeated in every
+ * language's copy of the document. It also has a default, so omitting it in one language
+ * does not fail the schema — the project simply moves to the other group there. The slug
+ * parity script cannot see this: it only compares file names.
+ */
+async function projectKindAgreesAcrossLanguages(): Promise<void> {
+  const projects = await getCollection('projects');
+
+  const kindsBySlug = (lang: string) =>
+    new Map(
+      projects
+        .filter((entry) => entry.id.startsWith(`${lang}/`))
+        .map((entry) => [entry.id.slice(lang.length + 1), entry.data.kind]),
+    );
+
+  const [first, ...rest] = locales;
+  const expected = kindsBySlug(first);
+
+  for (const lang of rest) {
+    const kinds = kindsBySlug(lang);
+    for (const [slug, kind] of expected) {
+      if (kinds.get(slug) !== kind) {
+        throw new Error(
+          `The projects disagree about the kind of '${slug}' ` +
+            `(${first}: ${kind} — ${lang}: ${kinds.get(slug) ?? 'missing'}). ` +
+            '`kind` groups the project on the list and must match in every language.',
+        );
+      }
+    }
+  }
 }
 
 type PerLocale = {

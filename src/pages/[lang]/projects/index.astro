@@ -23,7 +23,11 @@ const groups = (['commercial', 'personal'] as const)
   .filter((group) => group.items.length > 0);
 ---
 
-<Base lang={lang} title={`${t('nav.projects')} · kalugaman`} description={t('projects.all')}>
+<Base
+  lang={lang}
+  title={`${t('nav.projects')} · kalugaman`}
+  description={t('projects.description')}
+>
   <section class="section">
     <div class="container">
       <h1>{t('projects.all')}</h1>
@@ -60,6 +64,7 @@ const groups = (['commercial', 'personal'] as const)
   .group > h2 {
     font-size: var(--text-lg);
     font-weight: 600;
+    line-height: 1.45;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--color-muted);

@@ -9,7 +9,7 @@ interface Props {
   tags: string[];
   period: string;
   /** Heading level for the card title, so it follows the section it sits under: h3 below the
-      home page's "Featured" h2, h2 directly under the projects page's h1. */
+      projects page's group headings, h2 where the cards sit directly under a page h1. */
   titleTag?: 'h2' | 'h3';
 }
 const { lang, slug, title, description, tags, period, titleTag = 'h3' } = Astro.props;
