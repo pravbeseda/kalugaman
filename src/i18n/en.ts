@@ -16,7 +16,11 @@ export default {
   'resume.languages': 'Languages',
   'resume.download': 'Download PDF',
   'resume.project': 'More about the project',
-  'projects.all': 'All projects',
+  'projects.all': 'Projects',
+  'projects.description':
+    'Projects by Alexander Ivanov: commercial work in Angular and Electron, and personal projects in Kotlin.',
+  'projects.commercial': 'Commercial work',
+  'projects.personal': 'Personal projects',
   'projects.tags': 'Stack',
   'projects.repo': 'Source',
   'projects.website': 'Project website',

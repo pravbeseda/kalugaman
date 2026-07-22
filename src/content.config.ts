@@ -11,6 +11,9 @@ const projects = defineCollection({
     description: z.string(),
     tags: z.array(z.string()).default([]),
     period: z.string(),
+    // Splits the list into "commercial work" and "personal projects": a pet project
+    // must not read as a job. `order` sorts within a group, not across groups.
+    kind: z.enum(['commercial', 'personal']).default('commercial'),
     // A button per link, rendered in array order. `type` drives the default label
     // (i18n key `projects.<type>`) and the JSON-LD mapping in src/lib/schema.ts;
     // `label` overrides the caption when the default does not fit.

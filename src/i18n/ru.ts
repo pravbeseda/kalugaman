@@ -16,7 +16,11 @@ const ru: Record<keyof typeof en, string> = {
   'resume.languages': 'Языки',
   'resume.download': 'Скачать PDF',
   'resume.project': 'Подробнее о проекте',
-  'projects.all': 'Все проекты',
+  'projects.all': 'Проекты',
+  'projects.description':
+    'Проекты Александра Иванова: коммерческая разработка на Angular и Electron и личные проекты на Kotlin.',
+  'projects.commercial': 'Коммерческие проекты',
+  'projects.personal': 'Личные проекты',
   'projects.tags': 'Стек',
   'projects.repo': 'Исходники',
   'projects.website': 'Сайт проекта',
