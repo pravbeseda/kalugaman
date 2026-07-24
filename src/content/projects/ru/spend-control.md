@@ -2,7 +2,7 @@
 title: 'Сколько я могу потратить?'
 description: 'Android-приложение для контроля личных расходов. Более 100 000 установок.'
 tags: ['Kotlin', 'Android', 'Room']
-period: '2018 — сейчас'
+period: 'с 2018'
 kind: personal
 links:
   - type: website
