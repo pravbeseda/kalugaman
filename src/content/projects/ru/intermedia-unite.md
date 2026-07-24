@@ -2,7 +2,7 @@
 title: 'Intermedia Unite'
 description: 'Бизнес-мессенджер: веб на Angular, десктоп на Electron.'
 tags: ['Angular', 'Electron']
-period: '2022 — сейчас'
+period: 'с 2022'
 links:
   - type: website
     url: 'https://www.intermedia.com/products/unite'

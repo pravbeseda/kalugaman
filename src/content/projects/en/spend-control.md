@@ -2,7 +2,7 @@
 title: 'How Much Can I Spend?'
 description: 'An Android app for personal expense control. Over 100,000 installs.'
 tags: ['Kotlin', 'Android', 'Room']
-period: '2018 — now'
+period: 'since 2018'
 kind: personal
 links:
   - type: website

@@ -30,7 +30,8 @@ const href = `/${lang}/projects/${slug}`;
 
 <style>
   .project-card {
-    display: block;
+    display: flex;
+    flex-direction: column;
     padding: var(--space-6);
     color: inherit;
     transition:
@@ -70,6 +71,7 @@ const href = `/${lang}/projects/${slug}`;
     gap: var(--space-2);
     list-style: none;
     padding: 0;
-    margin-top: var(--space-4);
+    margin-top: auto;
+    padding-top: var(--space-4);
   }
 </style>
