@@ -1,5 +1,5 @@
 ---
-title: 'Sleep Noise'
+title: 'Шум для сна'
 description: 'Android-приложение с белым и коричневым шумом для сна. Звук синтезируется на лету, без аудиофайлов.'
 tags: ['Kotlin', 'Android', 'AudioTrack']
 period: 'с 2025'
