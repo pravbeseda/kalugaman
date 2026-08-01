@@ -1,7 +1,7 @@
-# kalugaman.ru
+# kalugaman.dev
 
 Personal website of Alexander Ivanov: a static, bilingual
-(English / Russian) portfolio and resume. Live at **https://kalugaman.ru**.
+(English / Russian) portfolio and resume. Live at **https://kalugaman.dev**.
 
 Static site built with **Astro** (SSG, zero client JS by default). Content is Markdown in
 Content Collections; presentation is `.astro` components; styling is design tokens. The three

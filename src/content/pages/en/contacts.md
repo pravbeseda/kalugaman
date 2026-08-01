@@ -1,7 +1,7 @@
 ---
 title: 'Contacts — kalugaman'
 description: 'Get in touch with Alexander: email and LinkedIn.'
-email: 'alex@kalugaman.ru'
+email: 'alex@kalugaman.dev'
 socials:
   - label: 'GitHub'
     url: 'https://github.com/pravbeseda'

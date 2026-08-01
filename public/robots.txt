@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://kalugaman.ru/sitemap-index.xml
+Sitemap: https://kalugaman.dev/sitemap-index.xml

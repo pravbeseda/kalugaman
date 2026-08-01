@@ -1,4 +1,4 @@
-# Plan: CI/CD for kalugaman.ru
+# Plan: CI/CD for kalugaman.dev
 
 Goal: a push to `main` updates the live site, with no manual steps. Plus checks on
 pull requests, so a broken build never reaches `main`.
@@ -9,7 +9,7 @@ Complements [`plan.md`](./plan.md) §8 and [`roadmap.md`](./roadmap.md).
 
 | Question           | Decision                                                                                       | Why                                                                                                               |
 | ------------------ | ---------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Server             | The mars VPS (also hosts drevo), provisioned by Ansible; site root `/var/www/kalugaman.ru`     | The machine exists and nginx is already there; own user and directory, independent of drevo                       |
+| Server             | The mars VPS (also hosts drevo), provisioned by Ansible; site root `/var/www/kalugaman.dev`    | The machine exists and nginx is already there; own user and directory, independent of drevo                       |
 | Swapping the build | rsync into `public.new/` → `mv` the live `public/` to `public.old/` → `public.new/` into place | Effectively atomic, without symlinks or release dirs; `public.old` is a one-step rollback                         |
 | Deploy trigger     | Push to `main` + `workflow_dispatch` (a button)                                                | Single developer; the gate already exists on PRs                                                                  |
 | Checks             | `astro check`, `prettier --check`, language parity, build + smoke                              | They catch exactly the failures that are real here                                                                |
@@ -89,9 +89,9 @@ jobs.deploy (ubuntu-latest, environment: production):
   - npm run build
   - npm run check:dist                        # never ship an empty build
   - shimataro/ssh-key-action@v2               # SSH_PRIVATE_KEY + SSH_KNOWN_HOSTS
-  - rsync -az --delete dist/ user@host:/var/www/kalugaman.ru/public.new/
+  - rsync -az --delete dist/ user@host:/var/www/kalugaman.dev/public.new/
   - ssh: swap into place (below)
-  - curl https://kalugaman.ru/en/             # the site answers 200
+  - curl https://kalugaman.dev/en/             # the site answers 200
   - on failed verification: roll back
 ```
 

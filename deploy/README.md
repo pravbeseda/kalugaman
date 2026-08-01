@@ -16,7 +16,7 @@ The pipeline itself: [`../docs/ci-cd.md`](../docs/ci-cd.md).
 /home/kalugaman-deploy/          # deploy user's home: the ssh key, nothing else
 └── .ssh/authorized_keys
 
-/var/www/kalugaman.ru/           # site root, owned by kalugaman-deploy
+/var/www/kalugaman.dev/          # site root, owned by kalugaman-deploy
 ├── public/                      # what nginx serves
 ├── public.new/                  # rsync target during a deploy, exists for seconds
 └── public.old/                  # previous build — one rename away from a rollback
@@ -27,7 +27,7 @@ tend to be created `0700`/`0750`, which makes nginx return 403 on everything, an
 service account's home doubling as a document root muddles backups and permissions.
 
 `public.new` and `public.old` are created by the workflow; Ansible only creates
-`/var/www/kalugaman.ru`. All three must sit on one filesystem — the swap relies on `mv`
+`/var/www/kalugaman.dev`. All three must sit on one filesystem — the swap relies on `mv`
 being a rename, not a copy.
 
 The deploy user is `kalugaman-deploy`, an account of its own rather than the shared
@@ -37,7 +37,7 @@ unprivileged, has no sudo, and owns only the site root.
 
 ## What the nginx vhost has to do
 
-Serve `/var/www/kalugaman.ru/public`, plus four things that are specific to this site:
+Serve `/var/www/kalugaman.dev/public`, plus four things that are specific to this site:
 
 **Language redirect on the root.** `/` is the only page without a language, so nginx
 picks one from `Accept-Language`:
@@ -90,16 +90,16 @@ The status stays 404 — `error_page` does not rewrite it unless asked to.
 Verify after a change:
 
 ```bash
-curl -sI -H 'Accept-Language: ru' https://kalugaman.ru/            # 302 → /ru/
-curl -sI -H 'Accept-Language: en-US,en;q=0.9,ru;q=0.8' https://kalugaman.ru/  # 302 → /en/
-curl -sI https://kalugaman.ru/en/            # must-revalidate + both security headers
-curl -sI https://kalugaman.ru/favicon-32.png # must-revalidate — no hash in the name
-curl -sI https://kalugaman.ru/_astro/<file>  # immutable
-curl -si https://kalugaman.ru/nope | head -1              # HTTP/2 404
-curl -s  https://kalugaman.ru/nope | grep -o '<title>[^<]*'  # the site's page, not nginx's
+curl -sI -H 'Accept-Language: ru' https://kalugaman.dev/            # 302 → /ru/
+curl -sI -H 'Accept-Language: en-US,en;q=0.9,ru;q=0.8' https://kalugaman.dev/  # 302 → /en/
+curl -sI https://kalugaman.dev/en/            # must-revalidate + both security headers
+curl -sI https://kalugaman.dev/favicon-32.png # must-revalidate — no hash in the name
+curl -sI https://kalugaman.dev/_astro/<file>  # immutable
+curl -si https://kalugaman.dev/nope | head -1              # HTTP/2 404
+curl -s  https://kalugaman.dev/nope | grep -o '<title>[^<]*'  # the site's page, not nginx's
 ```
 
-TLS is certbot (`kalugaman.ru` + `www`), with the 80→443 redirect. DNS: an A record for
+TLS is certbot (`kalugaman.dev` + `www`), with the 80→443 redirect. DNS: an A record for
 the apex to the mars IP, `www` as a CNAME.
 
 ## GitHub side
@@ -114,6 +114,9 @@ Settings → Secrets and variables → Actions.
 | `SSH_PRIVATE_KEY` | the private half of the deploy key, in full        |
 | `SSH_KNOWN_HOSTS` | output of `ssh-keyscan -p 53812 mars.kalugaman.ru` |
 
+`SSH_HOST` stays in the `.ru` zone on purpose: it names the machine, not the site, and
+mars serves both domains.
+
 Plus the variable that arms the deploy job: **Variables** → `DEPLOY_ENABLED` = `true`.
 Removing it is the kill switch for auto-deploy — the job is skipped, nothing else breaks.
 
@@ -126,8 +129,8 @@ is kept as `public.bad`.
 By hand:
 
 ```bash
-mv /var/www/kalugaman.ru/public /var/www/kalugaman.ru/public.bad
-mv /var/www/kalugaman.ru/public.old /var/www/kalugaman.ru/public
+mv /var/www/kalugaman.dev/public /var/www/kalugaman.dev/public.bad
+mv /var/www/kalugaman.dev/public.old /var/www/kalugaman.dev/public
 ```
 
 Or, more reproducibly, revert the commit on `main` — the deploy runs again.

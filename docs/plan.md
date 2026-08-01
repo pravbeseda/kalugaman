@@ -1,4 +1,4 @@
-# Plan: kalugaman.ru — developer's personal site
+# Plan: kalugaman.dev — developer's personal site
 
 ## 1. Goals and requirements
 
@@ -141,7 +141,7 @@ Details and the step-by-step plan live in [`ci-cd.md`](./ci-cd.md). The gist:
 
 ### 8.1 VPS + nginx
 
-- The site is static files in `/var/www/kalugaman.ru/public` on the mars VPS (which also hosts drevo, but under its own deploy user and directory). No symlinks, no release directories: the build is small, and swapping it in renames a staging directory into place. The server is provisioned by Ansible — see [`../deploy/README.md`](../deploy/README.md).
+- The site is static files in `/var/www/kalugaman.dev/public` on the mars VPS (which also hosts drevo, but under its own deploy user and directory). No symlinks, no release directories: the build is small, and swapping it in renames a staging directory into place. The server is provisioned by Ansible — see [`../deploy/README.md`](../deploy/README.md).
 - HTTPS: certbot (Let's Encrypt) with auto-renewal; 80→443 and www→apex redirects.
 - The vhost belongs to the Ansible role, not to this repository. Its requirements — the root language redirect from `Accept-Language`, caching by path (only `/_astro/` is hashed, so only it may be `immutable`), all `add_header` declared on one level, clean URLs — are spelled out in [`../deploy/README.md`](../deploy/README.md), along with the curl checks that verify them.
 
@@ -166,7 +166,7 @@ Live checklists and current status: [`roadmap.md`](./roadmap.md).
 - [x] **3. Pages**: home, resume, projects (list + detail), contacts — mobile-first
 - [x] **4. Themes**: themes.css, inline script, ThemeToggle
 - [x] **5. SEO baseline**: sitemap with i18n, canonical, OG/meta
-- [ ] **6. CI/CD + VPS**: checks on PRs, auto-deploy to `/var/www/kalugaman.ru`, nginx, certbot, DNS ← _we are here_
+- [ ] **6. CI/CD + VPS**: checks on PRs, auto-deploy to `/var/www/kalugaman.dev`, nginx, certbot, DNS ← _we are here_
 - [ ] **7. Polish**: mobile menu, 404, robots.txt, a11y, token debt
 - [ ] **8. PDF**: PrintResume layout, print page, Playwright script, download buttons
 - [ ] **9. Launch**: Lighthouse 95+, ATS parsing of the PDF, Search Console, monitoring
