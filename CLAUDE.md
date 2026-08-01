@@ -1,4 +1,4 @@
-# CLAUDE.md — kalugaman.ru
+# CLAUDE.md — kalugaman.dev
 
 Personal website of Alexander Ivanov (Senior Angular Developer). Static, bilingual
 portfolio / resume. Repo: https://github.com/pravbeseda/kalugaman (public).

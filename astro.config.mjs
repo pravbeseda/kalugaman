@@ -5,7 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 // Static SSG. i18n is handled manually via [lang] routing (src/pages/[lang]/...).
 export default defineConfig({
-  site: 'https://kalugaman.ru',
+  site: 'https://kalugaman.dev',
   trailingSlash: 'ignore',
   // Self-hosted, cut to Latin + Cyrillic (scripts/subset-fonts.sh) — ~35 KB a weight.
   // Astro hashes the files and derives a metric-matched system fallback for 400 and 600.
@@ -34,7 +34,7 @@ export default defineConfig({
         locales: { en: 'en', ru: 'ru' },
       },
       // root `/` is a server redirect (noindex) — keep it out of the sitemap
-      filter: (page) => page !== 'https://kalugaman.ru/',
+      filter: (page) => page !== 'https://kalugaman.dev/',
     }),
   ],
 });

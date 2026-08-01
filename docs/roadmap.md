@@ -1,7 +1,7 @@
 # Roadmap: from POC to production with auto-deploy
 
 Complements [`plan.md`](./plan.md) (architecture). This is the path from where the
-project stands today to a live site on `kalugaman.ru` deployed automatically from
+project stands today to a live site on `kalugaman.dev` deployed automatically from
 GitHub. CI/CD details live in [`ci-cd.md`](./ci-cd.md).
 
 ## Where we are
@@ -28,14 +28,14 @@ left: the PDF resume.
 
 ## Phase E' — CI/CD ✅
 
-The site is live at **https://kalugaman.ru** and every push to `main` ships it.
+The site is live at **https://kalugaman.dev** and every push to `main` ships it.
 Full write-up: [`ci-cd.md`](./ci-cd.md), server side: [`deploy/README.md`](../deploy/README.md).
 
 - [x] Prettier + `prettier-plugin-astro`, `npm run format` / `format:check`
 - [x] Language parity script (`scripts/check-i18n-parity.mjs`)
 - [x] Smoke check of `dist/` after the build (`scripts/check-dist.mjs`)
 - [x] `.github/workflows/ci.yml` — on PRs and pushes to `main`: format + check + parity + build + smoke
-- [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `/var/www/kalugaman.ru/public` into place, with an automatic rollback if the site does not answer
+- [x] `.github/workflows/deploy.yml` — push to `main` (+ `workflow_dispatch`): build → rsync → swap `/var/www/kalugaman.dev/public` into place, with an automatic rollback if the site does not answer
 - [x] Server (mars) provisioned by Ansible: `kalugaman-deploy` user, site root, nginx vhost, TLS, DNS
 - [x] GitHub secrets + `DEPLOY_ENABLED`; first deploy done, live behaviour verified (language redirect, cache headers, security headers)
 - [x] Rollback drill: verification pointed at a missing URL on purpose, the previous build was restored by rename (same inode), the bad one kept as `public.bad`, the site never stopped answering, and the run still went red

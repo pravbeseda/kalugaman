@@ -12,7 +12,7 @@ concurrency:
 env:
   # Provisioned by Ansible; owned by the deploy user. public/ is what nginx serves,
   # public.new/ and public.old/ are the staging and rollback siblings.
-  SITE_ROOT: /var/www/kalugaman.ru
+  SITE_ROOT: /var/www/kalugaman.dev
 
 jobs:
   deploy:
@@ -105,7 +105,7 @@ jobs:
       - name: Verify site responds
         run: |
           curl -fsS --retry 3 --retry-delay 5 --retry-all-errors \
-            -o /dev/null -w '%{http_code}\n' https://kalugaman.ru/en/
+            -o /dev/null -w '%{http_code}\n' https://kalugaman.dev/en/
 
       # Only when the swap itself succeeded: on an earlier failure nothing was
       # swapped, and .old is the previous deploy — restoring it would replace a

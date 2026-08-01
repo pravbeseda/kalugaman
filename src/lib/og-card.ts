@@ -92,7 +92,7 @@ const svg = (name: string, role: string, portrait: string) => {
     <line x1="${MARGIN}" y1="470" x2="${MARGIN + 160}" y2="470"
           stroke="${c['color-border']}" stroke-width="2"/>
     <text x="${MARGIN}" y="524" font-family="${MONO}" font-size="24" letter-spacing="2"
-          fill="${c['color-muted']}">kalugaman.ru</text>
+          fill="${c['color-muted']}">kalugaman.dev</text>
 
     <image xlink:href="${portrait}" clip-path="url(#round)"
            x="${PORTRAIT_CX - PORTRAIT_SIZE / 2}" y="${PORTRAIT_CY - PORTRAIT_SIZE / 2}"
@@ -210,7 +210,7 @@ async function draw(lang: Locale): Promise<Buffer> {
   fits(lang, 'role', role, [34, 600, SANS]);
   // Fixed strings, but they are drawn from the same subset fonts as the resume is.
   covered(lang, 'tagline', TAGLINE, [22, 400, MONO]);
-  covered(lang, 'domain', 'kalugaman.ru', [24, 400, MONO]);
+  covered(lang, 'domain', 'kalugaman.dev', [24, 400, MONO]);
 
   const png = new Resvg(svg(name, role, await portraitHref()), { font: FONT }).render().asPng();
 
