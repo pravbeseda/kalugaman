@@ -55,9 +55,9 @@ instead of quietly overwriting it.
 
 Plain **Node.js** (>= 18) with **zero dependencies** — the package is installed
 as a CLI and has no business dragging someone else's tree along. Tests run on the
-built-in `node:test` and include a check of the README itself: the command
-examples in the documentation are verified against the real CLI, so the docs
-cannot drift away from the code.
+built-in `node:test` and include a check of the README itself: the skills table
+in the documentation is verified against the skills the package actually ships,
+so the docs cannot drift away from the code.
 
 Support for an agent is a one-file **adapter plugin**: an id, a label and a
 function that returns the directories for a given environment. A new agent is
