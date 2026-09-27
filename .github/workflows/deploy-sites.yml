@@ -1,0 +1,55 @@
+name: Deploy sites
+
+# Project mini-sites: sites/<name>/ is served as https://<name>.kalugaman.dev/.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sites/**'
+      - '.github/workflows/deploy-sites.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-sites
+  cancel-in-progress: false
+
+env:
+  # Provisioned by Ansible; owned by the deploy user. The wildcard vhost serves
+  # <name>.kalugaman.dev from $SITES_ROOT/<name>.
+  SITES_ROOT: /var/www/sites
+
+jobs:
+  deploy:
+    if: vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      # --delay-updates moves the changed files into place at the end of the transfer, which is
+      # atomic enough for static pages. --delete removes the site whose folder was removed; Git
+      # drops an emptied sites/, so it is recreated for the last site's removal to reach the server.
+      - name: Upload sites
+        env:
+          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p sites
+          rsync -az --delete-delay --delay-updates -e "ssh -p $SSH_PORT" \
+            sites/ "$SSH_USER@$SSH_HOST:$SITES_ROOT/"
+
+      - name: Verify sites respond
+        run: |
+          shopt -s nullglob
+          for dir in sites/*/; do
+            name=$(basename "$dir")
+            curl -fsS --retry 3 --retry-delay 5 --retry-all-errors \
+              -o /dev/null -w "$name: %{http_code}\n" "https://$name.kalugaman.dev/"
+          done

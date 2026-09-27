@@ -102,6 +102,55 @@ curl -s  https://kalugaman.dev/nope | grep -o '<title>[^<]*'  # the site's page,
 TLS is certbot (`kalugaman.dev` + `www`), with the 80→443 redirect. DNS: an A record for
 the apex to the mars IP, `www` as a CNAME.
 
+## Project mini-sites
+
+`sites/<name>/` in this repository is served as `https://<name>.kalugaman.dev/` and deployed
+by `deploy-sites.yml`: one rsync of `sites/` into `/var/www/sites/`, with the same deploy
+user and secrets. The server is set up once; a new site is a new folder and nothing else.
+
+```
+/var/www/sites/                  # owned by kalugaman-deploy, created by Ansible
+├── home/                        # home.kalugaman.dev
+└── <name>/
+```
+
+**DNS**: a name per site (`home` is a CNAME to the apex), or once `*.kalugaman.dev` CNAME →
+`kalugaman.dev` for every future site. Explicit records keep winning over the wildcard.
+
+**One wildcard vhost** for every mini-site, with the wildcard certificate:
+
+```nginx
+server {
+    listen 443 ssl;
+    http2 on;
+    server_name ~^(?<site>[a-z0-9-]+)\.kalugaman\.dev$;
+    root /var/www/sites/$site;
+
+    add_header Cache-Control "public, max-age=0, must-revalidate" always;
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+
+    location / {
+        try_files $uri $uri.html $uri/index.html =404;
+    }
+}
+# plus the same server_name on :80 with `return 301 https://$host$request_uri;`
+```
+
+nginx checks exact server names before regular expressions, so `kalugaman.dev` and `www` stay
+on their own vhost. The pattern allows no dots, so the name cannot climb out of
+`/var/www/sites`; an unknown subdomain has no directory and gets a 404. Mini-site files carry
+no content hash, hence `must-revalidate` on everything.
+
+Verify after a change:
+
+```bash
+curl -sI https://home.kalugaman.dev/          # 200, must-revalidate + both security headers
+curl -sI https://home.kalugaman.dev/privacy   # 200 — clean URL for privacy.html
+curl -sI https://nope.kalugaman.dev/ | head -1  # HTTP/2 404
+curl -sI https://kalugaman.dev/en/ | head -1    # HTTP/2 200 — the main site is untouched
+```
+
 ## GitHub side
 
 Settings → Secrets and variables → Actions.
