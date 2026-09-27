@@ -71,6 +71,14 @@ locale-prefixed; there is no unprefixed /projects path).
 The projects index lists every project (as `h2` under the page `h1`), sorted by `order`. The
 detail route is generated automatically.
 
+### A project mini-site
+
+A standalone site on `<name>.kalugaman.dev` is a folder `sites/<name>/` of plain HTML and CSS:
+no build, nothing shared with the main site, and no language parity rule. `index.html` is the
+root, `privacy.html` is served as `/privacy`. A push to `main` that touches `sites/` deploys all
+of them (`deploy-sites.yml`); removing the folder removes the site. The server side needs no
+change — see [`deploy/README.md`](deploy/README.md).
+
 ### A language
 
 More than a config edit: a few places still assume exactly the two locales, so plan on code

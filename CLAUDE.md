@@ -70,6 +70,7 @@ src/layouts/Base.astro # <head>, meta, hreflang, ClientRouter, header/footer
 src/components/        # Header, Footer, ThemeToggle, LangSwitch, ProjectCard
 src/styles/            # tokens.css, themes.css, global.css
 src/pages/[lang]/      # routed pages (home, resume, projects, contacts)
+sites/<name>/          # standalone plain-HTML mini-sites on <name>.kalugaman.dev
 docs/plan.md           # architecture plan
 docs/roadmap.md        # development roadmap (POC → production + CI/CD)
 ```

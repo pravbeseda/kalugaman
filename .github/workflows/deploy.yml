@@ -3,6 +3,8 @@ name: Deploy
 on:
   push:
     branches: [main]
+    # Mini-sites ship through deploy-sites.yml.
+    paths-ignore: ['sites/**']
   workflow_dispatch:
 
 concurrency:
