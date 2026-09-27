@@ -79,33 +79,8 @@ h1 {
   line-height: 1.25;
 }
 
-h2 {
-  margin: 2rem 0 0.5rem;
-  font-size: 1.15rem;
-}
-
 .muted {
   color: var(--muted);
-}
-
-code {
-  font-size: 0.9em;
-}
-
-dt {
-  font-weight: 600;
-}
-
-dd {
-  margin: 0 0 0.75rem;
-}
-
-.links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  padding: 0;
-  list-style: none;
 }
 
 footer {
