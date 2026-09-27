@@ -75,9 +75,9 @@ detail route is generated automatically.
 
 A standalone site on `<name>.kalugaman.dev` is a folder `sites/<name>/` of plain HTML and CSS:
 no build, nothing shared with the main site, and no language parity rule. `index.html` is the
-root, `privacy.html` is served as `/privacy`. A push to `main` that touches `sites/` deploys all
-of them (`deploy-sites.yml`); removing the folder removes the site. The server side needs no
-change — see [`deploy/README.md`](deploy/README.md).
+root; any other page is served without its extension (`about.html` as `/about`). A push to
+`main` that touches `sites/` deploys all of them (`deploy-sites.yml`); removing the folder
+removes the site. The server side needs no change — see [`deploy/README.md`](deploy/README.md).
 
 ### A language
 

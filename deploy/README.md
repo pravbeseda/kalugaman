@@ -146,7 +146,6 @@ Verify after a change:
 
 ```bash
 curl -sI https://home.kalugaman.dev/          # 200, must-revalidate + both security headers
-curl -sI https://home.kalugaman.dev/privacy   # 200 — clean URL for privacy.html
 curl -sI https://nope.kalugaman.dev/ | head -1  # HTTP/2 404
 curl -sI https://kalugaman.dev/en/ | head -1    # HTTP/2 200 — the main site is untouched
 ```
