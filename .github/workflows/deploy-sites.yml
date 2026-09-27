@@ -33,18 +33,21 @@ jobs:
           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
       # --delay-updates moves the changed files into place at the end of the transfer, which is
-      # atomic enough for static pages. --delete removes the site whose folder was removed.
+      # atomic enough for static pages. --delete removes the site whose folder was removed; Git
+      # drops an emptied sites/, so it is recreated for the last site's removal to reach the server.
       - name: Upload sites
         env:
           SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
         run: |
+          mkdir -p sites
           rsync -az --delete-delay --delay-updates -e "ssh -p $SSH_PORT" \
             sites/ "$SSH_USER@$SSH_HOST:$SITES_ROOT/"
 
       - name: Verify sites respond
         run: |
+          shopt -s nullglob
           for dir in sites/*/; do
             name=$(basename "$dir")
             curl -fsS --retry 3 --retry-delay 5 --retry-all-errors \
