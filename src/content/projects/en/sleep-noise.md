@@ -45,8 +45,8 @@ on a `ReentrantLock`.
 Each noise is its own DSP algorithm: brown is a one-pole low-pass over white,
 pink is Paul Kellett's filter bank, grey is biquads fitted to the ISO 226
 equal-loudness contour, green is a 250–1200 Hz band-pass, surf is two bands with
-randomised wave envelopes. All sources share one level, so they mix without
-clipping.
+randomised wave envelopes. All sources share one level, so even all six at full
+volume clip under 1% of samples.
 
 Plus **Firebase** (Analytics, Crashlytics), a splash screen via
 `core-splashscreen`, two themes (purple and dark), **6 interface languages**

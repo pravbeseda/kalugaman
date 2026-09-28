@@ -37,7 +37,7 @@ many of the translations done by the users themselves.
 Components, MPAndroidChart for statistics, **Google Play Billing** for purchases,
 Firebase (Analytics, Crashlytics), reminders on AlarmManager, automatic backup on
 **WorkManager** and the Storage Access Framework. The architecture is **MVVM +
-Repository** with a pure Kotlin/JVM `domain` module: 23 use cases with 100% test
+Repository** with a pure Kotlin/JVM `domain` module: 19 use cases with 100% test
 coverage, manual DI through a composition root, and layer rules enforced by
 architecture tests. Built with **Gradle** with free and premium flavors, R8 in
 release builds.
@@ -55,8 +55,9 @@ myself first of all, so the product grows along with real use.
 - Built **CI/CD on GitHub Actions**: every PR runs linters, detekt, Android
   Lint, a coverage floor, instrumented tests on API 24 and 36 emulators, a
   secret scan and SAST; every merge ships a signed build to testers through
-  Firebase App Distribution; a release tag smoke-tests the R8 build and uploads
-  both variants to Google Play with a staged rollout.
+  Firebase App Distribution; a manually started release smoke-tests the R8 build,
+  uploads both variants to a Google Play beta track and creates the tag and
+  GitHub Release, and production gets a staged rollout from a separate workflow.
 - Carried out a **refactoring toward clean architecture**: business logic moved
   into the Android-independent `domain` module, data flows through Flow, over
   350 unit tests. The module is ready to become the shared core for sync between
