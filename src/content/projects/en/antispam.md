@@ -17,7 +17,8 @@ account, whatever the mail provider — is sent for classification to **TypeSafe
 Jev**, which answers with a category (spam, phishing, promo, legit) and a
 confidence. A policy takes it from there: spam and phishing at or above the
 threshold go to Junk; below it they get a yellow background and a gray flag but
-stay in the Inbox; promo mail gets a purple flag. The threshold defaults to 0.9.
+stay in the Inbox; promo mail gets a purple flag, again only at or above the
+threshold. The threshold defaults to 0.9.
 
 The main rule is **do no harm**: on any error — no key, no network, an
 unexpected response — the message is left untouched. Only the key headers, up
