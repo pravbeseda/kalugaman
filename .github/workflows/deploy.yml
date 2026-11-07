@@ -51,7 +51,7 @@ jobs:
       # where it happens: a PR build has no use for a 150MB Chromium. The cache is keyed on
       # the lockfile, which is what pins the Playwright version the browser must match.
       - name: Cache Playwright browser
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
