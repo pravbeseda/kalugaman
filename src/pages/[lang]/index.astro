@@ -51,15 +51,13 @@ const schema =
         />
         <div class="hero__heading">
           <h1 class="hero__name">{displayName}</h1>
-          {
-            currentJob && (
-              <p class="hero__role">
-                <span class="hero__role-position">{currentJob.position}</span>
-                <span class="hero__role-sep">{' · '}</span>
-                <span class="hero__role-company">{currentJob.company}</span>
-              </p>
-            )
-          }
+          {currentJob && (
+            <p class="hero__role">
+              <span class="hero__role-position">{currentJob.position}</span>
+              <span class="hero__role-sep">{' · '}</span>
+              <span class="hero__role-company">{currentJob.company}</span>
+            </p>
+          )}
         </div>
       </div>
       {home.data.tagline && <p class="hero__tagline">{home.data.tagline}</p>}
@@ -70,7 +68,9 @@ const schema =
         <a class="button button--primary" href={`/${lang}/projects`}>
           {t('home.cta.projects')}
         </a>
-        <a class="button" href={`/${lang}/resume`}>{t('home.cta.resume')}</a>
+        <a class="button" href={`/${lang}/resume`}>
+          {t('home.cta.resume')}
+        </a>
       </div>
     </div>
   </section>

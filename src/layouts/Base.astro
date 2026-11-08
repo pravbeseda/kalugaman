@@ -71,8 +71,7 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    {
-      /* Only the body weight is preloaded. A preload is a claim on bandwidth ahead of
+    {/* Only the body weight is preloaded. A preload is a claim on bandwidth ahead of
         everything else, including the portrait that is likely the LCP; the other two
         weights are fetched right after the CSS is parsed.
 
@@ -80,8 +79,7 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
         bold-metric family after a fallback family that already covers 400 and 600, and
         font matching picks a family before it picks a weight — so a 700 request never
         reaches it (measured: 331.03px either way, against 329.52px with the bold family
-        first). Headings therefore do move a little when Inter lands. */
-    }
+        first). Headings therefore do move a little when Inter lands. */}
     <Font cssVariable="--font-inter" preload={[{ weight: 400 }]} />
 
     <title>{title}</title>
@@ -89,37 +87,33 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
 
     {noindex && <meta name="robots" content="noindex, follow" />}
 
-    {
-      !noCanonical && (
-        <>
-          <link rel="canonical" href={canonical} />
-          {alternates.map((a) => (
-            <link rel="alternate" hreflang={a.lang} href={a.href} />
-          ))}
-          <link
-            rel="alternate"
-            hreflang="x-default"
-            href={new URL(switchLocalePath(path, defaultLocale), Astro.site).href}
-          />
-        </>
-      )
-    }
+    {!noCanonical && (
+      <>
+        <link rel="canonical" href={canonical} />
+        {alternates.map((a) => (
+          <link rel="alternate" hreflang={a.lang} href={a.href} />
+        ))}
+        <link
+          rel="alternate"
+          hreflang="x-default"
+          href={new URL(switchLocalePath(path, defaultLocale), Astro.site).href}
+        />
+      </>
+    )}
 
-    {
-      /* Open Graph. og:url is a claim about where the page lives — same claim as
-      canonical, so a page without a URL of its own makes neither. */
-    }
+    {/* Open Graph. og:url is a claim about where the page lives — same claim as
+      canonical, so a page without a URL of its own makes neither. */}
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="kalugaman.dev" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     {!noCanonical && <meta property="og:url" content={canonical} />}
     <meta property="og:locale" content={ogLocales[lang]} />
-    {
-      locales
-        .filter((l) => l !== lang)
-        .map((l) => <meta property="og:locale:alternate" content={ogLocales[l]} />)
-    }
+    {locales
+      .filter((l) => l !== lang)
+      .map((l) => (
+        <meta property="og:locale:alternate" content={ogLocales[l]} />
+      ))}
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content={String(CARD_SIZE.width)} />
@@ -132,12 +126,10 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
     {/* SPA-like navigation (no full reload) */}
     <ClientRouter />
 
-    {
-      /* Apply theme before first paint (no FOUC); re-apply on client navigation via
+    {/* Apply theme before first paint (no FOUC); re-apply on client navigation via
         astro:after-swap, before the new document paints (ClientRouter swaps the attributes
         of <html> too). Nothing else rides along: whether the toggle is usable is not this
-        script's to say — the module that gives the button its behaviour reveals it. */
-    }
+        script's to say — the module that gives the button its behaviour reveals it. */}
     <script is:inline>
       (() => {
         const applyTheme = () => {
@@ -153,7 +145,9 @@ const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
   </head>
   <body>
     {/* data-i18n: the 404 is built in one language and swapped on load — see 404.astro. */}
-    <a class="skip-link" href="#main" data-i18n="skip">{t('a11y.skip')}</a>
+    <a class="skip-link" href="#main" data-i18n="skip">
+      {t('a11y.skip')}
+    </a>
     {!bare && <Header lang={lang} />}
     <main id="main">
       <slot />

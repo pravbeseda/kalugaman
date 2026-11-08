@@ -23,14 +23,12 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
 
 <header class="header">
   <div class="container header__inner">
-    {
-      /* <details> rather than a button: the browser owns the open state, the keyboard and
+    {/* <details> rather than a button: the browser owns the open state, the keyboard and
         aria-expanded on the summary, and the menu still opens with JS off. The script
         below only handles what the element does not — Escape, a click outside, and a
         viewport that grew past the breakpoint. The links are rendered a second time
         because only one of the two navs is ever displayed, and display:none keeps the
-        other out of the accessibility tree. */
-    }
+        other out of the accessibility tree. */}
     <details class="menu" id="menu">
       <summary class="menu__button" aria-label={t('nav.menu')} title={t('nav.menu')}>
         <svg
@@ -62,24 +60,20 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
       </summary>
 
       <nav class="menu__panel" aria-label={t('nav.primary')}>
-        {
-          links.map((l) => (
-            <a
-              href={l.href}
-              class:list={['nav__link', { 'nav__link--active': isActive(l.href) }]}
-              aria-current={isActive(l.href) ? 'page' : undefined}
-            >
-              {l.label}
-            </a>
-          ))
-        }
+        {links.map((l) => (
+          <a
+            href={l.href}
+            class:list={['nav__link', { 'nav__link--active': isActive(l.href) }]}
+            aria-current={isActive(l.href) ? 'page' : undefined}
+          >
+            {l.label}
+          </a>
+        ))}
       </nav>
     </details>
 
-    {
-      /* The wordmark is dropped on a narrow phone (see the styles), where the row has no
-        room for it — so the link is named here rather than by its text. */
-    }
+    {/* The wordmark is dropped on a narrow phone (see the styles), where the row has no
+        room for it — so the link is named here rather than by its text. */}
     <a class="brand" href={base} aria-label="kalugaman.dev">
       <Image
         src={avatar}
@@ -89,21 +83,21 @@ const isActive = (href: string) => (href === base ? path === base : path.startsW
         class="brand__avatar"
         loading="eager"
       />
-      <span class="brand__name">kalugaman<span>.dev</span></span>
+      <span class="brand__name">
+        kalugaman<span>.dev</span>
+      </span>
     </a>
 
     <nav class="nav" aria-label={t('nav.primary')}>
-      {
-        links.map((l) => (
-          <a
-            href={l.href}
-            class:list={['nav__link', { 'nav__link--active': isActive(l.href) }]}
-            aria-current={isActive(l.href) ? 'page' : undefined}
-          >
-            {l.label}
-          </a>
-        ))
-      }
+      {links.map((l) => (
+        <a
+          href={l.href}
+          class:list={['nav__link', { 'nav__link--active': isActive(l.href) }]}
+          aria-current={isActive(l.href) ? 'page' : undefined}
+        >
+          {l.label}
+        </a>
+      ))}
     </nav>
 
     <div class="header__actions">

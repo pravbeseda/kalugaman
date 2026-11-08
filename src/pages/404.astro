@@ -37,27 +37,26 @@ const strings = Object.fromEntries(
   <section class="notfound">
     <p class="code">404</p>
     <h1 data-i18n="title">{t('notfound.title')}</h1>
-    <p class="text" data-i18n="text">{t('notfound.text')}</p>
-    <a class="button" href={`/${defaultLocale}/`} data-i18n="home">{t('notfound.home')}</a>
+    <p class="text" data-i18n="text">
+      {t('notfound.text')}
+    </p>
+    <a class="button" href={`/${defaultLocale}/`} data-i18n="home">
+      {t('notfound.home')}
+    </a>
   </section>
 
-  {
-    /* The data goes through a JSON tag rather than define:vars, which strips every other
-      attribute off the <script> — including the data-astro-rerun below. */
-  }
+  {/* The data goes through a JSON tag rather than define:vars, which strips every other
+      attribute off the <script> — including the data-astro-rerun below. */}
   <script
     type="application/json"
     id="notfound-i18n"
     is:inline
     set:html={JSON.stringify({ strings, locales, defaultLocale })}
   />
-
-  {
-    /* Inside the slot: a script placed next to <Base> would land after </html>.
+  {/* Inside the slot: a script placed next to <Base> would land after </html>.
       data-astro-rerun because ClientRouter swaps in a 404 response like any other
       document (it checks the content type, not the status) and skips scripts it has
-      already run — without it, a second dead link would show the English body. */
-  }
+      already run — without it, a second dead link would show the English body. */}
   <script is:inline data-astro-rerun>
     (() => {
       const { strings, locales, defaultLocale } = JSON.parse(
