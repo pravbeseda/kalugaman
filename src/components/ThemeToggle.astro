@@ -5,18 +5,14 @@ const { lang } = Astro.props as { lang: Locale };
 const t = useTranslations(lang);
 ---
 
-{
-  /* SVG rather than ☀/☾: Inter has no moon at all (nor does most of the Latin web),
+{/* SVG rather than ☀/☾: Inter has no moon at all (nor does most of the Latin web),
     so a glyph would be drawn by whatever symbol font the OS happens to have — a
-    different moon on every platform, next to a sun from Inter. */
-}
-{
-  /* The name and the tooltip say what a click will do, and that depends on the theme in
+    different moon on every platform, next to a sun from Inter. */}
+{/* The name and the tooltip say what a click will do, and that depends on the theme in
     force — which at build time is the visitor's system preference, unknowable from here.
     So the two possible strings are carried on the element and the script picks one; the
     attributes rendered here are the neutral form, never wrong, and in any case the button
-    is not shown until that script has run. */
-}
+    is not shown until that script has run. */}
 <button
   id="theme-toggle"
   class="theme-toggle"
@@ -38,9 +34,7 @@ const t = useTranslations(lang);
     aria-hidden="true"
   >
     <circle cx="12" cy="12" r="4.5"></circle>
-    <path
-      d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
-    ></path>
+    <path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"></path>
   </svg>
   <svg
     class="theme-toggle__icon theme-toggle__moon"

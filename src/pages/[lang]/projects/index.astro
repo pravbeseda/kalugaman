@@ -31,26 +31,24 @@ const groups = (['commercial', 'personal'] as const)
   <section class="section">
     <div class="container">
       <h1>{t('projects.all')}</h1>
-      {
-        groups.map((group) => (
-          <section class="group">
-            <h2>{t(`projects.${group.kind}`)}</h2>
-            <div class="grid">
-              {group.items.map((p) => (
-                <ProjectCard
-                  lang={lang}
-                  slug={p.id.replace(`${lang}/`, '')}
-                  title={p.data.title}
-                  description={p.data.description}
-                  tags={p.data.tags}
-                  period={p.data.period}
-                  titleTag="h3"
-                />
-              ))}
-            </div>
-          </section>
-        ))
-      }
+      {groups.map((group) => (
+        <section class="group">
+          <h2>{t(`projects.${group.kind}`)}</h2>
+          <div class="grid">
+            {group.items.map((p) => (
+              <ProjectCard
+                lang={lang}
+                slug={p.id.replace(`${lang}/`, '')}
+                title={p.data.title}
+                description={p.data.description}
+                tags={p.data.tags}
+                period={p.data.period}
+                titleTag="h3"
+              />
+            ))}
+          </div>
+        </section>
+      ))}
     </div>
   </section>
 </Base>

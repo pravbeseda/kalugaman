@@ -82,35 +82,31 @@ const schema = home
   <section class="section">
     <div class="container narrow">
       <header class="head">
-        {
-          /* Source order is the reading order for assistive tech: the name and details come
+        {/* Source order is the reading order for assistive tech: the name and details come
             first, the photo and download action last, so the heading is announced before the
             action rather than after it. The visual order is restored per breakpoint below —
             the photo/button aside is pulled to the left with `order` on narrow screens and
-            placed by grid areas on wide ones — so DOM order and visuals still agree. */
-        }
+            placed by grid areas on wide ones — so DOM order and visuals still agree. */}
         <div class="head__text">
           <h1>{name}</h1>
           <p class="role">{role}</p>
           <p class="muted">{location}</p>
           <ul class="contacts">
-            <li><a href={`mailto:${email}`}>{email}</a></li>
-            {
-              directSocials.map((s) => (
-                <li>
-                  <a href={s.url}>{bare(s.url)}</a>
-                </li>
-              ))
-            }
+            <li>
+              <a href={`mailto:${email}`}>{email}</a>
+            </li>
+            {directSocials.map((s) => (
+              <li>
+                <a href={s.url}>{bare(s.url)}</a>
+              </li>
+            ))}
           </ul>
         </div>
-        {
-          /* Photo and download button share a column. On a wide screen the aside is
+        {/* Photo and download button share a column. On a wide screen the aside is
             `display: contents`, so both become grid items of the header and the button lifts
             to the top-right of the name with its label. On a narrow screen the aside is a
             real flex column: the button drops under the photo as a compact "PDF" pill, and
-            the name gets the full width of the text column beside it. */
-        }
+            the name gets the full width of the text column beside it. */}
         <div class="head__aside">
           <Image
             src={portrait}
@@ -138,13 +134,13 @@ const schema = home
               <path d="M8 11l4 4 4-4"></path>
               <path d="M5 20h14"></path>
             </svg>
-            {
-              /* Full label on wide screens; a short, language-neutral "PDF" on narrow ones
+            {/* Full label on wide screens; a short, language-neutral "PDF" on narrow ones
                 where the button sits under the photo. The link's accessible name comes from
-                aria-label above, so the short text is decorative. */
-            }
+                aria-label above, so the short text is decorative. */}
             <span class="download__label">{t('resume.download')}</span>
-            <span class="download__short" aria-hidden="true">PDF</span>
+            <span class="download__short" aria-hidden="true">
+              PDF
+            </span>
           </a>
         </div>
       </header>
@@ -155,93 +151,83 @@ const schema = home
 
       <h2>{t('resume.experience')}</h2>
       <div class="stack timeline">
-        {
-          experience.map((job) => (
-            <div class="job">
-              <div class="job__head">
-                <div class="job__title">
-                  <strong>{job.position}</strong>
-                  <span class="muted job__company">{job.company}</span>
-                </div>
-                <span class="job__period">{job.period}</span>
+        {experience.map((job) => (
+          <div class="job">
+            <div class="job__head">
+              <div class="job__title">
+                <strong>{job.position}</strong>
+                <span class="muted job__company">{job.company}</span>
               </div>
-              <p class="job__lead">{job.summary}</p>
-              {job.highlights.length > 0 && (
-                <ul>
-                  {job.highlights.map((h) => (
-                    <li>{h}</li>
-                  ))}
-                </ul>
-              )}
-              {projectLinks.has(job.id) && (
-                <p class="job__more">
-                  <a href={projectLinks.get(job.id)!.href}>
-                    {t('resume.project')}: {projectLinks.get(job.id)!.title} →
-                  </a>
-                </p>
-              )}
+              <span class="job__period">{job.period}</span>
             </div>
-          ))
-        }
+            <p class="job__lead">{job.summary}</p>
+            {job.highlights.length > 0 && (
+              <ul>
+                {job.highlights.map((h) => (
+                  <li>{h}</li>
+                ))}
+              </ul>
+            )}
+            {projectLinks.has(job.id) && (
+              <p class="job__more">
+                <a href={projectLinks.get(job.id)!.href}>
+                  {t('resume.project')}: {projectLinks.get(job.id)!.title} →
+                </a>
+              </p>
+            )}
+          </div>
+        ))}
       </div>
 
       <h2>{t('resume.skills')}</h2>
       <div class="skills">
-        {
-          skills.map((group) => (
-            <div class="skills__group">
-              <h3>{group.group}</h3>
-              <ul class="tags">
-                {group.items.map((item) => (
-                  <li class="tag">{item}</li>
-                ))}
-              </ul>
-            </div>
-          ))
-        }
+        {skills.map((group) => (
+          <div class="skills__group">
+            <h3>{group.group}</h3>
+            <ul class="tags">
+              {group.items.map((item) => (
+                <li class="tag">{item}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </div>
 
       <div class="two-col">
         <div>
           <h2>{t('resume.education')}</h2>
           <div class="stack">
-            {
-              education.map((e) => (
-                <div>
-                  <strong>{e.degree}</strong>
-                  <div class="muted">{e.place}</div>
-                  <div class="muted period">{e.period}</div>
-                </div>
-              ))
-            }
+            {education.map((e) => (
+              <div>
+                <strong>{e.degree}</strong>
+                <div class="muted">{e.place}</div>
+                <div class="muted period">{e.period}</div>
+              </div>
+            ))}
           </div>
         </div>
         <div>
           <h2>{t('resume.languages')}</h2>
           <ul class="langs">
-            {
-              languages.map((l) => (
-                <li>
-                  <span>{l.name}</span>
-                  <span class="muted">{l.level}</span>
-                </li>
-              ))
-            }
+            {languages.map((l) => (
+              <li>
+                <span>{l.name}</span>
+                <span class="muted">{l.level}</span>
+              </li>
+            ))}
           </ul>
         </div>
       </div>
 
-      {
-        profileSocials.length > 0 && (
-          <ul class="profiles">
-            {profileSocials.map((s) => (
-              <li>
-                <a href={s.url}>{bare(s.url)}</a>
-              </li>
-            ))}
-          </ul>
-        )
-      }
+      {profileSocials.length > 0 && (
+        <ul class="profiles">
+          {profileSocials.map((s) => (
+            <li>
+              <a href={s.url}>{bare(s.url)}</a>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   </section>
 </Base>

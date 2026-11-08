@@ -24,7 +24,9 @@ const href = `/${lang}/projects/${slug}`;
   </div>
   <p class="muted">{description}</p>
   <ul class="project-card__tags">
-    {tags.map((tag) => <li class="tag">{tag}</li>)}
+    {tags.map((tag) => (
+      <li class="tag">{tag}</li>
+    ))}
   </ul>
 </a>
 
